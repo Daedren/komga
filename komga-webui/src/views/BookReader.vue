@@ -63,6 +63,9 @@
               <v-list-item @click="downloadCurrentPage">
                 <v-list-item-title>{{ $t('bookreader.download_current_page') }}</v-list-item-title>
               </v-list-item>
+              <v-list-item @click="beginScreenshot">
+                Crop and screenshot
+              </v-list-item>
             </v-list>
           </v-menu>
         </v-toolbar>
@@ -123,6 +126,7 @@
         @menu="toggleToolbars()"
         @jump-previous="jumpToPrevious()"
         @jump-next="jumpToNext()"
+        ref="reader"
       ></continuous-reader>
 
       <paged-reader
@@ -137,6 +141,7 @@
         @menu="toggleToolbars()"
         @jump-previous="jumpToPrevious()"
         @jump-next="jumpToNext()"
+        ref="reader"
       ></paged-reader>
     </div>
 
@@ -146,6 +151,21 @@
       @go="goTo"
       :pagesCount="pagesCount"
     ></thumbnail-explorer-dialog>
+
+    <v-bottom-sheet
+      v-model="cropperEnabled"
+      :close-on-content-click="false"
+      :max-width="900"
+      @keydown.esc.stop=""
+    >
+    <Screenshotter 
+      :imgSrc="cropperImgSrc"
+      :series="this.series"
+      :book="this.book"
+      :page="this.page"
+      @onComplete="cropperEnabled = false"
+    />
+    </v-bottom-sheet>
 
     <v-bottom-sheet
       v-model="showSettings"
@@ -300,6 +320,7 @@
 
 <script lang="ts">
 import {debounce} from 'lodash'
+import Screenshotter from '@/components/Screenshotter.vue'
 import SettingsSelect from '@/components/SettingsSelect.vue'
 import SettingsSwitch from '@/components/SettingsSwitch.vue'
 import ThumbnailExplorerDialog from '@/components/dialogs/ThumbnailExplorerDialog.vue'
@@ -327,6 +348,7 @@ import {Context, ContextOrigin} from '@/types/context'
 import {SeriesDto} from '@/types/komga-series'
 import jsFileDownloader from 'js-file-downloader'
 import screenfull from 'screenfull'
+import { partialScreenshot } from '@/functions/screenshot'
 
 export default Vue.extend({
   name: 'BookReader',
@@ -337,9 +359,12 @@ export default Vue.extend({
     SettingsSelect,
     ThumbnailExplorerDialog,
     ShortcutHelpDialog,
+    Screenshotter,
   },
   data: function () {
     return {
+      cropperEnabled: false,
+      cropperImgSrc: '',
       screenfull,
       fullscreenIcon: 'mdi-fullscreen',
       book: {} as BookDto,
@@ -856,6 +881,14 @@ export default Vue.extend({
         withCredentials: true,
         forceDesktopMode: true,
       })
+    },
+    beginScreenshot() {
+      let reader = (this.$refs.reader as Vue)
+
+      partialScreenshot(reader.$el).then(blob => {
+          this.cropperEnabled = !this.cropperEnabled
+          this.cropperImgSrc = blob
+        })
     },
   },
 })
