@@ -14,6 +14,7 @@ data class Library(
   val importComicInfoSeries: Boolean = true,
   val importComicInfoCollection: Boolean = true,
   val importComicInfoReadList: Boolean = true,
+  val importComicInfoSeriesAppendVolume: Boolean = true,
   val importEpubBook: Boolean = true,
   val importEpubSeries: Boolean = true,
   val importMylarSeries: Boolean = true,
@@ -25,6 +26,9 @@ data class Library(
   val convertToCbz: Boolean = false,
   val emptyTrashAfterScan: Boolean = false,
   val seriesCover: SeriesCover = SeriesCover.FIRST,
+  val hashFiles: Boolean = true,
+  val hashPages: Boolean = false,
+  val analyzeDimensions: Boolean = true,
 
   val unavailableDate: LocalDateTime? = null,
 
@@ -32,7 +36,7 @@ data class Library(
 
   override val createdDate: LocalDateTime = LocalDateTime.now(),
   override val lastModifiedDate: LocalDateTime = createdDate,
-) : Auditable(), Serializable {
+) : Auditable, Serializable {
 
   enum class SeriesCover {
     FIRST,

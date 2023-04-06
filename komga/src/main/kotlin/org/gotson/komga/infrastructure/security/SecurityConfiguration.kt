@@ -5,11 +5,12 @@ import org.gotson.komga.domain.model.ROLE_ADMIN
 import org.gotson.komga.domain.model.ROLE_USER
 import org.gotson.komga.infrastructure.configuration.KomgaProperties
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest
+import org.springframework.boot.actuate.health.HealthEndpoint
+import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.core.session.SessionRegistry
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository
@@ -18,6 +19,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.oauth2.core.user.OAuth2User
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices
@@ -33,31 +35,52 @@ class SecurityConfiguration(
   private val oidcUserService: OAuth2UserService<OidcUserRequest, OidcUser>,
   private val sessionCookieName: String,
   private val userAgentWebAuthenticationDetailsSource: WebAuthenticationDetailsSource,
+  private val sessionRegistry: SessionRegistry,
   clientRegistrationRepository: InMemoryClientRegistrationRepository?,
-) : WebSecurityConfigurerAdapter() {
+) {
 
   private val oauth2Enabled = clientRegistrationRepository != null
 
-  override fun configure(http: HttpSecurity) {
+  @Bean
+  fun filterChain(http: HttpSecurity): SecurityFilterChain {
     http
       .cors {}
       .csrf { it.disable() }
       .authorizeRequests {
-        // restrict all actuator endpoints to ADMIN only
+        // allow unauthorized access to actuator health endpoint
+        // this will only show limited details as `management.endpoint.health.show-details` is set to `when-authorized`
+        it.requestMatchers(EndpointRequest.to(HealthEndpoint::class.java)).permitAll()
+        // restrict all other actuator endpoints to ADMIN only
         it.requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(ROLE_ADMIN)
 
-        // claim is unprotected
         it.mvcMatchers(
+          // to claim server before any account is created
           "/api/v1/claim",
+          // used by webui
           "/api/v1/oauth2/providers",
           "/set-cookie",
+          "/error**",
+          "/css/**",
+          "/img/**",
+          "/js/**",
+          "/favicon.ico",
+          "/favicon-16x16.png",
+          "/favicon-32x32.png",
+          "/mstile-144x144.png",
+          "/apple-touch-icon.png",
+          "/apple-touch-icon-180x180.png",
+          "/android-chrome-192x192.png",
+          "/android-chrome-512x512.png",
+          "/manifest.json",
+          "/",
+          "/index.html",
         ).permitAll()
 
         // all other endpoints are restricted to authenticated users
         it.mvcMatchers(
           "/api/**",
           "/opds/**",
-          "/sse/**"
+          "/sse/**",
         ).hasRole(ROLE_USER)
       }
       .headers {
@@ -67,9 +90,15 @@ class SecurityConfiguration(
         it.authenticationDetailsSource(userAgentWebAuthenticationDetailsSource)
       }
       .logout {
-        it.logoutUrl("/api/v1/users/logout")
+        it.logoutUrl("/api/logout")
         it.deleteCookies(sessionCookieName)
         it.invalidateHttpSession(true)
+      }
+      .sessionManagement { session ->
+        session.sessionConcurrency {
+          it.sessionRegistry(sessionRegistry)
+          it.maximumSessions(-1)
+        }
       }
 
     if (oauth2Enabled) {
@@ -102,30 +131,11 @@ class SecurityConfiguration(
               setTokenValiditySeconds(komgaProperties.rememberMe.validity.seconds.toInt())
               setAlwaysRemember(true)
               setAuthenticationDetailsSource(userAgentWebAuthenticationDetailsSource)
-            }
+            },
           )
         }
     }
-  }
 
-  override fun configure(web: WebSecurity) {
-    web.ignoring()
-      .mvcMatchers(
-        "/error**",
-        "/css/**",
-        "/img/**",
-        "/js/**",
-        "/favicon.ico",
-        "/favicon-16x16.png",
-        "/favicon-32x32.png",
-        "/mstile-144x144.png",
-        "/apple-touch-icon.png",
-        "/apple-touch-icon-180x180.png",
-        "/android-chrome-192x192.png",
-        "/android-chrome-512x512.png",
-        "/manifest.json",
-        "/",
-        "/index.html"
-      )
+    return http.build()
   }
 }

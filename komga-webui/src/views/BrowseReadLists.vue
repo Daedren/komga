@@ -1,5 +1,5 @@
 <template>
-  <div :style="$vuetify.breakpoint.name === 'xs' ? 'margin-bottom: 56px' : undefined">
+  <div :style="$vuetify.breakpoint.xs ? 'margin-bottom: 56px' : undefined">
     <toolbar-sticky v-if="selectedReadLists.length === 0">
       <!--   Action menu   -->
       <library-actions-menu v-if="library"
@@ -14,7 +14,7 @@
 
       <v-spacer/>
 
-      <library-navigation v-if="$vuetify.breakpoint.name !== 'xs'" :libraryId="libraryId"/>
+      <library-navigation v-if="$vuetify.breakpoint.mdAndUp" :libraryId="libraryId"/>
 
       <v-spacer/>
 
@@ -30,7 +30,7 @@
       @delete="deleteReadLists"
     />
 
-    <library-navigation v-if="$vuetify.breakpoint.name === 'xs'" :libraryId="libraryId" bottom-navigation/>
+    <library-navigation v-if="$vuetify.breakpoint.smAndDown" :libraryId="libraryId" bottom-navigation/>
 
     <v-container fluid>
       <v-pagination
@@ -71,6 +71,7 @@ import {LIBRARIES_ALL, LIBRARY_ROUTE} from '@/types/library'
 import {LibrarySseDto} from '@/types/komga-sse'
 import MultiSelectBar from '@/components/bars/MultiSelectBar.vue'
 import {LibraryDto} from '@/types/komga-libraries'
+import {ReadListDto} from '@/types/komga-readlists'
 
 export default Vue.extend({
   name: 'BrowseReadLists',

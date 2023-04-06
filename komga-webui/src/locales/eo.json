@@ -43,6 +43,7 @@
   "book_card": {
     "error": "Eraro",
     "unknown": "Analizota",
+    "unread": "Ne legita",
     "unsupported": "Ne subtenata"
   },
   "book_import": {
@@ -176,18 +177,22 @@
     "title": "Kolekto {name}"
   },
   "common": {
+    "age": "Aĝo",
     "all_libraries": "Ĉiuj Bibliotekoj",
     "books": "Libroj",
     "books_n": "Neniuj libroj | 1 libro | {count} libroj",
     "books_total": "{count} el {total} libroj",
     "cancel": "Nuligi",
+    "choose_image": "Elekti bildon",
     "close": "Fermi",
     "collections": "Kolektoj",
     "create": "Krei",
     "delete": "Forigi",
+    "disk_space": "Diskospaco",
     "dismiss": "Fermi",
     "download": "Elŝuti",
     "email": "Retpoŝta adreso",
+    "filename": "Nomo de dosiero",
     "filter_no_matches": "La aktiva filtrilo ne lasas ion ajn",
     "genre": "Ĝenro",
     "go_to_library": "Iri al biblioteko",
@@ -200,6 +205,8 @@
     "n_selected": "{count} elektiĝis",
     "nothing_to_show": "Nenio por montri",
     "outdated": "Ne ĝisdata",
+    "page": "Paĝo",
+    "page_number": "Paĝnumero",
     "pages": "paĝoj",
     "pages_n": "Neniuj paĝoj | 1 paĝo | {count} paĝoj",
     "password": "Pasvorto",
@@ -210,6 +217,7 @@
     "required": "Deviga",
     "reset_filters": "Forigi filtrilojn",
     "roles": "Roloj",
+    "save_changes": "Konservi ŝanĝojn",
     "series": "Serio",
     "tags": "Etikedoj",
     "unavailable": "Nedisponebla",
@@ -272,6 +280,13 @@
       "button_confirm": "Analizi",
       "title": "Analizi bibliotekon"
     },
+    "delete_book": {
+      "button_confirm": "Forigi",
+      "confirm_delete": "Jes, forigu la libron «{name}» kaj ĝiajn dosierojn",
+      "confirm_delete_multiple": "Jes, forigu {count} librojn kaj iliajn dosierojn",
+      "dialog_title": "Forigi Libron",
+      "dialog_title_multiple": "Forigi Librojn"
+    },
     "delete_collection": {
       "button_confirm": "Forigi",
       "confirm_delete": "Jes, forigu la kolekton «{name}»",
@@ -296,6 +311,12 @@
       "warning_html": "La legolisto <b>{name}</b> estas forigota de ĉi tiu servilo. Viaj dosieroj ne ŝanĝiĝos. Tio <b>ne</b> esteas malfarebla. Ĉu daŭrigi?",
       "warning_multiple_html": "{count} legolistoj estas forigotaj de ĉi tiu servilo. Viaj dosieroj ne ŝanĝiĝos. Tio <b>ne</b> esteas malfarebla. Ĉu daŭrigi?"
     },
+    "delete_series": {
+      "button_confirm": "Forigi",
+      "confirm_delete": "Jes, forigu la serion «{name}» kaj ĝiajn dosierojn",
+      "confirm_delete_multiple": "Jes, forigu {count} seriojn kaj iliajn dosierojn",
+      "dialog_title": "Forigi Serion"
+    },
     "delete_user": {
       "button_confirm": "Forigi",
       "confirm_delete": "Jes, forigu la uzanton «{name}»",
@@ -303,6 +324,7 @@
       "warning_html": "La uzanto <b>{name}</b> estas forigota de ĉi tiu servilo. Tio <b>ne</b> esteas malfarebla. Ĉu daŭrigi?"
     },
     "edit_books": {
+      "add_author_role_error_duplicate": "Jam ekzistas",
       "authors_notice_multiple_edit": "Vi redaktas aŭtorojn de pluraj libroj. Tio ŝanĝos la aŭtorojn de ĉiu el tiuj libroj.",
       "button_cancel": "Nuligi",
       "button_confirm": "Konservi ŝanĝojn",
@@ -310,6 +332,9 @@
       "dialog_title_single": "Redakti libron {book}",
       "field_isbn": "ISBN",
       "field_isbn_error": "Devas esti valida ISBN-13",
+      "field_link_label": "Etikedo",
+      "field_link_url": "Reta adreso",
+      "field_link_url_error_protocol": "Devas esti per HTTP aŭ HTTPS",
       "field_number": "Numero",
       "field_number_sort": "Ordiga Numero",
       "field_number_sort_hint": "Vi povas uzi decimalojn",
@@ -320,6 +345,8 @@
       "field_title": "Titolo",
       "tab_authors": "Aŭtoroj",
       "tab_general": "Ĝenerala",
+      "tab_links": "Ligoj",
+      "tab_poster": "Afiŝo",
       "tab_tags": "Etikedoj",
       "tags_notice_multiple_edit": "Vi redaktas etikedojn de pluraj libroj. Tio ŝanĝos la etikedojn de ĉiu el tiuj libroj."
     },
@@ -328,7 +355,9 @@
       "button_confirm": "Konservi ŝanĝojn",
       "dialog_title": "Redakti kolekton",
       "field_manual_ordering": "Mana ordigo",
-      "label_ordering": "Implicite, serioj en kolekto estas ordigitaj laŭ nomo. Vi povas ŝalti manan ordigon por difini vian propran ordon."
+      "label_ordering": "Implicite, serioj en kolekto estas ordigitaj laŭ nomo. Vi povas ŝalti manan ordigon por difini vian propran ordon.",
+      "tab_general": "Ĝenerala",
+      "tab_poster": "Afiŝo"
     },
     "edit_library": {
       "button_browse": "Foliumi",
@@ -338,6 +367,7 @@
       "button_next": "Sekva",
       "dialog_title_add": "Aldoni Bibliotekon",
       "dialot_title_edit": "Redakti Bibliotekon",
+      "field_analysis_analyze_dimensions": "Analizi formaton",
       "field_convert_to_cbz": "Aŭtomate konverti al CBZ",
       "field_import_barcode_isbn": "Strikodo de ISBN",
       "field_import_comicinfo_book": "Metadatenoj pri libro",
@@ -357,6 +387,7 @@
       "field_series_cover": "Kovrilo de serio",
       "file_browser_dialog_button_confirm": "Elekti",
       "file_browser_dialog_title": "La radika dosierujo de biblioteko",
+      "label_analysis": "Analizo",
       "label_file_management": "Dosieradministrado",
       "label_import_barcode_isbn": "Enporti ISBN el strikodo",
       "label_import_comicinfo": "Enporti metadatenojn el CBR/CBZ-dosiero enhavanta dosieron ComicsInfo.xml",
@@ -374,7 +405,9 @@
       "button_confirm": "Konservi ŝanĝojn",
       "dialog_title": "Redakti legoliston",
       "field_name": "Nomo",
-      "field_summary": "Resumo"
+      "field_summary": "Resumo",
+      "tab_general": "Ĝenerala",
+      "tab_poster": "Afiŝo"
     },
     "edit_series": {
       "button_cancel": "Nuligi",
@@ -384,6 +417,7 @@
       "field_age_rating": "Aĝolimo",
       "field_age_rating_error": "Aĝolimo devas esti ne negativa",
       "field_genres": "Ĝenroj",
+      "field_labels": "Etikedoj",
       "field_language": "Lingvo",
       "field_language_hint": "Lingva etikedo laŭ IETF BCP 47",
       "field_publisher": "Eldonejo",
@@ -406,13 +440,6 @@
       "button_confirm": "Konservi ŝanĝojn",
       "dialog_title": "Redakti uzanton",
       "label_roles_for": "Roloj de {name}"
-    },
-    "edit_user_shared_libraries": {
-      "button_cancel": "Nuligi",
-      "button_confirm": "Konservi ŝanĝojn",
-      "dialog_title": "Redakti komunajn bibliotekojn",
-      "field_all_libraries": "Ĉiuj bibliotekoj",
-      "label_shared_with": "Komuna kun {name}"
     },
     "empty_trash": {
       "body": "Implicite, la servilo ne tuje forviŝas informojn pri dosieroj. Tio helpus, se disko provizore malkonektiĝus. Se vi malplenigus la rubujon de biblioteko, ĉiuj informoj pri mankantaj dosieroj forviŝiĝus.",
@@ -474,6 +501,7 @@
         "height": "Alto",
         "index": "Indekso",
         "media_type": "Tipo",
+        "size": "Grando",
         "width": "Larĝo"
       },
       "title": "Detaloj pri Libro",
@@ -487,10 +515,28 @@
       "title_comparison": "Komparo inter Libroj"
     }
   },
+  "duplicate_pages": {
+    "action_delete_manual": "Mane forviŝi",
+    "action_ignore": "Ignori",
+    "filter": {
+      "size": "Grando",
+      "total_size": "Totala grando"
+    },
+    "unknown_size": "Nesciata grando"
+  },
+  "duplicates": {
+    "file_hash": "Haketaĵo de dosiero",
+    "size": "Grando"
+  },
   "enums": {
     "copy_mode": {
       "HARDLINK": "Rekte Ligi/Kopii Dosierojn",
       "MOVE": "Movi Dosierojn"
+    },
+    "historical_event_type": {
+      "BookConverted": "Libro konvertita",
+      "BookFileDeleted": "Librodosiero forviŝita",
+      "BookImported": "Libro enportita"
     },
     "media_status": {
       "ERROR": "Eraro",
@@ -498,6 +544,11 @@
       "READY": "Preta",
       "UNKNOWN": "Nekonata",
       "UNSUPPORTED": "Ne subtenata"
+    },
+    "page_hash_action": {
+      "DELETE_AUTO": "Aŭtomate forviŝi",
+      "DELETE_MANUAL": "Mane forviŝi",
+      "IGNORE": "Ignori"
     },
     "reading_direction": {
       "LEFT_TO_RIGHT": "Demaldekstre dekstren",
@@ -529,11 +580,8 @@
     "ERR_1007": "Kelkaj rikordoj ne estis analizeblaj",
     "ERR_1008": "Nekonata eraro pri atingado de libro",
     "ERR_1009": "Jam ekzistas legolisto de tiu nomo",
-    "ERR_1010": "Neniu kongrua libro en la legolisto",
     "ERR_1011": "Kongrua serio ne estas unika",
-    "ERR_1012": "Neniu kongrua serio",
     "ERR_1013": "Kongrua numero de libro ne estas unika en serio",
-    "ERR_1014": "Neniu kongrua numero de libro en serio",
     "ERR_1015": "Eraro pri enportado de legolisto ComicsRack",
     "ERR_1016": "Dosierujo aŭ ne estas atingebla aŭ fakte ne estas dosierujo",
     "ERR_1017": "Ne eblas skani dosierujon, kiu estas jam parto de ekzistanta biblioteko",
@@ -550,6 +598,7 @@
   "filter": {
     "age_rating": "aĝolimo",
     "age_rating_none": "Nenio",
+    "complete": "Kompleta",
     "genre": "ĝenro",
     "in_progress": "En progreso",
     "language": "lingvo",
@@ -564,6 +613,16 @@
   "filter_drawer": {
     "filter": "filtri",
     "sort": "ordigi"
+  },
+  "history": {
+    "header": {
+      "book": "Libro",
+      "date": "Dato",
+      "details": "Detaloj",
+      "series": "Serio",
+      "type": "Tipo"
+    },
+    "title": "Historio"
   },
   "home": {
     "theme": "Etoso",
@@ -652,7 +711,6 @@
   },
   "settings_user": {
     "change_password": "Ŝanĝi pasvorton",
-    "edit_shared_libraries": "Redakti komunajn bibliotekojn",
     "edit_user": "Redakti uzanton",
     "latest_activity": "Lasta interago: {date}",
     "no_recent_activity": "Neniu ĵusa interago",

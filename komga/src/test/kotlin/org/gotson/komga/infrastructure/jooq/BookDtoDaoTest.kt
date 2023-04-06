@@ -37,6 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.net.URL
@@ -102,12 +103,81 @@ class BookDtoDaoTest(
       series,
       (1..3).map {
         makeBook("$it", seriesId = series.id, libraryId = library.id)
-      }
+      },
     )
 
     val books = bookRepository.findAll().sortedBy { it.name }
     books.elementAt(0).let { readProgressRepository.save(ReadProgress(it.id, user.id, 5, false)) }
     books.elementAt(1).let { readProgressRepository.save(ReadProgress(it.id, user.id, 5, true)) }
+  }
+
+  @Nested
+  inner class Criteria {
+    @Test
+    fun `given books when searching by multiple tags then results are matched and not duplicated`() {
+      // given
+      val book1 = makeBook("Éric le rouge", seriesId = series.id, libraryId = library.id)
+      val book2 = makeBook("Éric le bleu", seriesId = series.id, libraryId = library.id)
+      seriesLifecycle.addBooks(
+        series,
+        listOf(
+          book1,
+          book2,
+        ),
+      )
+
+      bookMetadataRepository.findById(book1.id).let {
+        bookMetadataRepository.update(it.copy(tags = setOf("tag1", "tag2")))
+      }
+      bookMetadataRepository.findById(book2.id).let {
+        bookMetadataRepository.update(it.copy(tags = setOf("tag1", "tag2")))
+      }
+
+      // when
+      val page = bookDtoDao.findAll(
+        BookSearchWithReadProgress(tags = setOf("tag1", "tag2")),
+        user.id,
+        Pageable.unpaged(),
+      )
+
+      // then
+      assertThat(page.totalElements).isEqualTo(2)
+      assertThat(page.content).hasSize(2)
+      assertThat(page.content.map { it.metadata.title }).containsExactly("Éric le rouge", "Éric le bleu")
+    }
+
+    @Test
+    fun `given books when searching by multiple authors then results are matched and not duplicated`() {
+      // given
+      val book1 = makeBook("Éric le rouge", seriesId = series.id, libraryId = library.id)
+      val book2 = makeBook("Éric le bleu", seriesId = series.id, libraryId = library.id)
+      seriesLifecycle.addBooks(
+        series,
+        listOf(
+          book1,
+          book2,
+        ),
+      )
+
+      bookMetadataRepository.findById(book1.id).let {
+        bookMetadataRepository.update(it.copy(authors = listOf(Author("Mark", "writer"), Author("Jim", "inker"))))
+      }
+      bookMetadataRepository.findById(book2.id).let {
+        bookMetadataRepository.update(it.copy(authors = listOf(Author("Mark", "writer"), Author("Jim", "inker"))))
+      }
+
+      // when
+      val page = bookDtoDao.findAll(
+        BookSearchWithReadProgress(authors = listOf(Author("Mark", "writer"), Author("Jim", "inker"))),
+        user.id,
+        Pageable.unpaged(),
+      )
+
+      // then
+      assertThat(page.totalElements).isEqualTo(2)
+      assertThat(page.content).hasSize(2)
+      assertThat(page.content.map { it.metadata.title }).containsExactly("Éric le rouge", "Éric le bleu")
+    }
   }
 
   @Nested
@@ -121,7 +191,7 @@ class BookDtoDaoTest(
       val found = bookDtoDao.findAll(
         BookSearchWithReadProgress(readStatus = listOf(ReadStatus.READ)),
         user.id,
-        PageRequest.of(0, 20)
+        PageRequest.of(0, 20),
       )
 
       // then
@@ -139,7 +209,7 @@ class BookDtoDaoTest(
       val found = bookDtoDao.findAll(
         BookSearchWithReadProgress(readStatus = listOf(ReadStatus.UNREAD)),
         user.id,
-        PageRequest.of(0, 20)
+        PageRequest.of(0, 20),
       )
 
       // then
@@ -157,7 +227,7 @@ class BookDtoDaoTest(
       val found = bookDtoDao.findAll(
         BookSearchWithReadProgress(readStatus = listOf(ReadStatus.IN_PROGRESS)),
         user.id,
-        PageRequest.of(0, 20)
+        PageRequest.of(0, 20),
       )
 
       // then
@@ -175,7 +245,7 @@ class BookDtoDaoTest(
       val found = bookDtoDao.findAll(
         BookSearchWithReadProgress(readStatus = listOf(ReadStatus.READ, ReadStatus.UNREAD)),
         user.id,
-        PageRequest.of(0, 20)
+        PageRequest.of(0, 20),
       )
 
       // then
@@ -192,7 +262,7 @@ class BookDtoDaoTest(
       val found = bookDtoDao.findAll(
         BookSearchWithReadProgress(readStatus = listOf(ReadStatus.READ, ReadStatus.IN_PROGRESS)),
         user.id,
-        PageRequest.of(0, 20)
+        PageRequest.of(0, 20),
       )
 
       // then
@@ -209,7 +279,7 @@ class BookDtoDaoTest(
       val found = bookDtoDao.findAll(
         BookSearchWithReadProgress(readStatus = listOf(ReadStatus.UNREAD, ReadStatus.IN_PROGRESS)),
         user.id,
-        PageRequest.of(0, 20)
+        PageRequest.of(0, 20),
       )
 
       // then
@@ -226,7 +296,7 @@ class BookDtoDaoTest(
       val found = bookDtoDao.findAll(
         BookSearchWithReadProgress(readStatus = listOf(ReadStatus.UNREAD, ReadStatus.IN_PROGRESS, ReadStatus.READ)),
         user.id,
-        PageRequest.of(0, 20)
+        PageRequest.of(0, 20),
       )
 
       // then
@@ -243,7 +313,7 @@ class BookDtoDaoTest(
       val found = bookDtoDao.findAll(
         BookSearchWithReadProgress(),
         user.id,
-        PageRequest.of(0, 20)
+        PageRequest.of(0, 20),
       )
 
       // then
@@ -263,7 +333,7 @@ class BookDtoDaoTest(
       val found = bookDtoDao.findAllOnDeck(
         user.id,
         null,
-        PageRequest.of(0, 20)
+        PageRequest.of(0, 20),
       )
 
       // then
@@ -277,14 +347,14 @@ class BookDtoDaoTest(
         series,
         (1..3).map {
           makeBook("$it", seriesId = series.id, libraryId = library.id)
-        }
+        },
       )
 
       // when
       val found = bookDtoDao.findAllOnDeck(
         user.id,
         null,
-        PageRequest.of(0, 20)
+        PageRequest.of(0, 20),
       )
 
       // then
@@ -298,7 +368,7 @@ class BookDtoDaoTest(
         series,
         (1..3).map {
           makeBook("$it", seriesId = series.id, libraryId = library.id)
-        }
+        },
       )
 
       val books = bookRepository.findAll().sortedBy { it.name }
@@ -308,7 +378,7 @@ class BookDtoDaoTest(
       val found = bookDtoDao.findAllOnDeck(
         user.id,
         null,
-        PageRequest.of(0, 20)
+        PageRequest.of(0, 20),
       )
 
       // then
@@ -329,7 +399,7 @@ class BookDtoDaoTest(
           makeBook("Robin", seriesId = series.id, libraryId = library.id),
           makeBook("Batman and Robin", seriesId = series.id, libraryId = library.id),
           makeBook("Batman", seriesId = series.id, libraryId = library.id),
-        )
+        ),
       )
 
       searchIndexLifecycle.rebuildIndex()
@@ -357,7 +427,7 @@ class BookDtoDaoTest(
           makeBook("Robin", seriesId = series.id, libraryId = library.id),
           makeBook("Batman and Robin", seriesId = series.id, libraryId = library.id),
           makeBook("Batman", seriesId = series.id, libraryId = library.id),
-        )
+        ),
       )
 
       bookMetadataRepository.findById(book1.id).let {
@@ -389,7 +459,7 @@ class BookDtoDaoTest(
           makeBook("Robin", seriesId = series.id, libraryId = library.id),
           makeBook("Batman and Robin", seriesId = series.id, libraryId = library.id),
           makeBook("Batman", seriesId = series.id, libraryId = library.id),
-        )
+        ),
       )
 
       bookMetadataRepository.findById(book1.id).let {
@@ -418,7 +488,7 @@ class BookDtoDaoTest(
         series,
         listOf(
           book1,
-        )
+        ),
       )
 
       bookMetadataRepository.findById(book1.id).let {
@@ -447,7 +517,7 @@ class BookDtoDaoTest(
         series,
         listOf(
           book1,
-        )
+        ),
       )
 
       bookMetadataRepository.findById(book1.id).let {
@@ -567,7 +637,7 @@ class BookDtoDaoTest(
         listOf(
           book1,
           makeBook("Batman", seriesId = series.id, libraryId = library.id),
-        )
+        ),
       )
 
       searchIndexLifecycle.rebuildIndex()
@@ -592,7 +662,7 @@ class BookDtoDaoTest(
         listOf(
           makeBook("S.W.O.R.D.", seriesId = series.id, libraryId = library.id),
           makeBook("Batman", seriesId = series.id, libraryId = library.id),
-        )
+        ),
       )
 
       searchIndexLifecycle.rebuildIndex()
@@ -619,7 +689,7 @@ class BookDtoDaoTest(
           makeBook("Robin and Batman", seriesId = series.id, libraryId = library.id),
           makeBook("Batman and Robin", seriesId = series.id, libraryId = library.id),
           makeBook("Batman", seriesId = series.id, libraryId = library.id),
-        )
+        ),
       )
 
       searchIndexLifecycle.rebuildIndex()
@@ -645,7 +715,7 @@ class BookDtoDaoTest(
           makeBook("Batman", seriesId = series.id, libraryId = library.id),
           makeBook("Another X-Men adventure", seriesId = series.id, libraryId = library.id),
           makeBook("X-Men", seriesId = series.id, libraryId = library.id),
-        )
+        ),
       )
 
       searchIndexLifecycle.rebuildIndex()
@@ -684,7 +754,7 @@ class BookDtoDaoTest(
         series,
         listOf(
           makeBook("[不道德公會][河添太一 ][東立]Vol.04-搬运", seriesId = series.id, libraryId = library.id, url = URL("file:/file.cbz")),
-        )
+        ),
       )
 
       searchIndexLifecycle.rebuildIndex()
@@ -698,6 +768,46 @@ class BookDtoDaoTest(
 
       // then
       assertThat(found).hasSize(1)
+    }
+  }
+
+  @Nested
+  inner class Duplicates {
+    @Test
+    fun `given books with same hash and size when searching then results are returned`() {
+      // given
+      seriesLifecycle.addBooks(
+        series,
+        listOf(
+          makeBook("Book 1", seriesId = series.id, libraryId = library.id).copy(fileHash = "hashed", fileSize = 10),
+          makeBook("Book 2", seriesId = series.id, libraryId = library.id).copy(fileHash = "hashed", fileSize = 10),
+        ),
+      )
+
+      // when
+      val found = bookDtoDao.findAllDuplicates(user.id, Pageable.unpaged()).content
+
+      // then
+      assertThat(found).hasSize(2)
+      assertThat(found.map { it.name }).containsExactlyInAnyOrder("Book 1", "Book 2")
+    }
+
+    @Test
+    fun `given books with same hash but different size when searching then no results are returned`() {
+      // given
+      seriesLifecycle.addBooks(
+        series,
+        listOf(
+          makeBook("Book 1", seriesId = series.id, libraryId = library.id).copy(fileHash = "hashed", fileSize = 10),
+          makeBook("Book 2", seriesId = series.id, libraryId = library.id).copy(fileHash = "hashed", fileSize = 12),
+        ),
+      )
+
+      // when
+      val found = bookDtoDao.findAllDuplicates(user.id, Pageable.unpaged()).content
+
+      // then
+      assertThat(found).isEmpty()
     }
   }
 }

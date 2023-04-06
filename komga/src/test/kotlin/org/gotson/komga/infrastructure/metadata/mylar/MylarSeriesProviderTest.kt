@@ -10,9 +10,12 @@ import org.gotson.komga.infrastructure.metadata.mylar.dto.AgeRating
 import org.gotson.komga.infrastructure.metadata.mylar.dto.MylarMetadata
 import org.gotson.komga.infrastructure.metadata.mylar.dto.Series
 import org.gotson.komga.infrastructure.metadata.mylar.dto.Status
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.springframework.core.io.ClassPathResource
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 
 class MylarSeriesProviderTest {
 
@@ -20,7 +23,13 @@ class MylarSeriesProviderTest {
 
   private val mylarSeriesProvider = MylarSeriesProvider(mockMapper)
 
-  private val series = makeSeries("series", url = ClassPathResource("mylar").url)
+  private lateinit var series: org.gotson.komga.domain.model.Series
+
+  @BeforeAll
+  fun setupSeries(@TempDir dir: Path) {
+    Files.createFile(dir.resolve("series.json"))
+    series = makeSeries("series", url = dir.toUri().toURL())
+  }
 
   @Test
   fun `given seriesJson when getting series metadata then metadata patch is valid`() {
@@ -29,7 +38,7 @@ class MylarSeriesProviderTest {
       publisher = "DC",
       imprint = "Vertigo",
       name = "Sandman",
-      comicId = "12345",
+      comicid = "12345",
       year = 1990,
       descriptionText = "Sandman comics",
       descriptionFormatted = "Sandman comics formatted",
@@ -69,7 +78,7 @@ class MylarSeriesProviderTest {
       publisher = "DC",
       imprint = "Vertigo",
       name = "Sandman",
-      comicId = "12345",
+      comicid = "12345",
       year = 1990,
       descriptionText = "Sandman comics",
       descriptionFormatted = null,
@@ -109,7 +118,7 @@ class MylarSeriesProviderTest {
       publisher = "DC",
       imprint = "Vertigo",
       name = "Sandman",
-      comicId = "12345",
+      comicid = "12345",
       year = 1990,
       descriptionText = "Sandman comics",
       descriptionFormatted = "Sandman comics formatted",
@@ -140,7 +149,7 @@ class MylarSeriesProviderTest {
       publisher = "DC",
       imprint = "Vertigo",
       name = "Sandman",
-      comicId = "12345",
+      comicid = "12345",
       year = 1990,
       descriptionText = "Sandman comics",
       descriptionFormatted = "Sandman comics formatted",
@@ -171,7 +180,7 @@ class MylarSeriesProviderTest {
       publisher = "DC",
       imprint = "Vertigo",
       name = "Sandman",
-      comicId = "12345",
+      comicid = "12345",
       year = 1990,
       descriptionText = "Sandman comics",
       descriptionFormatted = "Sandman comics formatted",

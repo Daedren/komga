@@ -4,10 +4,12 @@ import {CopyMode} from '@/types/enum-books'
 export interface BookDto {
   id: string,
   seriesId: string,
+  seriesTitle: string,
   libraryId: string,
   name: string,
   url: string,
   number: number,
+  created: string,
   lastModified: string,
   sizeBytes: number,
   size: string,
@@ -33,6 +35,8 @@ export interface PageDto {
   mediaType: string,
   width?: number,
   height?: number,
+  sizeBytes?: number,
+  size: string,
 }
 
 export interface PageDtoWithUrl {
@@ -41,6 +45,8 @@ export interface PageDtoWithUrl {
   mediaType: string,
   width?: number,
   height?: number,
+  sizeBytes?: number,
+  size: string,
   url: string,
 }
 
@@ -55,7 +61,7 @@ export interface BookMetadataDto {
   numberLock: boolean,
   numberSort: number,
   numberSortLock: boolean,
-  releaseDate: string,
+  releaseDate?: string,
   releaseDateLock: boolean,
   authors: AuthorDto[],
   authorsLock: boolean,
@@ -129,4 +135,11 @@ export interface BookImportDto {
   seriesId: string,
   upgradeBookId?: string,
   destinationName?: string,
+}
+
+export interface BookThumbnailDto {
+  id: string,
+  bookId: string,
+  type: string,
+  selected: boolean
 }

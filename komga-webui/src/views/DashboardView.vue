@@ -1,6 +1,6 @@
 <template>
-  <div :style="$vuetify.breakpoint.name === 'xs' ? 'margin-bottom: 56px' : undefined">
-    <toolbar-sticky v-if="individualLibrary && selectedSeries.length === 0">
+  <div :style="$vuetify.breakpoint.xs ? 'margin-bottom: 56px' : undefined">
+    <toolbar-sticky v-if="individualLibrary && selectedSeries.length === 0 && selectedBooks.length === 0">
       <!--   Action menu   -->
       <library-actions-menu v-if="library"
                             :library="library"/>
@@ -11,13 +11,13 @@
 
       <v-spacer/>
 
-      <library-navigation v-if="individualLibrary && $vuetify.breakpoint.name !== 'xs'" :libraryId="libraryId"/>
+      <library-navigation v-if="individualLibrary && $vuetify.breakpoint.mdAndUp" :libraryId="libraryId"/>
 
       <v-spacer/>
 
     </toolbar-sticky>
 
-    <library-navigation v-if="individualLibrary && $vuetify.breakpoint.name === 'xs'" :libraryId="libraryId"
+    <library-navigation v-if="individualLibrary && $vuetify.breakpoint.smAndDown" :libraryId="libraryId"
                         bottom-navigation/>
 
     <multi-select-bar
@@ -28,6 +28,7 @@
       @mark-unread="markSelectedSeriesUnread"
       @add-to-collection="addToCollection"
       @edit="editMultipleSeries"
+      @delete="deleteSeries"
     />
 
     <multi-select-bar
@@ -39,6 +40,7 @@
       @add-to-readlist="addToReadList"
       @edit="editMultipleBooks"
       @bulk-edit="bulkEditMultipleBooks"
+      @delete="deleteBooks"
     />
 
     <v-container fluid>
@@ -60,6 +62,7 @@
         </template>
         <template v-slot:content>
           <item-browser :items="loaderInProgressBooks.items"
+                        :item-context="[ItemContext.SHOW_SERIES]"
                         nowrap
                         :edit-function="isAdmin ? singleEditBook : undefined"
                         :selected.sync="selectedBooks"
@@ -80,6 +83,7 @@
         </template>
         <template v-slot:content>
           <item-browser :items="loaderOnDeckBooks.items"
+                        :item-context="[ItemContext.SHOW_SERIES]"
                         nowrap
                         :edit-function="isAdmin ? singleEditBook : undefined"
                         :selected.sync="selectedBooks"
@@ -100,6 +104,7 @@
         </template>
         <template v-slot:content>
           <item-browser :items="loaderRecentlyReleasedBooks.items"
+                        :item-context="[ItemContext.RELEASE_DATE, ItemContext.SHOW_SERIES]"
                         nowrap
                         :edit-function="isAdmin ? singleEditBook : undefined"
                         :selected.sync="selectedBooks"
@@ -120,6 +125,7 @@
         </template>
         <template v-slot:content>
           <item-browser :items="loaderLatestBooks.items"
+                        :item-context="[ItemContext.SHOW_SERIES]"
                         nowrap
                         :edit-function="isAdmin ? singleEditBook : undefined"
                         :selected.sync="selectedBooks"
@@ -180,6 +186,7 @@
         </template>
         <template v-slot:content>
           <item-browser :items="loaderRecentlyReadBooks.items"
+                        :item-context="[ItemContext.SHOW_SERIES, ItemContext.READ_DATE]"
                         nowrap
                         :edit-function="isAdmin ? singleEditBook : undefined"
                         :selected.sync="selectedBooks"
@@ -222,6 +229,7 @@ import {subMonths} from 'date-fns'
 import {BookSseDto, ReadProgressSeriesSseDto, ReadProgressSseDto, SeriesSseDto} from '@/types/komga-sse'
 import {LibraryDto} from '@/types/komga-libraries'
 import {PageLoader} from '@/types/pageLoader'
+import {ItemContext} from '@/types/items'
 
 export default Vue.extend({
   name: 'DashboardView',
@@ -236,6 +244,7 @@ export default Vue.extend({
   },
   data: () => {
     return {
+      ItemContext,
       loading: false,
       library: undefined as LibraryDto | undefined,
       loaderNewSeries: undefined as unknown as PageLoader<SeriesDto>,
@@ -304,7 +313,7 @@ export default Vue.extend({
       return this.$store.getters.meAdmin
     },
     fixedCardWidth(): number {
-      return this.$vuetify.breakpoint.name === 'xs' ? 120 : 150
+      return this.$vuetify.breakpoint.xs ? 120 : 150
     },
     allEmpty(): boolean {
       return this.loaderNewSeries?.items.length === 0 &&
@@ -440,6 +449,12 @@ export default Vue.extend({
     },
     editMultipleBooks() {
       this.$store.dispatch('dialogUpdateBooks', this.selectedBooks)
+    },
+    deleteSeries() {
+      this.$store.dispatch('dialogDeleteSeries', this.selectedSeries)
+    },
+    deleteBooks() {
+      this.$store.dispatch('dialogDeleteBook', this.selectedBooks)
     },
     bulkEditMultipleBooks() {
       this.$store.dispatch('dialogUpdateBulkBooks', this.selectedBooks)

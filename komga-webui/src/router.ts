@@ -66,7 +66,7 @@ const router = new Router({
         {
           path: '/settings',
           name: 'settings',
-          redirect: {name: 'settings-analysis'},
+          redirect: {name: 'settings-users'},
           component: () => import(/* webpackChunkName: "settings" */ './views/SettingsHolder.vue'),
           children: [
             {
@@ -83,19 +83,65 @@ const router = new Router({
               ],
             },
             {
-              path: '/settings/analysis',
-              name: 'settings-analysis',
-              beforeEnter: adminGuard,
-              component: () => import(/* webpackChunkName: "settings-analysis" */ './views/SettingsMediaAnalysis.vue'),
-            },
-            {
               path: '/settings/server',
               name: 'settings-server',
               beforeEnter: adminGuard,
               component: () => import(/* webpackChunkName: "settings-server" */ './views/SettingsServer.vue'),
             },
+            {
+              path: '/settings/metrics',
+              name: 'metrics',
+              beforeEnter: adminGuard,
+              component: () => import(/* webpackChunkName: "metrics" */ './views/Metrics.vue'),
+            },
           ],
         },
+        {
+          path: '/media-management',
+          name: 'media-management',
+          redirect: {name: 'media-analysis'},
+          component: () => import(/* webpackChunkName: "media-management" */ './views/MediaManagement.vue'),
+          children: [
+            {
+              path: '/media-management/analysis',
+              name: 'media-analysis',
+              beforeEnter: adminGuard,
+              component: () => import(/* webpackChunkName: "media-analysis" */ './views/MediaAnalysis.vue'),
+            },
+            {
+              path: '/media-management/duplicate-files',
+              name: 'duplicate-files',
+              beforeEnter: adminGuard,
+              component: () => import(/* webpackChunkName: "duplicate-files" */ './views/DuplicateFiles.vue'),
+            },
+            {
+              path: '/media-management/duplicate-pages',
+              name: 'duplicate-pages',
+              redirect: {name: 'settings-duplicate-pages-known'},
+              component: () => import(/* webpackChunkName: "duplicate-pages" */ './views/DuplicatePagesHolder.vue'),
+              children: [
+                {
+                  path: '/media-management/duplicate-pages/known',
+                  name: 'settings-duplicate-pages-known',
+                  beforeEnter: adminGuard,
+                  component: () => import(/* webpackChunkName: "duplicate-pages" */ './views/DuplicatePagesKnown.vue'),
+                },
+                {
+                  path: '/media-management/duplicate-pages/unknown',
+                  name: 'settings-duplicate-pages-unknown',
+                  beforeEnter: adminGuard,
+                  component: () => import(/* webpackChunkName: "duplicate-pages" */ './views/DuplicatePagesUnknown.vue'),
+                },
+              ],
+            },
+          ],
+        },
+        {
+          path: '/history',
+          name: 'history',
+          component: () => import(/* webpackChunkName: "history" */ './views/HistoryView.vue'),
+        },
+
         {
           path: '/account',
           name: 'account',
@@ -180,10 +226,10 @@ const router = new Router({
               component: () => import(/* webpackChunkName: "import-books" */ './views/ImportBooks.vue'),
             },
             {
-              path: '/import/readlists',
-              name: 'import-readlists',
+              path: '/import/readlist',
+              name: 'import-readlist',
               beforeEnter: adminGuard,
-              component: () => import(/* webpackChunkName: "import-readlists" */ './views/ImportReadLists.vue'),
+              component: () => import(/* webpackChunkName: "import-readlist" */ './views/ImportReadList.vue'),
             },
           ],
         },

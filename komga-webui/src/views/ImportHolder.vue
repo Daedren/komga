@@ -1,8 +1,8 @@
 <template>
   <div>
-    <v-tabs>
+    <v-tabs grow>
       <v-tab :to="{name: 'import-books'}">{{ $t('common.books') }}</v-tab>
-      <v-tab :to="{name: 'import-readlists'}">{{ $t('common.readlists') }}</v-tab>
+      <v-tab :to="{name: 'import-readlist'}">{{ $t('common.readlist') }}</v-tab>
     </v-tabs>
     <router-view/>
   </div>

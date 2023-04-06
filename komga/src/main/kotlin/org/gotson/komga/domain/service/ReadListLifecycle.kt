@@ -5,7 +5,7 @@ import org.gotson.komga.application.events.EventPublisher
 import org.gotson.komga.domain.model.DomainEvent
 import org.gotson.komga.domain.model.DuplicateNameException
 import org.gotson.komga.domain.model.ReadList
-import org.gotson.komga.domain.model.ReadListRequestResult
+import org.gotson.komga.domain.model.ReadListRequestMatch
 import org.gotson.komga.domain.model.ThumbnailReadList
 import org.gotson.komga.domain.persistence.ReadListRepository
 import org.gotson.komga.domain.persistence.ThumbnailReadListRepository
@@ -29,7 +29,7 @@ class ReadListLifecycle(
 ) {
 
   @Throws(
-    DuplicateNameException::class
+    DuplicateNameException::class,
   )
   fun addReadList(readList: ReadList): ReadList {
     logger.info { "Adding new read list: $readList" }
@@ -49,7 +49,7 @@ class ReadListLifecycle(
     val existing = readListRepository.findByIdOrNull(toUpdate.id)
       ?: throw IllegalArgumentException("Cannot update read list that does not exist")
 
-    if (existing.name != toUpdate.name && readListRepository.existsByName(toUpdate.name))
+    if (!existing.name.equals(toUpdate.name, true) && readListRepository.existsByName(toUpdate.name))
       throw DuplicateNameException("Read list name already exists")
 
     readListRepository.update(toUpdate)
@@ -70,14 +70,14 @@ class ReadListLifecycle(
     logger.info { "Deleting empty read lists" }
     transactionTemplate.executeWithoutResult {
       val toDelete = readListRepository.findAllEmpty()
-      readListRepository.delete(toDelete.map { it.id })
       thumbnailReadListRepository.deleteByReadListIds(toDelete.map { it.id })
+      readListRepository.delete(toDelete.map { it.id })
 
       toDelete.forEach { eventPublisher.publishEvent(DomainEvent.ReadListDeleted(it)) }
     }
   }
 
-  fun addThumbnail(thumbnail: ThumbnailReadList) {
+  fun addThumbnail(thumbnail: ThumbnailReadList): ThumbnailReadList {
     when (thumbnail.type) {
       ThumbnailReadList.Type.USER_UPLOADED -> {
         thumbnailReadListRepository.insert(thumbnail)
@@ -88,11 +88,12 @@ class ReadListLifecycle(
     }
 
     eventPublisher.publishEvent(DomainEvent.ThumbnailReadListAdded(thumbnail))
+    return thumbnail
   }
 
   fun markSelectedThumbnail(thumbnail: ThumbnailReadList) {
     thumbnailReadListRepository.markSelected(thumbnail)
-    eventPublisher.publishEvent(DomainEvent.ThumbnailReadListAdded(thumbnail))
+    eventPublisher.publishEvent(DomainEvent.ThumbnailReadListAdded(thumbnail.copy(selected = true)))
   }
 
   fun deleteThumbnail(thumbnail: ThumbnailReadList) {
@@ -120,21 +121,10 @@ class ReadListLifecycle(
     return mosaicGenerator.createMosaic(images)
   }
 
-  fun importReadList(fileContent: ByteArray): ReadListRequestResult {
-    val request = try {
-      readListProvider.importFromCbl(fileContent) ?: return ReadListRequestResult(null, emptyList(), "ERR_1015")
-    } catch (e: Exception) {
-      return ReadListRequestResult(null, emptyList(), "ERR_1015")
-    }
+  fun matchComicRackList(fileContent: ByteArray): ReadListRequestMatch {
+    val request = readListProvider.importFromCbl(fileContent)
 
-    val result = readListMatcher.matchReadListRequest(request)
-    return when {
-      result.readList != null -> {
-        readListRepository.insert(result.readList)
-        result.copy(readList = readListRepository.findByIdOrNull(result.readList.id)!!)
-      }
-      else -> result
-    }
+    return readListMatcher.matchReadListRequest(request)
   }
 
   private fun thumbnailsHouseKeeping(readListId: String) {
@@ -147,6 +137,7 @@ class ReadListLifecycle(
         logger.info { "More than one thumbnail is selected, removing extra ones" }
         thumbnailReadListRepository.markSelected(selected[0])
       }
+
       selected.isEmpty() && all.isNotEmpty() -> {
         logger.info { "Read list has no selected thumbnail, choosing one automatically" }
         thumbnailReadListRepository.markSelected(all.first())

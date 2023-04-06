@@ -3,6 +3,7 @@ package org.gotson.komga.interfaces.api.rest.dto
 import org.gotson.komga.domain.model.SeriesMetadata
 import org.gotson.komga.infrastructure.validation.NullOrBlankOrBCP47
 import org.gotson.komga.infrastructure.validation.NullOrNotBlank
+import javax.validation.Valid
 import javax.validation.constraints.Positive
 import javax.validation.constraints.PositiveOrZero
 import kotlin.properties.Delegates
@@ -74,4 +75,27 @@ class SeriesMetadataUpdateDto {
     }
 
   var totalBookCountLock: Boolean? = null
+
+  var sharingLabels: Set<String>?
+    by Delegates.observable(null) { prop, _, _ ->
+      isSet[prop.name] = true
+    }
+
+  var sharingLabelsLock: Boolean? = null
+
+  @get:Valid
+  var links: List<WebLinkUpdateDto>?
+    by Delegates.observable(null) { prop, _, _ ->
+      isSet[prop.name] = true
+    }
+
+  var linksLock: Boolean? = null
+
+  @get:Valid
+  var alternateTitles: List<AlternateTitleUpdateDto>?
+    by Delegates.observable(null) { prop, _, _ ->
+      isSet[prop.name] = true
+    }
+
+  var alternateTitlesLock: Boolean? = null
 }

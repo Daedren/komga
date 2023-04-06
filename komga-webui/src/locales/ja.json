@@ -42,7 +42,9 @@
   },
   "book_card": {
     "error": "エラー",
+    "no_release_date": "発売日はありません",
     "unknown": "分析待ち",
+    "unread": "未読",
     "unsupported": "非対応"
   },
   "book_import": {
@@ -87,6 +89,7 @@
     "move_next": "もう一度「次」を押すと次の書籍へ移動します。",
     "move_next_exit": "もう一度「次」を押すと書籍を閉じます。",
     "move_previous": "もう一度「前」を押すと前の書籍へ移動します。",
+    "notification_poster_set_book": "書籍のポスターが現在のページに設定されました。",
     "paged_reader_layout": {
       "double": "見開き",
       "double_no_cover": "見開き (カバーなし)",
@@ -128,6 +131,7 @@
       "cycle_scale": "大きさを切り替える",
       "cycle_side_padding": "左右の余白を切り替える",
       "first_page": "最初のページ",
+      "fullscreen": "全画面表示/解除",
       "last_page": "最後のページ",
       "left_to_right": "左から右に",
       "menus": "メニュー",
@@ -151,9 +155,11 @@
     "file": "ファイル名",
     "format": "フォーマット",
     "isbn": "ISBN",
+    "links": "リンク集",
     "navigation_within_readlist": "この読書リスト内の一覧: {name}",
     "outdated_tooltip": "この本のファイルが変更されました。この本を再分析する必要があります",
     "read_book": "書籍を読む",
+    "read_incognito": "シークレットモードで読む",
     "size": "サイズ"
   },
   "browse_collection": {
@@ -187,6 +193,7 @@
     "dismiss": "却下",
     "download": "ダウンロード",
     "email": "メールアドレス",
+    "filename": "ファイル名",
     "filter_no_matches": "フィルタに一致するものはありません",
     "genre": "ジャンル",
     "go_to_library": "ライブラリへ移動",
@@ -213,6 +220,7 @@
     "tags": "タグ",
     "unavailable": "利用できません",
     "unlock_all": "全てアンロック",
+    "url": "URL",
     "use_filter_panel_to_change_filter": "フィルターパネルを使って有効なフィルタを変更する",
     "year": "年"
   },
@@ -406,13 +414,6 @@
       "dialog_title": "ユーザを編集",
       "label_roles_for": "{name} がもつ役割"
     },
-    "edit_user_shared_libraries": {
-      "button_cancel": "キャンセル",
-      "button_confirm": "変更を保存",
-      "dialog_title": "共有ライブラリを編集",
-      "field_all_libraries": "全ライブラリ",
-      "label_shared_with": "{name} と共有"
-    },
     "empty_trash": {
       "body": "デフォルトでは、メディアサーバーはメディアの情報をすぐには削除しません。これは、ドライブが一時的に切断された場合に役立ちます。ライブラリのゴミ箱を空にすると、見つからないメディアに関するすべての情報が削除されます。",
       "button_confirm": "空",
@@ -486,6 +487,12 @@
       "title_comparison": "書籍の比較"
     }
   },
+  "duplicate_pages": {
+    "action_ignore": "無視"
+  },
+  "duplicates": {
+    "title": "重複ファイル"
+  },
   "enums": {
     "copy_mode": {
       "HARDLINK": "ハードリンク/コピーファイル",
@@ -522,11 +529,8 @@
     "ERR_1007": "分析できない項目がありました",
     "ERR_1008": "想定外のエラーで書籍の項目が取得できません",
     "ERR_1009": "すでに同じ名前の読書リストがあります",
-    "ERR_1010": "指定された読書リストの内に一致する本がありませんでした",
     "ERR_1011": "シリーズに一致するものがありません",
-    "ERR_1012": "シリーズに一致しません",
     "ERR_1013": "シリーズ内の書籍番号が一意に一致しません",
-    "ERR_1014": "シリーズ内の書籍番号が一致しない",
     "ERR_1015": "ComicRack読書リストのデシリアライズ時のエラー",
     "ERR_1016": "ディレクトリにアクセスできない、またはディレクトリではありません",
     "ERR_1017": "既存のライブラリの一部であるフォルダをスキャンできない"
@@ -625,7 +629,6 @@
     "server_settings": "サーバ設定"
   },
   "settings_user": {
-    "edit_shared_libraries": "共有ライブラリの編集",
     "edit_user": "ユーザの編集",
     "role_administrator": "管理者",
     "role_user": "ユーザ"

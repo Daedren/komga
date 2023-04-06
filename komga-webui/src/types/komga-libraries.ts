@@ -7,6 +7,7 @@ export interface LibraryCreationDto {
   importComicInfoSeries: boolean,
   importComicInfoCollection: boolean,
   importComicInfoReadList: boolean,
+  importComicInfoSeriesAppendVolume: boolean,
   importEpubBook: boolean,
   importEpubSeries: boolean,
   importMylarSeries: boolean,
@@ -18,6 +19,9 @@ export interface LibraryCreationDto {
   convertToCbz: boolean,
   emptyTrashAfterScan: boolean,
   seriesCover: SeriesCoverDto,
+  hashFiles: boolean,
+  hashPages: boolean,
+  analyzeDimensions: boolean,
 }
 
 export interface LibraryUpdateDto {
@@ -27,6 +31,7 @@ export interface LibraryUpdateDto {
   importComicInfoSeries: boolean,
   importComicInfoCollection: boolean,
   importComicInfoReadList: boolean,
+  importComicInfoSeriesAppendVolume: boolean,
   importEpubBook: boolean,
   importEpubSeries: boolean,
   importMylarSeries: boolean,
@@ -38,6 +43,9 @@ export interface LibraryUpdateDto {
   convertToCbz: boolean,
   emptyTrashAfterScan: boolean,
   seriesCover: SeriesCoverDto,
+  hashFiles: boolean,
+  hashPages: boolean,
+  analyzeDimensions: boolean,
 }
 
 export interface LibraryDto {
@@ -48,6 +56,7 @@ export interface LibraryDto {
   importComicInfoSeries: boolean,
   importComicInfoCollection: boolean,
   importComicInfoReadList: boolean,
+  importComicInfoSeriesAppendVolume: boolean,
   importEpubBook: boolean,
   importEpubSeries: boolean,
   importMylarSeries: boolean,
@@ -59,5 +68,8 @@ export interface LibraryDto {
   convertToCbz: boolean,
   emptyTrashAfterScan: boolean,
   seriesCover: SeriesCoverDto,
+  hashFiles: boolean,
+  hashPages: boolean,
+  analyzeDimensions: boolean,
   unavailable: boolean,
 }

@@ -11,6 +11,7 @@ open class CodedException : Exception {
     this.code = code
   }
 }
+
 fun Exception.withCode(code: String) = CodedException(this, code)
 
 class MediaNotReadyException : Exception()
@@ -21,3 +22,4 @@ class DuplicateNameException(message: String, code: String = "") : CodedExceptio
 class PathContainedInPath(message: String, code: String = "") : CodedException(message, code)
 class UserEmailAlreadyExistsException(message: String, code: String = "") : CodedException(message, code)
 class BookConversionException(message: String) : Exception(message)
+class ComicRackListException(message: String, code: String = "") : CodedException(message, code)

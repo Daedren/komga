@@ -14,9 +14,9 @@ data class ThumbnailReadList(
 
   override val createdDate: LocalDateTime = LocalDateTime.now(),
   override val lastModifiedDate: LocalDateTime = createdDate,
-) : Auditable(), Serializable {
+) : Auditable, Serializable {
   enum class Type {
-    USER_UPLOADED
+    USER_UPLOADED,
   }
 
   override fun equals(other: Any?): Boolean {

@@ -79,6 +79,9 @@ class ComicInfo {
   @JsonProperty(value = "Genre")
   var genre: String? = null
 
+  @JsonProperty(value = "Tags")
+  var tags: String? = null
+
   @JsonProperty(value = "Web")
   var web: String? = null
 
@@ -122,4 +125,7 @@ class ComicInfo {
 
   @JsonProperty(value = "AgeRating", defaultValue = "Unknown")
   var ageRating: AgeRating? = null
+
+  @JsonProperty(value = "GTIN")
+  var gtin: String? = null
 }

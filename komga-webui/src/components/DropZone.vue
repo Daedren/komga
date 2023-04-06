@@ -1,22 +1,28 @@
 <template>
   <label class="drop-zone" v-cloak @drop.prevent="dropHandler" @dragover.prevent>
-    <span class="file-input">Choose an image</span> - drag and drop
+    <span class="file-input">{{ $t('common.choose_image') }}</span> - {{ $t('common.drag_drop') }}
     <input ref="input" hidden aria-hidden="true" type="file" accept="image/*" multiple @change="dropHandler">
   </label>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import {getFileFromUrl} from '@/functions/file'
 
 export default Vue.extend({
   name: 'DropZone',
   methods: {
-    dropHandler(event: Event) {
+    async dropHandler(event: Event) {
       if (event instanceof DragEvent && event.dataTransfer) {
-        const droppedFiles = event.dataTransfer.files
-        if (!droppedFiles) return
-
-        this.$emit('on-input-change', Array.from(droppedFiles))
+        if (event.dataTransfer.files.length > 0)
+          this.$emit('on-input-change', Array.from(event.dataTransfer.files))
+        else {
+          const url = event.dataTransfer.getData('text/uri-list')
+          if (url) {
+            const file = await getFileFromUrl(url)
+            this.$emit('on-input-change', [file])
+          }
+        }
       }
       if (event.target instanceof HTMLInputElement && event.target.files) {
         const selectedFiles = event.target.files
@@ -34,7 +40,7 @@ export default Vue.extend({
 
 <style scoped>
 .drop-zone {
-  background:repeating-linear-gradient(
+  background: repeating-linear-gradient(
     135deg,
     var(--v-base-lighten1),
     var(--v-base-lighten1) 20px,

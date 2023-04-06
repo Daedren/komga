@@ -2,7 +2,9 @@ package org.gotson.komga.infrastructure.jooq
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
+import org.gotson.komga.domain.model.AlternateTitle
 import org.gotson.komga.domain.model.SeriesMetadata
+import org.gotson.komga.domain.model.WebLink
 import org.gotson.komga.domain.model.makeLibrary
 import org.gotson.komga.domain.model.makeSeries
 import org.gotson.komga.domain.persistence.LibraryRepository
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.net.URI
 import java.time.LocalDateTime
 
 @ExtendWith(SpringExtension::class)
@@ -22,7 +25,7 @@ import java.time.LocalDateTime
 class SeriesMetadataDaoTest(
   @Autowired private val seriesMetadataDao: SeriesMetadataDao,
   @Autowired private val seriesRepository: SeriesRepository,
-  @Autowired private val libraryRepository: LibraryRepository
+  @Autowired private val libraryRepository: LibraryRepository,
 ) {
 
   private val library = makeLibrary()
@@ -62,6 +65,9 @@ class SeriesMetadataDaoTest(
       tags = setOf("tag", "another"),
       language = "en",
       totalBookCount = 5,
+      sharingLabels = setOf("kids"),
+      links = listOf(WebLink("Comicvine", URI("https://comicvine.gamespot.com/doctor-strange/4050-2676/"))),
+      alternateTitles = listOf(AlternateTitle("fr", "La Series")),
       titleLock = true,
       titleSortLock = true,
       summaryLock = true,
@@ -72,7 +78,10 @@ class SeriesMetadataDaoTest(
       languageLock = true,
       tagsLock = true,
       totalBookCountLock = true,
-      seriesId = series.id
+      sharingLabelsLock = true,
+      linksLock = true,
+      alternateTitlesLock = true,
+      seriesId = series.id,
     )
 
     seriesMetadataDao.insert(metadata)
@@ -93,6 +102,15 @@ class SeriesMetadataDaoTest(
     assertThat(created.genres).containsAll(metadata.genres)
     assertThat(created.tags).containsAll(metadata.tags)
     assertThat(created.totalBookCount).isEqualTo(metadata.totalBookCount)
+    assertThat(created.sharingLabels).containsAll(metadata.sharingLabels)
+    with(created.links.first()) {
+      assertThat(label).isEqualTo(metadata.links.first().label)
+      assertThat(url).isEqualTo(metadata.links.first().url)
+    }
+    with(created.alternateTitles.first()) {
+      assertThat(label).isEqualTo(metadata.alternateTitles.first().label)
+      assertThat(title).isEqualTo(metadata.alternateTitles.first().title)
+    }
 
     assertThat(created.titleLock).isEqualTo(metadata.titleLock)
     assertThat(created.titleSortLock).isEqualTo(metadata.titleSortLock)
@@ -105,6 +123,9 @@ class SeriesMetadataDaoTest(
     assertThat(created.languageLock).isEqualTo(metadata.languageLock)
     assertThat(created.tagsLock).isEqualTo(metadata.tagsLock)
     assertThat(created.totalBookCountLock).isEqualTo(metadata.totalBookCountLock)
+    assertThat(created.sharingLabelsLock).isEqualTo(metadata.sharingLabelsLock)
+    assertThat(created.linksLock).isEqualTo(metadata.linksLock)
+    assertThat(created.alternateTitlesLock).isEqualTo(metadata.alternateTitlesLock)
   }
 
   @Test
@@ -114,7 +135,7 @@ class SeriesMetadataDaoTest(
     val now = LocalDateTime.now()
     val metadata = SeriesMetadata(
       title = "Series",
-      seriesId = series.id
+      seriesId = series.id,
     )
 
     seriesMetadataDao.insert(metadata)
@@ -135,6 +156,9 @@ class SeriesMetadataDaoTest(
     assertThat(created.genres).isEmpty()
     assertThat(created.tags).isEmpty()
     assertThat(created.totalBookCount).isNull()
+    assertThat(created.sharingLabels).isEmpty()
+    assertThat(created.links).isEmpty()
+    assertThat(created.alternateTitles).isEmpty()
 
     assertThat(created.titleLock).isFalse
     assertThat(created.titleSortLock).isFalse
@@ -147,6 +171,9 @@ class SeriesMetadataDaoTest(
     assertThat(created.languageLock).isFalse
     assertThat(created.tagsLock).isFalse
     assertThat(created.totalBookCountLock).isFalse
+    assertThat(created.sharingLabelsLock).isFalse
+    assertThat(created.linksLock).isFalse
+    assertThat(created.alternateTitlesLock).isFalse
   }
 
   @Test
@@ -157,7 +184,7 @@ class SeriesMetadataDaoTest(
       status = SeriesMetadata.Status.ENDED,
       title = "Series",
       titleSort = "Series, The",
-      seriesId = series.id
+      seriesId = series.id,
     )
 
     seriesMetadataDao.insert(metadata)
@@ -198,7 +225,10 @@ class SeriesMetadataDaoTest(
       genres = setOf("Action"),
       tags = setOf("tag"),
       totalBookCount = 3,
-      seriesId = series.id
+      sharingLabels = setOf("kids"),
+      links = listOf(WebLink("Comicvine", URI("https://comicvine.gamespot.com/doctor-strange/4050-2676/"))),
+      alternateTitles = listOf(AlternateTitle("fr", "La Series")),
+      seriesId = series.id,
     )
     seriesMetadataDao.insert(metadata)
     val created = seriesMetadataDao.findById(metadata.seriesId)
@@ -218,6 +248,9 @@ class SeriesMetadataDaoTest(
         genres = setOf("Adventure"),
         tags = setOf("Another"),
         totalBookCount = 8,
+        sharingLabels = setOf("adult"),
+        links = emptyList(),
+        alternateTitles = emptyList(),
         statusLock = true,
         titleLock = true,
         titleSortLock = true,
@@ -229,6 +262,9 @@ class SeriesMetadataDaoTest(
         genresLock = true,
         tagsLock = true,
         totalBookCountLock = true,
+        sharingLabelsLock = true,
+        linksLock = true,
+        alternateTitlesLock = true,
       )
     }
 
@@ -251,6 +287,9 @@ class SeriesMetadataDaoTest(
     assertThat(modified.genres).containsAll(updated.genres)
     assertThat(modified.tags).containsAll(updated.tags)
     assertThat(modified.totalBookCount).isEqualTo(updated.totalBookCount)
+    assertThat(modified.sharingLabels).containsAll(updated.sharingLabels)
+    assertThat(modified.links).isEmpty()
+    assertThat(modified.alternateTitles).isEmpty()
 
     assertThat(modified.titleLock).isTrue
     assertThat(modified.titleSortLock).isTrue
@@ -263,5 +302,8 @@ class SeriesMetadataDaoTest(
     assertThat(modified.publisherLock).isTrue
     assertThat(modified.tagsLock).isTrue
     assertThat(modified.totalBookCountLock).isTrue
+    assertThat(modified.sharingLabelsLock).isTrue
+    assertThat(modified.linksLock).isTrue
+    assertThat(modified.alternateTitlesLock).isTrue
   }
 }

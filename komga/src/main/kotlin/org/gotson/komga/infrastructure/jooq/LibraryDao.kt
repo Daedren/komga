@@ -13,7 +13,7 @@ import java.time.ZoneId
 
 @Component
 class LibraryDao(
-  private val dsl: DSLContext
+  private val dsl: DSLContext,
 ) : LibraryRepository {
 
   private val l = Tables.LIBRARY
@@ -65,6 +65,7 @@ class LibraryDao(
       .set(l.IMPORT_COMICINFO_SERIES, library.importComicInfoSeries)
       .set(l.IMPORT_COMICINFO_COLLECTION, library.importComicInfoCollection)
       .set(l.IMPORT_COMICINFO_READLIST, library.importComicInfoReadList)
+      .set(l.IMPORT_COMICINFO_SERIES_APPEND_VOLUME, library.importComicInfoSeriesAppendVolume)
       .set(l.IMPORT_EPUB_BOOK, library.importEpubBook)
       .set(l.IMPORT_EPUB_SERIES, library.importEpubSeries)
       .set(l.IMPORT_MYLAR_SERIES, library.importMylarSeries)
@@ -75,8 +76,11 @@ class LibraryDao(
       .set(l.REPAIR_EXTENSIONS, library.repairExtensions)
       .set(l.CONVERT_TO_CBZ, library.convertToCbz)
       .set(l.EMPTY_TRASH_AFTER_SCAN, library.emptyTrashAfterScan)
-      .set(l.UNAVAILABLE_DATE, library.unavailableDate)
       .set(l.SERIES_COVER, library.seriesCover.toString())
+      .set(l.HASH_FILES, library.hashFiles)
+      .set(l.HASH_PAGES, library.hashPages)
+      .set(l.ANALYZE_DIMENSIONS, library.analyzeDimensions)
+      .set(l.UNAVAILABLE_DATE, library.unavailableDate)
       .execute()
   }
 
@@ -89,6 +93,7 @@ class LibraryDao(
       .set(l.IMPORT_COMICINFO_SERIES, library.importComicInfoSeries)
       .set(l.IMPORT_COMICINFO_COLLECTION, library.importComicInfoCollection)
       .set(l.IMPORT_COMICINFO_READLIST, library.importComicInfoReadList)
+      .set(l.IMPORT_COMICINFO_SERIES_APPEND_VOLUME, library.importComicInfoSeriesAppendVolume)
       .set(l.IMPORT_EPUB_BOOK, library.importEpubBook)
       .set(l.IMPORT_EPUB_SERIES, library.importEpubSeries)
       .set(l.IMPORT_MYLAR_SERIES, library.importMylarSeries)
@@ -100,6 +105,9 @@ class LibraryDao(
       .set(l.CONVERT_TO_CBZ, library.convertToCbz)
       .set(l.EMPTY_TRASH_AFTER_SCAN, library.emptyTrashAfterScan)
       .set(l.SERIES_COVER, library.seriesCover.toString())
+      .set(l.HASH_FILES, library.hashFiles)
+      .set(l.HASH_PAGES, library.hashPages)
+      .set(l.ANALYZE_DIMENSIONS, library.analyzeDimensions)
       .set(l.UNAVAILABLE_DATE, library.unavailableDate)
       .set(l.LAST_MODIFIED_DATE, LocalDateTime.now(ZoneId.of("Z")))
       .where(l.ID.eq(library.id))
@@ -116,6 +124,7 @@ class LibraryDao(
       importComicInfoSeries = importComicinfoSeries,
       importComicInfoCollection = importComicinfoCollection,
       importComicInfoReadList = importComicinfoReadlist,
+      importComicInfoSeriesAppendVolume = importComicinfoSeriesAppendVolume,
       importEpubBook = importEpubBook,
       importEpubSeries = importEpubSeries,
       importMylarSeries = importMylarSeries,
@@ -127,9 +136,13 @@ class LibraryDao(
       convertToCbz = convertToCbz,
       emptyTrashAfterScan = emptyTrashAfterScan,
       seriesCover = Library.SeriesCover.valueOf(seriesCover),
+      hashFiles = hashFiles,
+      hashPages = hashPages,
+      analyzeDimensions = analyzeDimensions,
+
       unavailableDate = unavailableDate,
       id = id,
       createdDate = createdDate.toCurrentTimeZone(),
-      lastModifiedDate = lastModifiedDate.toCurrentTimeZone()
+      lastModifiedDate = lastModifiedDate.toCurrentTimeZone(),
     )
 }

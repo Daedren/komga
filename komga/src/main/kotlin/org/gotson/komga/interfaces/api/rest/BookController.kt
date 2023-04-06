@@ -10,10 +10,12 @@ import org.apache.commons.io.IOUtils
 import org.gotson.komga.application.events.EventPublisher
 import org.gotson.komga.application.tasks.HIGHEST_PRIORITY
 import org.gotson.komga.application.tasks.HIGH_PRIORITY
-import org.gotson.komga.application.tasks.TaskReceiver
+import org.gotson.komga.application.tasks.TaskEmitter
+import org.gotson.komga.domain.model.Book
 import org.gotson.komga.domain.model.BookSearchWithReadProgress
 import org.gotson.komga.domain.model.DomainEvent
 import org.gotson.komga.domain.model.ImageConversionException
+import org.gotson.komga.domain.model.KomgaUser
 import org.gotson.komga.domain.model.MarkSelectedPreference
 import org.gotson.komga.domain.model.Media
 import org.gotson.komga.domain.model.MediaNotReadyException
@@ -26,6 +28,7 @@ import org.gotson.komga.domain.persistence.BookMetadataRepository
 import org.gotson.komga.domain.persistence.BookRepository
 import org.gotson.komga.domain.persistence.MediaRepository
 import org.gotson.komga.domain.persistence.ReadListRepository
+import org.gotson.komga.domain.persistence.SeriesMetadataRepository
 import org.gotson.komga.domain.persistence.ThumbnailBookRepository
 import org.gotson.komga.domain.service.BookLifecycle
 import org.gotson.komga.infrastructure.image.ImageType
@@ -78,6 +81,7 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.FileNotFoundException
 import java.io.OutputStream
+import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.NoSuchFileException
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -89,36 +93,39 @@ private val logger = KotlinLogging.logger {}
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class BookController(
-  private val taskReceiver: TaskReceiver,
+  private val taskEmitter: TaskEmitter,
   private val bookLifecycle: BookLifecycle,
   private val bookRepository: BookRepository,
   private val bookMetadataRepository: BookMetadataRepository,
+  private val seriesMetadataRepository: SeriesMetadataRepository,
   private val mediaRepository: MediaRepository,
   private val bookDtoRepository: BookDtoRepository,
   private val readListRepository: ReadListRepository,
   private val contentDetector: ContentDetector,
   private val eventPublisher: EventPublisher,
-  private val thumbnailBookRepository: ThumbnailBookRepository
+  private val thumbnailBookRepository: ThumbnailBookRepository,
 ) {
 
   @PageableAsQueryParam
   @GetMapping("api/v1/books")
   fun getAllBooks(
     @AuthenticationPrincipal principal: KomgaPrincipal,
-    @RequestParam(name = "search", required = false) searchTerm: String?,
-    @RequestParam(name = "library_id", required = false) libraryIds: List<String>?,
-    @RequestParam(name = "media_status", required = false) mediaStatus: List<Media.Status>?,
-    @RequestParam(name = "read_status", required = false) readStatus: List<ReadStatus>?,
-    @RequestParam(name = "released_after", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) releasedAfter: LocalDate?,
-    @RequestParam(name = "tag", required = false) tags: List<String>?,
+    @RequestParam(name = "search", required = false) searchTerm: String? = null,
+    @RequestParam(name = "library_id", required = false) libraryIds: List<String>? = null,
+    @RequestParam(name = "media_status", required = false) mediaStatus: List<Media.Status>? = null,
+    @RequestParam(name = "read_status", required = false) readStatus: List<ReadStatus>? = null,
+    @RequestParam(name = "released_after", required = false)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    releasedAfter: LocalDate? = null,
+    @RequestParam(name = "tag", required = false) tags: List<String>? = null,
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
-    @Parameter(hidden = true) page: Pageable
+    @Parameter(hidden = true) page: Pageable,
   ): Page<BookDto> {
     val sort =
       when {
         page.sort.isSorted -> page.sort
         !searchTerm.isNullOrBlank() -> Sort.by("relevance")
-        else -> Sort.by(Sort.Order.asc("metadata.title"))
+        else -> Sort.unsorted()
       }
 
     val pageRequest =
@@ -126,7 +133,7 @@ class BookController(
       else PageRequest.of(
         page.pageNumber,
         page.pageSize,
-        sort
+        sort,
       )
 
     val bookSearch = BookSearchWithReadProgress(
@@ -135,10 +142,10 @@ class BookController(
       mediaStatus = mediaStatus,
       readStatus = readStatus,
       releasedAfter = releasedAfter,
-      tags = tags
+      tags = tags,
     )
 
-    return bookDtoRepository.findAll(bookSearch, principal.user.id, pageRequest)
+    return bookDtoRepository.findAll(bookSearch, principal.user.id, pageRequest, principal.user.restrictions)
       .map { it.restrictUrl(!principal.user.roleAdmin) }
   }
 
@@ -148,7 +155,7 @@ class BookController(
   fun getLatestBooks(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
-    @Parameter(hidden = true) page: Pageable
+    @Parameter(hidden = true) page: Pageable,
   ): Page<BookDto> {
     val sort = Sort.by(Sort.Order.desc("lastModifiedDate"))
 
@@ -157,15 +164,16 @@ class BookController(
       else PageRequest.of(
         page.pageNumber,
         page.pageSize,
-        sort
+        sort,
       )
 
     return bookDtoRepository.findAll(
       BookSearchWithReadProgress(
-        libraryIds = principal.user.getAuthorizedLibraryIds(null)
+        libraryIds = principal.user.getAuthorizedLibraryIds(null),
       ),
       principal.user.id,
-      pageRequest
+      pageRequest,
+      principal.user.restrictions,
     ).map { it.restrictUrl(!principal.user.roleAdmin) }
   }
 
@@ -174,33 +182,58 @@ class BookController(
   @GetMapping("api/v1/books/ondeck")
   fun getBooksOnDeck(
     @AuthenticationPrincipal principal: KomgaPrincipal,
-    @RequestParam(name = "library_id", required = false) libraryIds: List<String>?,
-    @Parameter(hidden = true) page: Pageable
+    @RequestParam(name = "library_id", required = false) libraryIds: List<String>? = null,
+    @Parameter(hidden = true) page: Pageable,
   ): Page<BookDto> =
     bookDtoRepository.findAllOnDeck(
       principal.user.id,
       principal.user.getAuthorizedLibraryIds(libraryIds),
-      page
+      page,
+      principal.user.restrictions,
     ).map { it.restrictUrl(!principal.user.roleAdmin) }
+
+  @PageableAsQueryParam
+  @GetMapping("api/v1/books/duplicates")
+  @PreAuthorize("hasRole('$ROLE_ADMIN')")
+  fun getDuplicateBooks(
+    @AuthenticationPrincipal principal: KomgaPrincipal,
+    @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
+    @Parameter(hidden = true) page: Pageable,
+  ): Page<BookDto> {
+    val sort =
+      when {
+        page.sort.isSorted -> page.sort
+        else -> Sort.by(Sort.Order.asc("fileHash"))
+      }
+
+    val pageRequest =
+      if (unpaged) Pageable.unpaged()
+      else PageRequest.of(
+        page.pageNumber,
+        page.pageSize,
+        sort,
+      )
+
+    return bookDtoRepository.findAllDuplicates(principal.user.id, pageRequest)
+  }
 
   @GetMapping("api/v1/books/{bookId}")
   fun getOneBook(
     @AuthenticationPrincipal principal: KomgaPrincipal,
-    @PathVariable bookId: String
+    @PathVariable bookId: String,
   ): BookDto =
     bookDtoRepository.findByIdOrNull(bookId, principal.user.id)?.let {
-      if (!principal.user.canAccessLibrary(it.libraryId)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+      principal.user.checkContentRestriction(it)
+
       it.restrictUrl(!principal.user.roleAdmin)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
   @GetMapping("api/v1/books/{bookId}/previous")
   fun getBookSiblingPrevious(
     @AuthenticationPrincipal principal: KomgaPrincipal,
-    @PathVariable bookId: String
+    @PathVariable bookId: String,
   ): BookDto {
-    bookRepository.getLibraryIdOrNull(bookId)?.let {
-      if (!principal.user.canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    principal.user.checkContentRestriction(bookId)
 
     return bookDtoRepository.findPreviousInSeriesOrNull(bookId, principal.user.id)
       ?.restrictUrl(!principal.user.roleAdmin)
@@ -210,11 +243,9 @@ class BookController(
   @GetMapping("api/v1/books/{bookId}/next")
   fun getBookSiblingNext(
     @AuthenticationPrincipal principal: KomgaPrincipal,
-    @PathVariable bookId: String
+    @PathVariable bookId: String,
   ): BookDto {
-    bookRepository.getLibraryIdOrNull(bookId)?.let {
-      if (!principal.user.canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    principal.user.checkContentRestriction(bookId)
 
     return bookDtoRepository.findNextInSeriesOrNull(bookId, principal.user.id)
       ?.restrictUrl(!principal.user.roleAdmin)
@@ -224,13 +255,11 @@ class BookController(
   @GetMapping("api/v1/books/{bookId}/readlists")
   fun getAllReadListsByBook(
     @AuthenticationPrincipal principal: KomgaPrincipal,
-    @PathVariable(name = "bookId") bookId: String
+    @PathVariable(name = "bookId") bookId: String,
   ): List<ReadListDto> {
-    bookRepository.getLibraryIdOrNull(bookId)?.let {
-      if (!principal.user.canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    principal.user.checkContentRestriction(bookId)
 
-    return readListRepository.findAllContainingBookId(bookId, principal.user.getAuthorizedLibraryIds(null))
+    return readListRepository.findAllContainingBookId(bookId, principal.user.getAuthorizedLibraryIds(null), principal.user.restrictions)
       .map { it.toDto() }
   }
 
@@ -238,17 +267,15 @@ class BookController(
   @GetMapping(
     value = [
       "api/v1/books/{bookId}/thumbnail",
-      "opds/v1.2/books/{bookId}/thumbnail"
+      "opds/v1.2/books/{bookId}/thumbnail",
     ],
-    produces = [MediaType.IMAGE_JPEG_VALUE]
+    produces = [MediaType.IMAGE_JPEG_VALUE],
   )
   fun getBookThumbnail(
     @AuthenticationPrincipal principal: KomgaPrincipal,
-    @PathVariable bookId: String
+    @PathVariable bookId: String,
   ): ByteArray {
-    bookRepository.getLibraryIdOrNull(bookId)?.let {
-      if (!principal.user.canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    principal.user.checkContentRestriction(bookId)
 
     return bookLifecycle.getThumbnailBytes(bookId) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
@@ -258,11 +285,9 @@ class BookController(
   fun getBookThumbnailById(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @PathVariable(name = "bookId") bookId: String,
-    @PathVariable(name = "thumbnailId") thumbnailId: String
+    @PathVariable(name = "thumbnailId") thumbnailId: String,
   ): ByteArray {
-    bookRepository.getLibraryIdOrNull(bookId)?.let {
-      if (!principal.user.canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    principal.user.checkContentRestriction(bookId)
 
     return bookLifecycle.getThumbnailBytesByThumbnailId(thumbnailId)
       ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
@@ -273,9 +298,7 @@ class BookController(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @PathVariable(name = "bookId") bookId: String,
   ): Collection<ThumbnailBookDto> {
-    bookRepository.getLibraryIdOrNull(bookId)?.let {
-      if (!principal.user.canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    principal.user.checkContentRestriction(bookId)
 
     return thumbnailBookRepository.findAllByBookId(bookId)
       .map { it.toDto() }
@@ -283,28 +306,26 @@ class BookController(
 
   @PostMapping(value = ["api/v1/books/{bookId}/thumbnails"], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @PreAuthorize("hasRole('$ROLE_ADMIN')")
-  @ResponseStatus(HttpStatus.ACCEPTED)
   fun addUserUploadedBookThumbnail(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @PathVariable(name = "bookId") bookId: String,
     @RequestParam("file") file: MultipartFile,
     @RequestParam("selected") selected: Boolean = true,
-  ) {
+  ): ThumbnailBookDto {
     val book = bookRepository.findByIdOrNull(bookId) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
-    if (!principal.user.canAccessBook(book)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
 
     if (!contentDetector.isImage(file.inputStream.buffered().use { contentDetector.detectMediaType(it) }))
       throw ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
 
-    bookLifecycle.addThumbnailForBook(
+    return bookLifecycle.addThumbnailForBook(
       ThumbnailBook(
         bookId = book.id,
         thumbnail = file.bytes,
         type = ThumbnailBook.Type.USER_UPLOADED,
-        selected = selected
+        selected = selected,
       ),
-      if (selected) MarkSelectedPreference.YES else MarkSelectedPreference.NO
-    )
+      if (selected) MarkSelectedPreference.YES else MarkSelectedPreference.NO,
+    ).toDto()
   }
 
   @PutMapping("api/v1/books/{bookId}/thumbnails/{thumbnailId}/selected")
@@ -315,13 +336,9 @@ class BookController(
     @PathVariable(name = "bookId") bookId: String,
     @PathVariable(name = "thumbnailId") thumbnailId: String,
   ) {
-    bookRepository.findByIdOrNull(bookId)?.let { book ->
-      if (!principal.user.canAccessBook(book)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
-
     thumbnailBookRepository.findByIdOrNull(thumbnailId)?.let {
       thumbnailBookRepository.markSelected(it)
-      eventPublisher.publishEvent(DomainEvent.ThumbnailBookAdded(it))
+      eventPublisher.publishEvent(DomainEvent.ThumbnailBookAdded(it.copy(selected = true)))
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
 
@@ -333,10 +350,6 @@ class BookController(
     @PathVariable(name = "bookId") bookId: String,
     @PathVariable(name = "thumbnailId") thumbnailId: String,
   ) {
-    bookRepository.findByIdOrNull(bookId)?.let { book ->
-      if (!principal.user.canAccessBook(book)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
-
     thumbnailBookRepository.findByIdOrNull(thumbnailId)?.let {
       try {
         bookLifecycle.deleteThumbnailForBook(it)
@@ -351,17 +364,17 @@ class BookController(
     value = [
       "api/v1/books/{bookId}/file",
       "api/v1/books/{bookId}/file/*",
-      "opds/v1.2/books/{bookId}/file/*"
+      "opds/v1.2/books/{bookId}/file/*",
     ],
-    produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE]
+    produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE],
   )
   @PreAuthorize("hasRole('$ROLE_FILE_DOWNLOAD')")
   fun getBookFile(
     @AuthenticationPrincipal principal: KomgaPrincipal,
-    @PathVariable bookId: String
+    @PathVariable bookId: String,
   ): ResponseEntity<StreamingResponseBody> =
     bookRepository.findByIdOrNull(bookId)?.let { book ->
-      if (!principal.user.canAccessBook(book)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+      principal.user.checkContentRestriction(book)
       try {
         val media = mediaRepository.findById(book.id)
         with(FileSystemResource(book.path)) {
@@ -376,9 +389,9 @@ class BookController(
             .headers(
               HttpHeaders().apply {
                 contentDisposition = ContentDisposition.builder("attachment")
-                  .filename(book.path.name)
+                  .filename(book.path.name, UTF_8)
                   .build()
-              }
+              },
             )
             .contentType(getMediaTypeOrDefault(media.mediaType))
             .contentLength(this.contentLength())
@@ -393,22 +406,29 @@ class BookController(
   @GetMapping("api/v1/books/{bookId}/pages")
   fun getBookPages(
     @AuthenticationPrincipal principal: KomgaPrincipal,
-    @PathVariable bookId: String
+    @PathVariable bookId: String,
   ): List<PageDto> =
     bookRepository.findByIdOrNull(bookId)?.let { book ->
-      if (!principal.user.canAccessBook(book)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+      principal.user.checkContentRestriction(book)
 
       val media = mediaRepository.findById(book.id)
       when (media.status) {
         Media.Status.UNKNOWN -> throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book has not been analyzed yet")
         Media.Status.OUTDATED -> throw ResponseStatusException(
           HttpStatus.NOT_FOUND,
-          "Book is outdated and must be re-analyzed"
+          "Book is outdated and must be re-analyzed",
         )
         Media.Status.ERROR -> throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book analysis failed")
         Media.Status.UNSUPPORTED -> throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book format is not supported")
-        Media.Status.READY -> media.pages.mapIndexed { index, s ->
-          PageDto(index + 1, s.fileName, s.mediaType, s.dimension?.width, s.dimension?.height)
+        Media.Status.READY -> media.pages.mapIndexed { index, bookPage ->
+          PageDto(
+            number = index + 1,
+            fileName = bookPage.fileName,
+            mediaType = bookPage.mediaType,
+            width = bookPage.dimension?.width,
+            height = bookPage.dimension?.height,
+            sizeBytes = bookPage.fileSize,
+          )
         }
       }
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
@@ -417,16 +437,16 @@ class BookController(
     content = [
       Content(
         mediaType = "image/*",
-        schema = Schema(type = "string", format = "binary")
-      )
-    ]
+        schema = Schema(type = "string", format = "binary"),
+      ),
+    ],
   )
   @GetMapping(
     value = [
       "api/v1/books/{bookId}/pages/{pageNumber}",
-      "opds/v1.2/books/{bookId}/pages/{pageNumber}"
+      "opds/v1.2/books/{bookId}/pages/{pageNumber}",
     ],
-    produces = [MediaType.ALL_VALUE]
+    produces = [MediaType.ALL_VALUE],
   )
   @PreAuthorize("hasRole('$ROLE_PAGE_STREAMING')")
   fun getBookPage(
@@ -436,11 +456,13 @@ class BookController(
     @PathVariable pageNumber: Int,
     @Parameter(
       description = "Convert the image to the provided format.",
-      schema = Schema(allowableValues = ["jpeg", "png"])
+      schema = Schema(allowableValues = ["jpeg", "png"]),
     )
-    @RequestParam(value = "convert", required = false) convertTo: String?,
+    @RequestParam(value = "convert", required = false)
+    convertTo: String?,
     @Parameter(description = "If set to true, pages will start at index 0. If set to false, pages will start at index 1.")
-    @RequestParam(value = "zero_based", defaultValue = "false") zeroBasedIndex: Boolean,
+    @RequestParam(value = "zero_based", defaultValue = "false")
+    zeroBasedIndex: Boolean,
   ): ResponseEntity<ByteArray> =
     bookRepository.findByIdOrNull((bookId))?.let { book ->
       val media = mediaRepository.findById(bookId)
@@ -450,7 +472,9 @@ class BookController(
           .setNotModified(media)
           .body(ByteArray(0))
       }
-      if (!principal.user.canAccessBook(book)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+
+      principal.user.checkContentRestriction(book)
+
       try {
         val convertFormat = when (convertTo?.lowercase()) {
           "jpeg" -> ImageType.JPEG
@@ -471,7 +495,7 @@ class BookController(
               contentDisposition = ContentDisposition.builder("inline")
                 .filename(imageFileName)
                 .build()
-            }
+            },
           )
           .contentType(getMediaTypeOrDefault(pageContent.mediaType))
           .setNotModified(media)
@@ -491,13 +515,13 @@ class BookController(
   @ApiResponse(content = [Content(schema = Schema(type = "string", format = "binary"))])
   @GetMapping(
     value = ["api/v1/books/{bookId}/pages/{pageNumber}/thumbnail"],
-    produces = [MediaType.IMAGE_JPEG_VALUE]
+    produces = [MediaType.IMAGE_JPEG_VALUE],
   )
   fun getBookPageThumbnail(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     request: WebRequest,
     @PathVariable bookId: String,
-    @PathVariable pageNumber: Int
+    @PathVariable pageNumber: Int,
   ): ResponseEntity<ByteArray> =
     bookRepository.findByIdOrNull(bookId)?.let { book ->
       val media = mediaRepository.findById(bookId)
@@ -507,7 +531,9 @@ class BookController(
           .setNotModified(media)
           .body(ByteArray(0))
       }
-      if (!principal.user.canAccessBook(book)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+
+      principal.user.checkContentRestriction(book)
+
       try {
         val pageContent = bookLifecycle.getBookPage(book, pageNumber, resizeTo = 300)
 
@@ -532,7 +558,7 @@ class BookController(
   @ResponseStatus(HttpStatus.ACCEPTED)
   fun analyze(@PathVariable bookId: String) {
     bookRepository.findByIdOrNull(bookId)?.let { book ->
-      taskReceiver.analyzeBook(book.id, HIGH_PRIORITY)
+      taskEmitter.analyzeBook(book, HIGH_PRIORITY)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
 
@@ -541,8 +567,8 @@ class BookController(
   @ResponseStatus(HttpStatus.ACCEPTED)
   fun refreshMetadata(@PathVariable bookId: String) {
     bookRepository.findByIdOrNull(bookId)?.let { book ->
-      taskReceiver.refreshBookMetadata(book.id, priority = HIGH_PRIORITY)
-      taskReceiver.refreshBookLocalArtwork(book.id, priority = HIGH_PRIORITY)
+      taskEmitter.refreshBookMetadata(book, priority = HIGH_PRIORITY)
+      taskEmitter.refreshBookLocalArtwork(book, priority = HIGH_PRIORITY)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
 
@@ -552,14 +578,16 @@ class BookController(
   fun updateMetadata(
     @PathVariable bookId: String,
     @Parameter(description = "Metadata fields to update. Set a field to null to unset the metadata. You can omit fields you don't want to update.")
-    @Valid @RequestBody newMetadata: BookMetadataUpdateDto,
+    @Valid
+    @RequestBody
+    newMetadata: BookMetadataUpdateDto,
   ) =
     bookMetadataRepository.findByIdOrNull(bookId)?.let { existing ->
       val updated = existing.patch(newMetadata)
       bookMetadataRepository.update(updated)
 
       bookRepository.findByIdOrNull(bookId)?.let { updatedBook ->
-        taskReceiver.aggregateSeriesMetadata(updatedBook.seriesId)
+        taskEmitter.aggregateSeriesMetadata(updatedBook.seriesId)
         updatedBook.let { eventPublisher.publishEvent(DomainEvent.BookUpdated(it)) }
       }
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
@@ -569,7 +597,9 @@ class BookController(
   @ResponseStatus(HttpStatus.NO_CONTENT)
   fun updateBatchMetadata(
     @Parameter(description = "A map of book IDs which values are the metadata fields to update. Set a field to null to unset the metadata. You can omit fields you don't want to update.")
-    @Valid @RequestBody newMetadatas: Map<String, BookMetadataUpdateDto>,
+    @Valid
+    @RequestBody
+    newMetadatas: Map<String, BookMetadataUpdateDto>,
   ) {
     val updatedBooks = newMetadatas.mapNotNull { (bookId, newMetadata) ->
       bookMetadataRepository.findByIdOrNull(bookId)?.let { existing ->
@@ -581,7 +611,7 @@ class BookController(
     }
 
     updatedBooks.forEach { eventPublisher.publishEvent(DomainEvent.BookUpdated(it)) }
-    updatedBooks.map { it.seriesId }.distinct().forEach { taskReceiver.aggregateSeriesMetadata(it) }
+    updatedBooks.map { it.seriesId }.distinct().forEach { taskEmitter.aggregateSeriesMetadata(it) }
   }
 
   @Operation(description = "Mark book as read and/or change page progress")
@@ -590,11 +620,13 @@ class BookController(
   fun markReadProgress(
     @PathVariable bookId: String,
     @Parameter(description = "page can be omitted if completed is set to true. completed can be omitted, and will be set accordingly depending on the page passed and the total number of pages in the book.")
-    @Valid @RequestBody readProgress: ReadProgressUpdateDto,
-    @AuthenticationPrincipal principal: KomgaPrincipal
+    @Valid
+    @RequestBody
+    readProgress: ReadProgressUpdateDto,
+    @AuthenticationPrincipal principal: KomgaPrincipal,
   ) {
     bookRepository.findByIdOrNull(bookId)?.let { book ->
-      if (!principal.user.canAccessBook(book)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+      principal.user.checkContentRestriction(book)
 
       try {
         if (readProgress.completed != null && readProgress.completed)
@@ -612,10 +644,10 @@ class BookController(
   @ResponseStatus(HttpStatus.NO_CONTENT)
   fun deleteReadProgress(
     @PathVariable bookId: String,
-    @AuthenticationPrincipal principal: KomgaPrincipal
+    @AuthenticationPrincipal principal: KomgaPrincipal,
   ) {
     bookRepository.findByIdOrNull(bookId)?.let { book ->
-      if (!principal.user.canAccessBook(book)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+      principal.user.checkContentRestriction(book)
 
       bookLifecycle.deleteReadProgress(book, principal.user)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
@@ -629,7 +661,7 @@ class BookController(
   ) {
     bookImportBatch.books.forEach {
       try {
-        taskReceiver.importBook(
+        taskEmitter.importBook(
           sourceFile = it.sourceFile,
           seriesId = it.seriesId,
           copyMode = bookImportBatch.copyMode,
@@ -647,9 +679,9 @@ class BookController(
   @PreAuthorize("hasRole('$ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.ACCEPTED)
   fun deleteBook(
-    @PathVariable bookId: String
+    @PathVariable bookId: String,
   ) {
-    taskReceiver.deleteBook(
+    taskEmitter.deleteBook(
       bookId = bookId,
       priority = HIGHEST_PRIORITY,
     )
@@ -660,4 +692,49 @@ class BookController(
 
   private fun getBookLastModified(media: Media) =
     media.lastModifiedDate.toInstant(ZoneOffset.UTC).toEpochMilli()
+
+  /**
+   * Convenience function to check for content restriction.
+   * This will retrieve data from repositories if needed.
+   *
+   * @throws[ResponseStatusException] if the user cannot access the content
+   */
+  private fun KomgaUser.checkContentRestriction(book: BookDto) {
+    if (!canAccessLibrary(book.libraryId)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+    if (restrictions.isRestricted) seriesMetadataRepository.findById(book.seriesId).let {
+      if (!isContentAllowed(it.ageRating, it.sharingLabels)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+    }
+  }
+
+  /**
+   * Convenience function to check for content restriction.
+   * This will retrieve data from repositories if needed.
+   *
+   * @throws[ResponseStatusException] if the user cannot access the content
+   */
+  private fun KomgaUser.checkContentRestriction(book: Book) {
+    if (!canAccessLibrary(book.libraryId)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+    if (restrictions.isRestricted) seriesMetadataRepository.findById(book.seriesId).let {
+      if (!isContentAllowed(it.ageRating, it.sharingLabels)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+    }
+  }
+
+  /**
+   * Convenience function to check for content restriction.
+   * This will retrieve data from repositories if needed.
+   *
+   * @throws[ResponseStatusException] if the user cannot access the content
+   */
+  private fun KomgaUser.checkContentRestriction(bookId: String) {
+    if (!sharedAllLibraries) {
+      bookRepository.getLibraryIdOrNull(bookId)?.let {
+        if (!canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+      } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    }
+    if (restrictions.isRestricted) bookRepository.getSeriesIdOrNull(bookId)?.let { seriesId ->
+      seriesMetadataRepository.findById(seriesId).let {
+        if (!isContentAllowed(it.ageRating, it.sharingLabels)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+      }
+    } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+  }
 }

@@ -7,15 +7,16 @@ import org.apache.lucene.document.StringField
 import org.apache.lucene.document.TextField
 import org.gotson.komga.domain.model.ReadList
 import org.gotson.komga.domain.model.SeriesCollection
-import org.gotson.komga.infrastructure.language.toDate
 import org.gotson.komga.interfaces.api.rest.dto.BookDto
 import org.gotson.komga.interfaces.api.rest.dto.SeriesDto
+import org.gotson.komga.language.toDate
 
 enum class LuceneEntity(val type: String, val id: String, val defaultFields: Array<String>) {
   Book("book", "book_id", arrayOf("title", "isbn")),
   Series("series", "series_id", arrayOf("title")),
   Collection("collection", "collection_id", arrayOf("name")),
-  ReadList("readlist", "readlist_id", arrayOf("name"));
+  ReadList("readlist", "readlist_id", arrayOf("name")),
+  ;
 
   companion object {
     const val TYPE = "type"
@@ -45,6 +46,7 @@ fun SeriesDto.toDocument() =
   Document().apply {
     add(TextField("title", metadata.title, Field.Store.NO))
     if (metadata.titleSort != metadata.title) add(TextField("title", metadata.titleSort, Field.Store.NO))
+    metadata.alternateTitles.forEach { add(TextField("title", it.title, Field.Store.NO)) }
     add(TextField("publisher", metadata.publisher, Field.Store.NO))
     add(TextField("status", metadata.status, Field.Store.NO))
     add(TextField("reading_direction", metadata.readingDirection, Field.Store.NO))
@@ -69,6 +71,7 @@ fun SeriesDto.toDocument() =
     }
     if (booksMetadata.releaseDate != null) add(TextField("release_date", DateTools.dateToString(booksMetadata.releaseDate.toDate(), DateTools.Resolution.YEAR), Field.Store.NO))
     add(TextField("deleted", deleted.toString(), Field.Store.NO))
+    if (metadata.totalBookCount != null) add(TextField("complete", (metadata.totalBookCount == booksCount).toString(), Field.Store.NO))
 
     add(StringField(LuceneEntity.TYPE, LuceneEntity.Series.type, Field.Store.NO))
     add(StringField(LuceneEntity.Series.id, id, Field.Store.YES))

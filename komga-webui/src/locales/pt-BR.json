@@ -22,13 +22,13 @@
     "change_password": "Alterar senha"
   },
   "authentication_activity": {
-    "datetime": "Data/Hora",
+    "datetime": "Data e Hora",
     "email": "E-mail",
     "error": "Erro",
     "ip": "IP",
     "source": "Origem",
-    "success": "Sucessso",
-    "user_agent": "User Agent"
+    "success": "Sucesso",
+    "user_agent": "Agente de Usuário"
   },
   "author_roles": {
     "colorist": "coloristas",
@@ -37,7 +37,7 @@
     "inker": "arte-finalistas",
     "letterer": "letristas",
     "penciller": "desenhistas",
-    "translator": "tradutores",
+    "translator": "Tradutores",
     "writer": "Escritores"
   },
   "book_card": {
@@ -407,13 +407,6 @@
       "dialog_title": "Editar usuário",
       "label_roles_for": "Cargos para {name}"
     },
-    "edit_user_shared_libraries": {
-      "button_cancel": "Cancelar",
-      "button_confirm": "Salvar mudanças",
-      "dialog_title": "Editar bibliotecas compartilhadas",
-      "field_all_libraries": "Todas as bibliotecas",
-      "label_shared_with": "Compartilhado com {name}"
-    },
     "empty_trash": {
       "body": "Por padrão, o servidor de mídia não remove as informações da mídia imediatamente. Isso ajuda se uma unidade estiver temporariamente desconectada. Quando você esvazia a lixeira de uma biblioteca, todas as informações sobre mídia ausente são excluídas.",
       "button_confirm": "Vazio",
@@ -529,11 +522,8 @@
     "ERR_1007": "Algumas entradas não puderam ser analisadas",
     "ERR_1008": "Erro desconhecido ao obter entradas do livro",
     "ERR_1009": "Já existe uma lista de leitura com esse nome",
-    "ERR_1010": "Nenhum livro foi correspondido na solicitação de lista de leitura",
     "ERR_1011": "Sem correspondência única para a série",
-    "ERR_1012": "Sem correspondência para a série",
     "ERR_1013": "Nenhuma correspondência única para o número do livro dentro da série",
-    "ERR_1014": "Nenhuma correspondência para o número do livro dentro da série",
     "ERR_1015": "Erro ao desserializar ComicRack ReadingList",
     "ERR_1016": "Diretório não acessível ou não é um diretório",
     "ERR_1017": "Não é possível digitalizar a pasta que faz parte de uma biblioteca existente",
@@ -652,7 +642,6 @@
   },
   "settings_user": {
     "change_password": "Alterar senha",
-    "edit_shared_libraries": "Editar bibliotecas compartilhadas",
     "edit_user": "Editar Usuário",
     "latest_activity": "Última atividade: {date}",
     "no_recent_activity": "Nenhuma atividade recente",

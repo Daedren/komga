@@ -25,7 +25,7 @@ class SeriesCollectionLifecycle(
 ) {
 
   @Throws(
-    DuplicateNameException::class
+    DuplicateNameException::class,
   )
   fun addCollection(collection: SeriesCollection): SeriesCollection {
     logger.info { "Adding new collection: $collection" }
@@ -46,7 +46,7 @@ class SeriesCollectionLifecycle(
     val existing = collectionRepository.findByIdOrNull(toUpdate.id)
       ?: throw IllegalArgumentException("Cannot update collection that does not exist")
 
-    if (existing.name != toUpdate.name && collectionRepository.existsByName(toUpdate.name))
+    if (!existing.name.equals(toUpdate.name, true) && collectionRepository.existsByName(toUpdate.name))
       throw DuplicateNameException("Collection name already exists")
 
     collectionRepository.update(toUpdate)
@@ -73,7 +73,7 @@ class SeriesCollectionLifecycle(
     }
   }
 
-  fun addThumbnail(thumbnail: ThumbnailSeriesCollection) {
+  fun addThumbnail(thumbnail: ThumbnailSeriesCollection): ThumbnailSeriesCollection {
     when (thumbnail.type) {
       ThumbnailSeriesCollection.Type.USER_UPLOADED -> {
         thumbnailSeriesCollectionRepository.insert(thumbnail)
@@ -84,11 +84,12 @@ class SeriesCollectionLifecycle(
     }
 
     eventPublisher.publishEvent(DomainEvent.ThumbnailSeriesCollectionAdded(thumbnail))
+    return thumbnail
   }
 
   fun markSelectedThumbnail(thumbnail: ThumbnailSeriesCollection) {
     thumbnailSeriesCollectionRepository.markSelected(thumbnail)
-    eventPublisher.publishEvent(DomainEvent.ThumbnailSeriesCollectionAdded(thumbnail))
+    eventPublisher.publishEvent(DomainEvent.ThumbnailSeriesCollectionAdded(thumbnail.copy(selected = true)))
   }
 
   fun deleteThumbnail(thumbnail: ThumbnailSeriesCollection) {

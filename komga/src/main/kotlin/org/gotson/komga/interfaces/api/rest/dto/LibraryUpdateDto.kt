@@ -9,6 +9,7 @@ data class LibraryUpdateDto(
   val importComicInfoSeries: Boolean,
   val importComicInfoCollection: Boolean,
   val importComicInfoReadList: Boolean,
+  val importComicInfoSeriesAppendVolume: Boolean,
   val importEpubBook: Boolean,
   val importEpubSeries: Boolean,
   val importMylarSeries: Boolean,
@@ -20,4 +21,7 @@ data class LibraryUpdateDto(
   val convertToCbz: Boolean,
   val emptyTrashAfterScan: Boolean,
   val seriesCover: SeriesCoverDto,
+  val hashFiles: Boolean,
+  val hashPages: Boolean,
+  val analyzeDimensions: Boolean,
 )

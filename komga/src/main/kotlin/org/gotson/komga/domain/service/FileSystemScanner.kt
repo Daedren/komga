@@ -71,7 +71,9 @@ class FileSystemScanner(
       val pathToBookSidecars = mutableMapOf<Path, MutableList<TempSidecar>>()
 
       Files.walkFileTree(
-        root, setOf(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE,
+        root,
+        setOf(FileVisitOption.FOLLOW_LINKS),
+        Integer.MAX_VALUE,
         object : FileVisitor<Path> {
           override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
             logger.trace { "preVisit: $dir (regularFile:${attrs.isRegularFile}, directory:${attrs.isDirectory}, symbolicLink:${attrs.isSymbolicLink}, other:${attrs.isOther})" }
@@ -84,7 +86,7 @@ class FileSystemScanner(
             pathToSeries[dir] = Series(
               name = dir.name.ifBlank { dir.pathString },
               url = dir.toUri().toURL(),
-              fileLastModified = attrs.getUpdatedTime()
+              fileLastModified = attrs.getUpdatedTime(),
             )
 
             return FileVisitResult.CONTINUE
@@ -159,7 +161,7 @@ class FileSystemScanner(
 
             return FileVisitResult.CONTINUE
           }
-        }
+        },
       )
     }.also {
       val countOfBooks = scannedSeries.values.sumOf { it.size }
@@ -192,7 +194,7 @@ class FileSystemScanner(
       name = path.nameWithoutExtension,
       url = path.toUri().toURL(),
       fileLastModified = attrs.getUpdatedTime(),
-      fileSize = attrs.size()
+      fileSize = attrs.size(),
     )
 }
 

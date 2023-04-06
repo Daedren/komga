@@ -1,5 +1,12 @@
 import {AxiosInstance} from 'axios'
 import {AuthorDto, BookDto} from '@/types/komga-books'
+import {
+  ReadListCreationDto,
+  ReadListDto,
+  ReadListRequestMatchDto,
+  ReadListThumbnailDto,
+  ReadListUpdateDto,
+} from '@/types/komga-readlists'
 
 const qs = require('qs')
 
@@ -55,17 +62,17 @@ export default class KomgaReadListsService {
     }
   }
 
-  async postReadListImport(files: any): Promise<ReadListRequestResultDto[]> {
+  async postReadListMatch(file: any): Promise<ReadListRequestMatchDto> {
     try {
       const formData = new FormData()
-      files.forEach((f: any) => formData.append('files', f))
-      return (await this.http.post(`${API_READLISTS}/import`, formData, {
+      formData.append('file', file)
+      return (await this.http.post(`${API_READLISTS}/match/comicrack`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       })).data
     } catch (e) {
-      let msg = 'An error occurred while trying to import readlists\''
+      let msg = 'An error occurred while trying to match readlist'
       if (e.response.data.message) {
         msg += `: ${e.response.data.message}`
       }
@@ -109,7 +116,7 @@ export default class KomgaReadListsService {
 
       return (await this.http.get(`${API_READLISTS}/${readListId}/books`, {
         params: params,
-        paramsSerializer: params => qs.stringify(params, { indices: false }),
+        paramsSerializer: params => qs.stringify(params, {indices: false}),
       })).data
     } catch (e) {
       let msg = 'An error occurred while trying to retrieve books'
@@ -137,6 +144,57 @@ export default class KomgaReadListsService {
       return (await this.http.get(`${API_READLISTS}/${readListId}/books/${bookId}/previous`)).data
     } catch (e) {
       let msg = 'An error occurred while trying to retrieve book'
+      if (e.response.data.message) {
+        msg += `: ${e.response.data.message}`
+      }
+      throw new Error(msg)
+    }
+  }
+
+  async getThumbnails(readListId: string): Promise<ReadListThumbnailDto[]> {
+    try {
+      return (await this.http.get(`${API_READLISTS}/${readListId}/thumbnails`)).data
+    } catch (e) {
+      let msg = `An error occurred while trying to retrieve thumbnails for readlist '${readListId}'`
+      if (e.response.data.message) {
+        msg += `: ${e.response.data.message}`
+      }
+      throw new Error(msg)
+    }
+  }
+
+  async uploadThumbnail(readListId: string, file: File, selected: boolean) {
+    try {
+      const body = new FormData()
+      body.append('file', file)
+      body.append('selected', `${selected}`)
+      await this.http.post(`${API_READLISTS}/${readListId}/thumbnails`, body)
+    } catch (e) {
+      let msg = `An error occurred while trying to upload thumbnail for readlist '${readListId}'`
+      if (e.response.data.message) {
+        msg += `: ${e.response.data.message}`
+      }
+      throw new Error(msg)
+    }
+  }
+
+  async deleteThumbnail(readListId: string, thumbnailId: string) {
+    try {
+      await this.http.delete(`${API_READLISTS}/${readListId}/thumbnails/${thumbnailId}`)
+    } catch (e) {
+      let msg = `An error occurred while trying to delete thumbnail for readlist '${readListId}'`
+      if (e.response.data.message) {
+        msg += `: ${e.response.data.message}`
+      }
+      throw new Error(msg)
+    }
+  }
+
+  async markThumbnailAsSelected(readListId: string, thumbnailId: string) {
+    try {
+      await this.http.put(`${API_READLISTS}/${readListId}/thumbnails/${thumbnailId}/selected`)
+    } catch (e) {
+      let msg = `An error occurred while trying to mark thumbnail as selected for readlist '${readListId}'`
       if (e.response.data.message) {
         msg += `: ${e.response.data.message}`
       }

@@ -4,10 +4,12 @@ import {
   BookImportBatchDto,
   BookMetadataUpdateBatchDto,
   BookMetadataUpdateDto,
+  BookThumbnailDto,
   PageDto,
   ReadProgressUpdateDto,
 } from '@/types/komga-books'
 import {formatISO} from 'date-fns'
+import {ReadListDto} from '@/types/komga-readlists'
 
 const qs = require('qs')
 
@@ -44,6 +46,21 @@ export default class KomgaBooksService {
       })).data
     } catch (e) {
       let msg = 'An error occurred while trying to retrieve books'
+      if (e.response.data.message) {
+        msg += `: ${e.response.data.message}`
+      }
+      throw new Error(msg)
+    }
+  }
+
+  async getDuplicateBooks(pageRequest?: PageRequest): Promise<Page<BookDto>> {
+    try {
+      return (await this.http.get(`${API_BOOKS}/duplicates`, {
+        params: pageRequest,
+        paramsSerializer: params => qs.stringify(params, {indices: false}),
+      })).data
+    } catch (e) {
+      let msg = 'An error occurred while trying to retrieve duplicate books'
       if (e.response.data.message) {
         msg += `: ${e.response.data.message}`
       }
@@ -218,6 +235,57 @@ export default class KomgaBooksService {
       await this.http.delete(`${API_BOOKS}/${bookId}/file`)
     } catch (e) {
       let msg = 'An error occurred while trying to delete book'
+      if (e.response.data.message) {
+        msg += `: ${e.response.data.message}`
+      }
+      throw new Error(msg)
+    }
+  }
+
+  async getThumbnails(bookId: string): Promise<BookThumbnailDto[]> {
+    try {
+      return (await this.http.get(`${API_BOOKS}/${bookId}/thumbnails`)).data
+    } catch (e) {
+      let msg = `An error occurred while trying to retrieve thumbnails for book '${bookId}'`
+      if (e.response.data.message) {
+        msg += `: ${e.response.data.message}`
+      }
+      throw new Error(msg)
+    }
+  }
+
+  async uploadThumbnail(bookId: string, file: File, selected: boolean) {
+    try {
+      const body = new FormData()
+      body.append('file', file)
+      body.append('selected', `${selected}`)
+      await this.http.post(`${API_BOOKS}/${bookId}/thumbnails`, body)
+    } catch (e) {
+      let msg = `An error occurred while trying to upload thumbnail for book '${bookId}'`
+      if (e.response.data.message) {
+        msg += `: ${e.response.data.message}`
+      }
+      throw new Error(msg)
+    }
+  }
+
+  async deleteThumbnail(bookId: string, thumbnailId: string) {
+    try {
+      await this.http.delete(`${API_BOOKS}/${bookId}/thumbnails/${thumbnailId}`)
+    } catch (e) {
+      let msg = `An error occurred while trying to delete thumbnail for book '${bookId}'`
+      if (e.response.data.message) {
+        msg += `: ${e.response.data.message}`
+      }
+      throw new Error(msg)
+    }
+  }
+
+  async markThumbnailAsSelected(bookId: string, thumbnailId: string) {
+    try {
+      await this.http.put(`${API_BOOKS}/${bookId}/thumbnails/${thumbnailId}/selected`)
+    } catch (e) {
+      let msg = `An error occurred while trying to mark thumbnail as selected for book '${bookId}'`
       if (e.response.data.message) {
         msg += `: ${e.response.data.message}`
       }

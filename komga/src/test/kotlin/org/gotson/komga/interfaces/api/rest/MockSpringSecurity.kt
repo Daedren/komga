@@ -1,5 +1,8 @@
 package org.gotson.komga.interfaces.api.rest
 
+import org.gotson.komga.domain.model.AgeRestriction
+import org.gotson.komga.domain.model.AllowExclude
+import org.gotson.komga.domain.model.ContentRestrictions
 import org.gotson.komga.domain.model.KomgaUser
 import org.gotson.komga.domain.model.ROLE_ADMIN
 import org.gotson.komga.domain.model.ROLE_FILE_DOWNLOAD
@@ -19,7 +22,11 @@ annotation class WithMockCustomUser(
   val roles: Array<String> = [ROLE_FILE_DOWNLOAD, ROLE_PAGE_STREAMING],
   val sharedAllLibraries: Boolean = true,
   val sharedLibraries: Array<String> = [],
-  val id: String = "0"
+  val id: String = "0",
+  val allowAgeUnder: Int = -1,
+  val excludeAgeOver: Int = -1,
+  val allowLabels: Array<String> = [],
+  val excludeLabels: Array<String> = [],
 )
 
 class WithMockCustomUserSecurityContextFactory : WithSecurityContextFactory<WithMockCustomUser> {
@@ -35,8 +42,15 @@ class WithMockCustomUserSecurityContextFactory : WithSecurityContextFactory<With
         rolePageStreaming = customUser.roles.contains(ROLE_PAGE_STREAMING),
         sharedAllLibraries = customUser.sharedAllLibraries,
         sharedLibrariesIds = customUser.sharedLibraries.toSet(),
-        id = customUser.id
-      )
+        restrictions = ContentRestrictions(
+          ageRestriction = if (customUser.allowAgeUnder >= 0) AgeRestriction(customUser.allowAgeUnder, AllowExclude.ALLOW_ONLY)
+          else if (customUser.excludeAgeOver >= 0) AgeRestriction(customUser.excludeAgeOver, AllowExclude.EXCLUDE)
+          else null,
+          labelsAllow = customUser.allowLabels.toSet(),
+          labelsExclude = customUser.excludeLabels.toSet(),
+        ),
+        id = customUser.id,
+      ),
     )
     val auth = UsernamePasswordAuthenticationToken(principal, "", principal.authorities)
     context.authentication = auth

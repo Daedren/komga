@@ -2,8 +2,8 @@ package org.gotson.komga.interfaces.api.rest
 
 import org.gotson.komga.domain.model.KomgaUser
 import org.gotson.komga.domain.service.KomgaUserLifecycle
-import org.gotson.komga.interfaces.api.rest.dto.UserDto
-import org.gotson.komga.interfaces.api.rest.dto.toDto
+import org.gotson.komga.interfaces.api.rest.dto.UserDtoV2
+import org.gotson.komga.interfaces.api.rest.dto.toDtoV2
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
@@ -20,7 +20,7 @@ import javax.validation.constraints.NotBlank
 @RequestMapping("api/v1/claim", produces = [MediaType.APPLICATION_JSON_VALUE])
 @Validated
 class ClaimController(
-  private val userDetailsLifecycle: KomgaUserLifecycle
+  private val userDetailsLifecycle: KomgaUserLifecycle,
 ) {
 
   @GetMapping
@@ -28,9 +28,13 @@ class ClaimController(
 
   @PostMapping
   fun claimAdmin(
-    @Email(regexp = ".+@.+\\..+") @RequestHeader("X-Komga-Email") email: String,
-    @NotBlank @RequestHeader("X-Komga-Password") password: String
-  ): UserDto {
+    @Email(regexp = ".+@.+\\..+")
+    @RequestHeader("X-Komga-Email")
+    email: String,
+    @NotBlank
+    @RequestHeader("X-Komga-Password")
+    password: String,
+  ): UserDtoV2 {
     if (userDetailsLifecycle.countUsers() > 0)
       throw ResponseStatusException(HttpStatus.BAD_REQUEST, "This server has already been claimed")
 
@@ -38,12 +42,12 @@ class ClaimController(
       KomgaUser(
         email = email,
         password = password,
-        roleAdmin = true
-      )
-    ).toDto()
+        roleAdmin = true,
+      ),
+    ).toDtoV2()
   }
 
   data class ClaimStatus(
-    val isClaimed: Boolean
+    val isClaimed: Boolean,
   )
 }

@@ -11,6 +11,7 @@ data class LibraryDto(
   val importComicInfoSeries: Boolean,
   val importComicInfoCollection: Boolean,
   val importComicInfoReadList: Boolean,
+  val importComicInfoSeriesAppendVolume: Boolean,
   val importEpubBook: Boolean,
   val importEpubSeries: Boolean,
   val importMylarSeries: Boolean,
@@ -22,6 +23,9 @@ data class LibraryDto(
   val convertToCbz: Boolean,
   val emptyTrashAfterScan: Boolean,
   val seriesCover: SeriesCoverDto,
+  val hashFiles: Boolean,
+  val hashPages: Boolean,
+  val analyzeDimensions: Boolean,
   val unavailable: Boolean,
 )
 
@@ -33,6 +37,7 @@ fun Library.toDto(includeRoot: Boolean) = LibraryDto(
   importComicInfoSeries = importComicInfoSeries,
   importComicInfoCollection = importComicInfoCollection,
   importComicInfoReadList = importComicInfoReadList,
+  importComicInfoSeriesAppendVolume = importComicInfoSeriesAppendVolume,
   importEpubBook = importEpubBook,
   importEpubSeries = importEpubSeries,
   importMylarSeries = importMylarSeries,
@@ -44,5 +49,8 @@ fun Library.toDto(includeRoot: Boolean) = LibraryDto(
   convertToCbz = convertToCbz,
   emptyTrashAfterScan = emptyTrashAfterScan,
   seriesCover = seriesCover.toDto(),
+  hashFiles = hashFiles,
+  hashPages = hashPages,
+  analyzeDimensions = analyzeDimensions,
   unavailable = unavailableDate != null,
 )

@@ -44,7 +44,8 @@ class BookMetadataDao(
       .where(d.BOOK_ID.`in`(bookIds))
       .groupBy(*groupFields)
       .fetchGroups(
-        { it.into(d) }, { it.into(a) },
+        { it.into(d) },
+        { it.into(a) },
       ).map { (dr, ar) ->
         dr.toDomain(ar.filterNot { it.name == null }.map { it.toDomain() }, findTags(dr.bookId), findLinks(dr.bookId))
       }
@@ -53,9 +54,7 @@ class BookMetadataDao(
     dsl.select(bt.TAG)
       .from(bt)
       .where(bt.BOOK_ID.eq(bookId))
-      .fetchInto(bt)
-      .mapNotNull { it.tag }
-      .toSet()
+      .fetchSet(bt.TAG)
 
   private fun findLinks(bookId: String) =
     dsl.select(bl.LABEL, bl.URL)

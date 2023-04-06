@@ -2,7 +2,8 @@ package org.gotson.komga.interfaces.api.rest
 
 import org.gotson.komga.application.tasks.HIGHEST_PRIORITY
 import org.gotson.komga.application.tasks.HIGH_PRIORITY
-import org.gotson.komga.application.tasks.TaskReceiver
+import org.gotson.komga.application.tasks.TaskEmitter
+import org.gotson.komga.domain.model.BookSearch
 import org.gotson.komga.domain.model.DirectoryNotFoundException
 import org.gotson.komga.domain.model.DuplicateNameException
 import org.gotson.komga.domain.model.Library
@@ -39,7 +40,7 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("api/v1/libraries", produces = [MediaType.APPLICATION_JSON_VALUE])
 class LibraryController(
-  private val taskReceiver: TaskReceiver,
+  private val taskEmitter: TaskEmitter,
   private val libraryLifecycle: LibraryLifecycle,
   private val libraryRepository: LibraryRepository,
   private val bookRepository: BookRepository,
@@ -48,7 +49,7 @@ class LibraryController(
 
   @GetMapping
   fun getAll(
-    @AuthenticationPrincipal principal: KomgaPrincipal
+    @AuthenticationPrincipal principal: KomgaPrincipal,
   ): List<LibraryDto> =
     if (principal.user.sharedAllLibraries) {
       libraryRepository.findAll()
@@ -59,7 +60,7 @@ class LibraryController(
   @GetMapping("{libraryId}")
   fun getOne(
     @AuthenticationPrincipal principal: KomgaPrincipal,
-    @PathVariable libraryId: String
+    @PathVariable libraryId: String,
   ): LibraryDto =
     libraryRepository.findByIdOrNull(libraryId)?.let {
       if (!principal.user.canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
@@ -70,7 +71,8 @@ class LibraryController(
   @PreAuthorize("hasRole('$ROLE_ADMIN')")
   fun addOne(
     @AuthenticationPrincipal principal: KomgaPrincipal,
-    @Valid @RequestBody library: LibraryCreationDto
+    @Valid @RequestBody
+    library: LibraryCreationDto,
   ): LibraryDto =
     try {
       libraryLifecycle.addLibrary(
@@ -81,6 +83,7 @@ class LibraryController(
           importComicInfoSeries = library.importComicInfoSeries,
           importComicInfoCollection = library.importComicInfoCollection,
           importComicInfoReadList = library.importComicInfoReadList,
+          importComicInfoSeriesAppendVolume = library.importComicInfoSeriesAppendVolume,
           importEpubBook = library.importEpubBook,
           importEpubSeries = library.importEpubSeries,
           importMylarSeries = library.importMylarSeries,
@@ -92,14 +95,18 @@ class LibraryController(
           convertToCbz = library.convertToCbz,
           emptyTrashAfterScan = library.emptyTrashAfterScan,
           seriesCover = library.seriesCover.toDomain(),
-        )
+          hashFiles = library.hashFiles,
+          hashPages = library.hashPages,
+          analyzeDimensions = library.analyzeDimensions,
+        ),
       ).toDto(includeRoot = principal.user.roleAdmin)
     } catch (e: Exception) {
       when (e) {
         is FileNotFoundException,
         is DirectoryNotFoundException,
         is DuplicateNameException,
-        is PathContainedInPath ->
+        is PathContainedInPath,
+        ->
           throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
         else -> throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR)
       }
@@ -110,7 +117,8 @@ class LibraryController(
   @ResponseStatus(HttpStatus.NO_CONTENT)
   fun updateOne(
     @PathVariable libraryId: String,
-    @Valid @RequestBody library: LibraryUpdateDto
+    @Valid @RequestBody
+    library: LibraryUpdateDto,
   ) {
     libraryRepository.findByIdOrNull(libraryId)?.let {
       val toUpdate = Library(
@@ -121,6 +129,7 @@ class LibraryController(
         importComicInfoSeries = library.importComicInfoSeries,
         importComicInfoCollection = library.importComicInfoCollection,
         importComicInfoReadList = library.importComicInfoReadList,
+        importComicInfoSeriesAppendVolume = library.importComicInfoSeriesAppendVolume,
         importEpubBook = library.importEpubBook,
         importEpubSeries = library.importEpubSeries,
         importMylarSeries = library.importMylarSeries,
@@ -132,6 +141,9 @@ class LibraryController(
         convertToCbz = library.convertToCbz,
         emptyTrashAfterScan = library.emptyTrashAfterScan,
         seriesCover = library.seriesCover.toDomain(),
+        hashFiles = library.hashFiles,
+        hashPages = library.hashPages,
+        analyzeDimensions = library.analyzeDimensions,
       )
       try {
         libraryLifecycle.updateLibrary(toUpdate)
@@ -140,7 +152,8 @@ class LibraryController(
           is FileNotFoundException,
           is DirectoryNotFoundException,
           is DuplicateNameException,
-          is PathContainedInPath ->
+          is PathContainedInPath,
+          ->
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
           else -> throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR)
         }
@@ -162,7 +175,7 @@ class LibraryController(
   @ResponseStatus(HttpStatus.ACCEPTED)
   fun scan(@PathVariable libraryId: String) {
     libraryRepository.findByIdOrNull(libraryId)?.let { library ->
-      taskReceiver.scanLibrary(library.id, HIGHEST_PRIORITY)
+      taskEmitter.scanLibrary(library.id, HIGHEST_PRIORITY)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
 
@@ -170,8 +183,8 @@ class LibraryController(
   @PreAuthorize("hasRole('$ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.ACCEPTED)
   fun analyze(@PathVariable libraryId: String) {
-    bookRepository.findAllIdsByLibraryId(libraryId).forEach {
-      taskReceiver.analyzeBook(it, HIGH_PRIORITY)
+    bookRepository.findAll(BookSearch(libraryIds = listOf(libraryId))).forEach {
+      taskEmitter.analyzeBook(it, HIGH_PRIORITY)
     }
   }
 
@@ -179,12 +192,12 @@ class LibraryController(
   @PreAuthorize("hasRole('$ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.ACCEPTED)
   fun refreshMetadata(@PathVariable libraryId: String) {
-    bookRepository.findAllIdsByLibraryId(libraryId).forEach {
-      taskReceiver.refreshBookMetadata(it, priority = HIGH_PRIORITY)
-      taskReceiver.refreshBookLocalArtwork(it, priority = HIGH_PRIORITY)
+    bookRepository.findAll(BookSearch(libraryIds = listOf(libraryId))).forEach {
+      taskEmitter.refreshBookMetadata(it, priority = HIGH_PRIORITY)
+      taskEmitter.refreshBookLocalArtwork(it, priority = HIGH_PRIORITY)
     }
     seriesRepository.findAllIdsByLibraryId(libraryId).forEach {
-      taskReceiver.refreshSeriesLocalArtwork(it, priority = HIGH_PRIORITY)
+      taskEmitter.refreshSeriesLocalArtwork(it, priority = HIGH_PRIORITY)
     }
   }
 
@@ -193,7 +206,7 @@ class LibraryController(
   @ResponseStatus(HttpStatus.ACCEPTED)
   fun emptyTrash(@PathVariable libraryId: String) {
     libraryRepository.findByIdOrNull(libraryId)?.let { library ->
-      taskReceiver.emptyTrash(library.id, HIGH_PRIORITY)
+      taskEmitter.emptyTrash(library.id, HIGH_PRIORITY)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
 }

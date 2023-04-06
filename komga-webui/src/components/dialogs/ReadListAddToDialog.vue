@@ -77,6 +77,8 @@
 import Vue from 'vue'
 import {BookDto} from '@/types/komga-books'
 import {ERROR} from '@/types/events'
+import {stripAccents} from '@/functions/string'
+import {ReadListCreationDto, ReadListDto, ReadListUpdateDto} from '@/types/komga-readlists'
 
 export default Vue.extend({
   name: 'ReadListAddToDialog',
@@ -100,7 +102,7 @@ export default Vue.extend({
       this.modal = val
       if (val) {
         this.newReadList = ''
-        this.readLists = (await this.$komgaReadLists.getReadLists(undefined, {unpaged: true} as PageRequest)).content
+        this.readLists = this.$_.orderBy((await this.$komgaReadLists.getReadLists(undefined, {unpaged: true} as PageRequest)).content, ['lastModifiedDate'], ['desc'])
       }
     },
     modal(val) {
@@ -116,12 +118,12 @@ export default Vue.extend({
       else return [this.books.id]
     },
     duplicate(): string {
-      if (this.newReadList !== '' && this.readLists.some(e => e.name === this.newReadList)) {
+      if (this.newReadList !== '' && this.readLists.some(e => e.name.toLowerCase() === this.newReadList.toLowerCase())) {
         return this.$t('dialog.add_to_readlist.field_search_create_error').toString()
       } else return ''
     },
     readListsFiltered(): ReadListDto[] {
-      return this.readLists.filter((x: ReadListDto) => x.name.toLowerCase().includes(this.newReadList.toLowerCase()))
+      return this.readLists.filter((x: ReadListDto) => stripAccents(x.name.toLowerCase()).includes(stripAccents(this.newReadList.toLowerCase())))
     },
   },
   methods: {
@@ -149,7 +151,7 @@ export default Vue.extend({
       } as ReadListCreationDto
 
       try {
-        const created = await this.$komgaReadLists.postReadList(toCreate)
+        await this.$komgaReadLists.postReadList(toCreate)
         this.dialogClose()
       } catch (e) {
         this.$eventHub.$emit(ERROR, {message: e.message} as ErrorEvent)

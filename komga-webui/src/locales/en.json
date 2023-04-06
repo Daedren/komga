@@ -42,7 +42,9 @@
   },
   "book_card": {
     "error": "Error",
+    "no_release_date": "No release date",
     "unknown": "To be analyzed",
+    "unread": "Unread",
     "unsupported": "Unsupported"
   },
   "book_import": {
@@ -87,6 +89,9 @@
     "move_next": "Click or press \"Next\" again to move to the next book.",
     "move_next_exit": "Click or press \"Next\" again to exit the reader.",
     "move_previous": "Click or press \"Previous\" again to move to the previous book.",
+    "notification_poster_set_book": "Book poster is now set to the current page.",
+    "notification_poster_set_readlist": "Read list poster is now set to the current page.",
+    "notification_poster_set_series": "Series poster is now set to the current page.",
     "paged_reader_layout": {
       "double": "Double pages",
       "double_no_cover": "Double pages (no cover)",
@@ -102,6 +107,9 @@
       "width": "Fit width",
       "width_shrink_only": "Fit width (shrink only)"
     },
+    "set_current_page_as_book_poster": "Set page as poster for book",
+    "set_current_page_as_readlist_poster": "Set page as poster for read list",
+    "set_current_page_as_series_poster": "Set page as poster for series",
     "settings": {
       "always_fullscreen": "Always Full Screen",
       "animate_page_transitions": "Animate page transitions",
@@ -166,7 +174,8 @@
   },
   "browse_readlist": {
     "edit_elements": "Edit elements",
-    "edit_readlist": "Edit read list"
+    "edit_readlist": "Edit read list",
+    "manual_ordering": "manual ordering"
   },
   "browse_series": {
     "earliest_year_from_release_dates": "This is the earliest year from the release dates from all books in the series",
@@ -178,20 +187,27 @@
     "title": "{name} collection"
   },
   "common": {
+    "age": "Age",
     "all_libraries": "All Libraries",
+    "book": "Book",
     "books": "Books",
     "books_n": "No book | 1 book | {count} books",
     "books_total": "{count} / {total} books",
     "cancel": "Cancel",
+    "choose_image": "Choose an image",
     "close": "Close",
     "collections": "Collections",
     "create": "Create",
     "delete": "Delete",
+    "disk_space": "Disk space",
     "dismiss": "Dismiss",
     "download": "Download",
+    "drag_drop": "drag and drop",
     "email": "Email",
+    "filename": "Filename",
     "filter_no_matches": "The active filter has no matches",
     "genre": "Genre",
+    "go_to_collection": "Go to collection",
     "go_to_library": "Go to library",
     "go_to_readlist": "Go to read list",
     "go_to_series": "Go to series",
@@ -202,20 +218,28 @@
     "n_selected": "{count} selected",
     "nothing_to_show": "Nothing to show",
     "outdated": "Outdated",
+    "page": "Page",
+    "page_number": "Page number",
     "pages": "pages",
+    "pages_left": "No pages left | 1 page left | {count} pages left",
     "pages_n": "No pages | 1 page | {count} pages",
     "password": "Password",
     "pending_tasks": "No pending tasks | 1 pending task | {count} pending tasks",
     "publisher": "Publisher",
     "read": "Read",
+    "read_on": "Read on {date}",
+    "readlist": "Read List",
     "readlists": "Read Lists",
     "required": "Required",
     "reset_filters": "Reset filters",
     "roles": "Roles",
-    "series": "Series",
+    "save_changes": "Save changes",
+    "series": "Series | Series",
+    "sidecars": "Sidecars",
     "tags": "Tags",
     "unavailable": "Unavailable",
     "unlock_all": "Unlock all",
+    "url": "URL",
     "use_filter_panel_to_change_filter": "Use the filter panel to change the active filter",
     "year": "year"
   },
@@ -232,10 +256,20 @@
     "book_number": "Book number: {name}",
     "book_series": "Series: {name}",
     "button_import": "Import",
+    "button_match": "Match",
     "comicrack_preambule_html": "You can import existing ComicRack Reading Lists in <code>.cbl</code> format.<br/>Komga will try to match the provided series and book number with series and books in your libraries.",
+    "dialog_confirmation": {
+      "body": "{unmatched} / {total} books are unmatched",
+      "create": "Create anyway",
+      "title": "Some books are not matched"
+    },
+    "field_file_label": "ComicRack Reading List (.cbl)",
     "field_files_label": "ComicRack Reading Lists (.cbl)",
     "import_read_lists": "Import Read Lists",
     "imported_as": "Imported as {name}",
+    "readlist_created": "Read List created: {name}",
+    "requested_number": "Requested Number",
+    "requested_series": "Requested Series",
     "results_preambule": "Result of the import is shown below. You can also check the unmatched books for each provided file.",
     "size_limit": "Size should be less than {size} MB",
     "tab_title": "Data Import"
@@ -273,6 +307,10 @@
       "body": "Analyzes all the media files in the library. The analysis captures information about the media. Depending on your library size, this may take a long time.",
       "button_confirm": "Analyze",
       "title": "Analyze library"
+    },
+    "book_picker": {
+      "filter": "Filter by book number, title, or release date",
+      "title": "Select Book"
     },
     "delete_book": {
       "button_confirm": "Delete",
@@ -326,8 +364,10 @@
       "authors_notice_multiple_edit": "You are editing authors for multiple books. This will override existing authors of each book.",
       "button_cancel": "Cancel",
       "button_confirm": "Save changes",
+      "copy_from": "Copy from {field}",
       "dialog_title_multiple": "Edit {count} book | Edit {count} books",
       "dialog_title_single": "Edit {book}",
+      "field_alternate_title": "Alternate title",
       "field_isbn": "ISBN",
       "field_isbn_error": "Must be a valid ISBN 13",
       "field_link_label": "Label",
@@ -342,9 +382,12 @@
       "field_summary": "Summary",
       "field_tags": "Tags",
       "field_title": "Title",
+      "number_sort_decrement": "Decrement all by 1",
+      "number_sort_increment": "Increment all by 1",
       "tab_authors": "Authors",
       "tab_general": "General",
       "tab_links": "Links",
+      "tab_poster": "Poster",
       "tab_tags": "Tags",
       "tags_notice_multiple_edit": "You are editing tags for multiple books. This will override existing tags of each book."
     },
@@ -353,7 +396,9 @@
       "button_confirm": "Save changes",
       "dialog_title": "Edit collection",
       "field_manual_ordering": "Manual ordering",
-      "label_ordering": "By default, series in a collection will be ordered by name. You can enable manual ordering to define your own order."
+      "label_ordering": "By default, series in a collection will be ordered by name. You can enable manual ordering to define your own order.",
+      "tab_general": "General",
+      "tab_poster": "Poster"
     },
     "edit_library": {
       "button_browse": "Browse",
@@ -363,12 +408,16 @@
       "button_next": "Next",
       "dialog_title_add": "Add Library",
       "dialot_title_edit": "Edit Library",
+      "field_analysis_analyze_dimensions": "Analyze pages dimensions",
+      "field_analysis_hash_files": "Compute hash for files",
+      "field_analysis_hash_pages": "Compute hash for pages",
       "field_convert_to_cbz": "Automatically convert to CBZ",
       "field_import_barcode_isbn": "ISBN barcode",
       "field_import_comicinfo_book": "Book metadata",
       "field_import_comicinfo_collections": "Collections",
       "field_import_comicinfo_readlists": "Read lists",
       "field_import_comicinfo_series": "Series metadata",
+      "field_import_comicinfo_series_append_volume": "Append volume to series title",
       "field_import_epub_book": "Book metadata",
       "field_import_epub_series": "Series metadata",
       "field_import_local_artwork": "Local artwork",
@@ -382,6 +431,7 @@
       "field_series_cover": "Series cover",
       "file_browser_dialog_button_confirm": "Choose",
       "file_browser_dialog_title": "Library's root folder",
+      "label_analysis": "Analysis",
       "label_file_management": "File management",
       "label_import_barcode_isbn": "Import ISBN within barcode",
       "label_import_comicinfo": "Import metadata for CBR/CBZ containing a ComicInfo.xml file",
@@ -392,14 +442,20 @@
       "label_series_cover": "Series cover",
       "tab_general": "General",
       "tab_metadata": "Metadata",
-      "tab_options": "Options"
+      "tab_options": "Options",
+      "tooltip_scanner_force_modified_time": "Enable if the library is on a Google Drive",
+      "tooltip_use_resources": "Can consume lots of resources on large libraries or slow hardware"
     },
     "edit_readlist": {
       "button_cancel": "Cancel",
       "button_confirm": "Save changes",
       "dialog_title": "Edit read list",
+      "field_manual_ordering": "Manual ordering",
       "field_name": "Name",
-      "field_summary": "Summary"
+      "field_summary": "Summary",
+      "label_ordering": "By default, books in a read list are ordered manually. You can disable manual ordering to sort books by release date.",
+      "tab_general": "General",
+      "tab_poster": "Poster"
     },
     "edit_series": {
       "button_cancel": "Cancel",
@@ -409,6 +465,7 @@
       "field_age_rating": "Age Rating",
       "field_age_rating_error": "Age rating must be 0 or more",
       "field_genres": "Genres",
+      "field_labels": "Labels",
       "field_language": "Language",
       "field_language_hint": "IETF BCP 47 language tag",
       "field_publisher": "Publisher",
@@ -423,7 +480,9 @@
       "mixed": "MIXED",
       "tab_general": "General",
       "tab_poster": "Poster",
+      "tab_sharing": "Sharing",
       "tab_tags": "Tags",
+      "tab_titles": "Alternate Titles",
       "tags_notice_multiple_edit": "You are editing tags for multiple series. This will override existing tags of each series."
     },
     "edit_user": {
@@ -432,12 +491,18 @@
       "dialog_title": "Edit user",
       "label_roles_for": "Roles for {name}"
     },
-    "edit_user_shared_libraries": {
-      "button_cancel": "Cancel",
-      "button_confirm": "Save changes",
-      "dialog_title": "Edit shared libraries",
-      "field_all_libraries": "All libraries",
-      "label_shared_with": "Shared with {name}"
+    "edit_user_restrictions": {
+      "age_restriction": {
+        "allow_under": "Allow only under",
+        "exclude_over": "Exclude over",
+        "none": "No restriction"
+      },
+      "edit_restrictions_for": "Edit restrictions for {name}",
+      "label_age_restriction": "Age restriction",
+      "label_allow_only_labels": "Allow only labels",
+      "label_exclude_labels": "Exclude labels",
+      "tab_content_restrictions": "Content Restrictions",
+      "tab_shared_libraries": "Shared Libraries"
     },
     "empty_trash": {
       "body": "By default the media server doesn't remove information for media right away. This helps if a drive is temporarily disconnected. When you empty the trash for a library, all information about missing media is deleted.",
@@ -476,6 +541,7 @@
     },
     "series_picker": {
       "label_search_series": "Search Series",
+      "no_results": "No Series found",
       "title": "Select Series"
     },
     "server_stop": {
@@ -499,6 +565,7 @@
         "height": "Height",
         "index": "Index",
         "media_type": "Media type",
+        "size": "Size",
         "width": "Width"
       },
       "title": "Book Details",
@@ -512,10 +579,45 @@
       "title_comparison": "Book Comparison"
     }
   },
+  "duplicate_pages": {
+    "action_delete_auto": "Auto delete",
+    "action_delete_manual": "Manual delete",
+    "action_delete_matches": "Delete matches",
+    "action_ignore": "Ignore",
+    "delete_to_save": "Delete to save {size}",
+    "deleted_count": "Deleted {count} times",
+    "filter": {
+      "count": "Count",
+      "delete_count": "Deletion count",
+      "delete_size": "Space saved",
+      "size": "Size",
+      "total_size": "Total size"
+    },
+    "info": "Deleting duplicate pages will modify your files. Backup your files and use manual deletion before using automatic deletion.",
+    "known": "Known",
+    "matches_n": "No matches | 1 match | {count} matches",
+    "new": "New",
+    "saved_size": "Saved {size}",
+    "title": "Duplicate pages",
+    "unknown_size": "Unknown size"
+  },
+  "duplicates": {
+    "file_hash": "File hash",
+    "size": "Size",
+    "title": "Duplicate Files",
+    "url": "URL"
+  },
   "enums": {
     "copy_mode": {
       "HARDLINK": "Hardlink/Copy Files",
       "MOVE": "Move Files"
+    },
+    "historical_event_type": {
+      "BookConverted": "Book converted",
+      "BookFileDeleted": "Book file deleted",
+      "BookImported": "Book imported",
+      "DuplicatePageDeleted": "Duplicate page deleted",
+      "SeriesFolderDeleted": "Series folder deleted"
     },
     "media_status": {
       "ERROR": "Error",
@@ -523,6 +625,11 @@
       "READY": "Ready",
       "UNKNOWN": "Unknown",
       "UNSUPPORTED": "Unsupported"
+    },
+    "page_hash_action": {
+      "DELETE_AUTO": "Auto delete",
+      "DELETE_MANUAL": "Manual delete",
+      "IGNORE": "Ignore"
     },
     "reading_direction": {
       "LEFT_TO_RIGHT": "Left to right",
@@ -554,12 +661,7 @@
     "ERR_1007": "Some entries could not be analyzed",
     "ERR_1008": "Unknown error while getting book's entries",
     "ERR_1009": "A read list with that name already exists",
-    "ERR_1010": "No books were matched within the read list request",
-    "ERR_1011": "No unique match for series",
-    "ERR_1012": "No match for series",
-    "ERR_1013": "No unique match for book number within series",
-    "ERR_1014": "No match for book number within series",
-    "ERR_1015": "Error while deserializing ComicRack ReadingList",
+    "ERR_1015": "Error while deserializing ComicRack CBL",
     "ERR_1016": "Directory not accessible or not a directory",
     "ERR_1017": "Cannot scan folder that is part of an existing library",
     "ERR_1018": "File not found",
@@ -570,11 +672,17 @@
     "ERR_1023": "Book already present in ReadingList",
     "ERR_1024": "OAuth2 login error: no email attribute",
     "ERR_1025": "OAuth2 login error: no local user exist with that email",
-    "ERR_1026": "OpenID Connect login error: email not verified"
+    "ERR_1026": "OpenID Connect login error: email not verified",
+    "ERR_1027": "OpenID Connect login error: no email_verified attribute",
+    "ERR_1028": "OpenID Connect login error: no email attribute",
+    "ERR_1029": "ComicRack CBL does not contain any Book element",
+    "ERR_1030": "ComicRack CBL has no Name element",
+    "ERR_1031": "ComicRack CBL Book is missing series or number"
   },
   "filter": {
     "age_rating": "age rating",
     "age_rating_none": "None",
+    "complete": "Complete",
     "genre": "genre",
     "in_progress": "In Progress",
     "language": "language",
@@ -589,6 +697,16 @@
   "filter_drawer": {
     "filter": "filter",
     "sort": "sort"
+  },
+  "history": {
+    "header": {
+      "book": "Book",
+      "date": "Date",
+      "details": "Details",
+      "series": "Series",
+      "type": "Type"
+    },
+    "title": "History"
   },
   "home": {
     "theme": "Theme",
@@ -614,6 +732,9 @@
     "status": "Status",
     "url": "URL"
   },
+  "media_management": {
+    "title": "Media Management"
+  },
   "menu": {
     "add_to_collection": "Add to collection",
     "add_to_readlist": "Add to read list",
@@ -632,6 +753,15 @@
     "scan_library_files": "Scan library files",
     "select_all": "Select all"
   },
+  "metrics": {
+    "library_books": "Books per library",
+    "library_disk_space": "Library disk space",
+    "library_series": "Series per library",
+    "library_sidecars": "Sidecars per library",
+    "tasks_executed": "Tasks executed",
+    "tasks_total_time": "Tasks total time",
+    "title": "Metrics"
+  },
   "navigation": {
     "home": "Home",
     "libraries": "Libraries",
@@ -645,6 +775,12 @@
   "read_more": {
     "less": "Read less",
     "more": "Read more"
+  },
+  "readlist_import": {
+    "row": {
+      "duplicate_book": "Duplicate book",
+      "error_choose_book": "Choose a book"
+    }
   },
   "readlists_expansion_panel": {
     "manage_readlist": "Manage read list",
@@ -677,7 +813,7 @@
   },
   "settings_user": {
     "change_password": "Change password",
-    "edit_shared_libraries": "Edit shared libraries",
+    "edit_restrictions": "Edit restrictions",
     "edit_user": "Edit user",
     "latest_activity": "Latest activity: {date}",
     "no_recent_activity": "No recent activity",
@@ -702,6 +838,7 @@
   },
   "thumbnail_card": {
     "tooltip_delete": "Delete",
+    "tooltip_generated": "Generated artwork",
     "tooltip_mark_as_selected": "Mark as selected",
     "tooltip_selected": "Selected",
     "tooltip_sidecar": "Local artwork",
@@ -709,6 +846,10 @@
     "tooltip_to_be_uploaded": "To be uploaded",
     "tooltip_too_big": "File too big!",
     "tooltip_user_uploaded": "User uploaded"
+  },
+  "titles_more": {
+    "less": "Less titles",
+    "more": "More titles"
   },
   "user_roles": {
     "ADMIN": "Administrator",
@@ -719,6 +860,9 @@
   "users": {
     "authentication_activity": "Authentication Activity",
     "users": "Users"
+  },
+  "validation": {
+    "zero_or_more": "Must be 0 or more"
   },
   "welcome": {
     "add_library": "Add library",

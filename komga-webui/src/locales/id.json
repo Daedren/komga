@@ -42,7 +42,9 @@
   },
   "book_card": {
     "error": "Error",
+    "no_release_date": "Tidak ada tanggal rilis",
     "unknown": "Untuk dianalisis",
+    "unread": "Belum dibaca",
     "unsupported": "Tidak didukung"
   },
   "book_import": {
@@ -87,6 +89,9 @@
     "move_next": "Klik atau tekan \"Selanjutnya\" lagi untuk berpindah ke buku berikutnya.",
     "move_next_exit": "Klik atau tekan \"Selanjutnya\" lagi untuk keluar dari pembaca.",
     "move_previous": "Klik atau tekan \"Sebelumnya\" lagi untuk berpindah ke buku sebelumnya.",
+    "notification_poster_set_book": "Poster buku sekarang diatur ke halaman saat ini.",
+    "notification_poster_set_readlist": "Poster daftar baca sekarang diatur ke halaman saat ini.",
+    "notification_poster_set_series": "Poster seri sekarang diatur ke halaman saat ini.",
     "paged_reader_layout": {
       "double": "Halaman ganda",
       "double_no_cover": "Halaman ganda (tanpa sampul)",
@@ -102,6 +107,9 @@
       "width": "Pas lebar",
       "width_shrink_only": "Pas lebar (hanya susutkan)"
     },
+    "set_current_page_as_book_poster": "Tetapkan halaman sebagai poster untuk buku",
+    "set_current_page_as_readlist_poster": "Tetapkan halaman sebagai poster untuk daftar bacaan",
+    "set_current_page_as_series_poster": "Tetapkan halaman sebagai poster untuk seri",
     "settings": {
       "always_fullscreen": "Selalu Layar Penuh",
       "animate_page_transitions": "Animasikan transisi halaman",
@@ -128,6 +136,7 @@
       "cycle_scale": "Skala perputaran",
       "cycle_side_padding": "Padding sisi perputaran",
       "first_page": "Halaman pertama",
+      "fullscreen": "Masuk/keluar mode layar penuh",
       "last_page": "Halaman terakhir",
       "left_to_right": "Kiri ke Kanan",
       "menus": "Menu",
@@ -151,6 +160,7 @@
     "file": "BERKAS",
     "format": "FORMAT",
     "isbn": "ISBN",
+    "links": "LINK",
     "navigation_within_readlist": "Navigasi dalam daftar bacaan: {name}",
     "outdated_tooltip": "Berkas untuk buku ini telah diubah, buku ini perlu dianalisis ulang",
     "read_book": "Baca buku",
@@ -176,20 +186,26 @@
     "title": "{name} koleksi"
   },
   "common": {
+    "age": "Umur",
     "all_libraries": "Semua Pustaka",
     "books": "Buku",
     "books_n": "Tidak ada buku | 1 buku | {count} buku",
     "books_total": "{count} / {total} buku",
     "cancel": "Batalkan",
+    "choose_image": "Pilih gambar",
     "close": "Tutup",
     "collections": "Koleksi",
     "create": "Buat",
     "delete": "Hapus",
+    "disk_space": "Ruang disk",
     "dismiss": "Hentikan",
     "download": "Unduh",
+    "drag_drop": "drag dan drop",
     "email": "Email",
+    "filename": "Nama berkas",
     "filter_no_matches": "Filter aktif tidak memiliki kecocokan",
     "genre": "Genre",
+    "go_to_collection": "Menuju koleksi",
     "go_to_library": "Menuju pustaka",
     "go_to_readlist": "Menuju daftar bacaan",
     "go_to_series": "Menuju ke seri",
@@ -200,6 +216,8 @@
     "n_selected": "{count} terpilih",
     "nothing_to_show": "Tidak ada yang dapat ditampilkan",
     "outdated": "Kedaluwarsa",
+    "page": "Halaman",
+    "page_number": "Nomor halaman",
     "pages": "halaman",
     "pages_n": "Tidak ada halaman | 1 halaman | {count} halaman",
     "password": "Kata sandi",
@@ -210,10 +228,13 @@
     "required": "Diperlukan",
     "reset_filters": "Setel ulang filter",
     "roles": "Peran",
+    "save_changes": "Simpan perubahan",
     "series": "Seri",
+    "sidecars": "Sidecars",
     "tags": "Tag",
     "unavailable": "Tidak tersedia",
     "unlock_all": "Buka seluruhnya",
+    "url": "URL",
     "use_filter_panel_to_change_filter": "Gunakan panel filter untuk mengubah filter aktif",
     "year": "tahun"
   },
@@ -272,6 +293,15 @@
       "button_confirm": "Analisa",
       "title": "Analisa pustaka"
     },
+    "delete_book": {
+      "button_confirm": "Hapus",
+      "confirm_delete": "Ya, hapus buku \"{name}\" beserta filenya",
+      "confirm_delete_multiple": "Ya, hapus {count} buku beserta filenya",
+      "dialog_title": "Hapus Buku",
+      "dialog_title_multiple": "Hapus Buku",
+      "warning_html": "Buku <b>{name}</b> akan dihapus dari server ini bersama dengan file media yang disimpan. Tindakan ini <b>tidak dapat</b> dibatalkan. Lanjutkan?",
+      "warning_multiple_html": "{count} buku akan dihapus dari server ini bersama dengan file media yang disimpan. Tindakan ini <b>tidak dapat</b> dibatalkan. Lanjutkan?"
+    },
     "delete_collection": {
       "button_confirm": "Hapus",
       "confirm_delete": "Ya, hapus koleksi \"{name}\"",
@@ -296,6 +326,14 @@
       "warning_html": "Daftar baca <b>{name}</b> akan dihapus dari server ini. Berkas media Anda tidak akan terpengaruh. Ini <b>tidak dapat</b> diurungkan. Lanjutkan?",
       "warning_multiple_html": "{count} daftar baca akan dihapus dari server ini. Berkas media Anda tidak akan terpengaruh. Ini <b>tidak dapat</b> diurungkan. Lanjutkan?"
     },
+    "delete_series": {
+      "button_confirm": "Hapus",
+      "confirm_delete": "Ya, hapus seri \"{name}\" dan filenya",
+      "confirm_delete_multiple": "Ya, hapus {count} seri dan filenya",
+      "dialog_title": "Hapus Seri",
+      "warning_html": "Seri <b>{name}</b> akan dihapus dari server ini bersama dengan file media yang tersimpan. Tindakan ini <b> tidak dapat </b> dibatalkan. Lanjutkan?",
+      "warning_multiple_html": "{count} seri akan dihapus dari server ini bersama dengan file media yang disimpan. Tindakan ini <b>tidak dapat</b> dibatalkan. Lanjutkan?"
+    },
     "delete_user": {
       "button_confirm": "Hapus",
       "confirm_delete": "Ya, hapus pengguna \"{name}\"",
@@ -303,6 +341,7 @@
       "warning_html": "Pengguna <b>{name}</b> akan dihapus dari server ini. Ini <b>tidak dapat</b> diurungkan. Lanjutkan?"
     },
     "edit_books": {
+      "add_author_role_error_duplicate": "Sudah ada",
       "authors_notice_multiple_edit": "Anda sedang mengedit penulis untuk beberapa buku. Ini akan menimpa penulis yang ada dari setiap buku.",
       "button_cancel": "Batal",
       "button_confirm": "Simpan perubahan",
@@ -310,6 +349,10 @@
       "dialog_title_single": "Ubah {book}",
       "field_isbn": "ISBN",
       "field_isbn_error": "Harus memiliki ISBN 13 yang valid",
+      "field_link_label": "Label",
+      "field_link_url": "URL",
+      "field_link_url_error_protocol": "Harus http atau https",
+      "field_link_url_error_url": "Harus URL yang valid",
       "field_number": "Nomor",
       "field_number_sort": "Nomor Urut",
       "field_number_sort_hint": "Anda dapat menggunakan angka desimal",
@@ -320,6 +363,8 @@
       "field_title": "Judul",
       "tab_authors": "Pengarang",
       "tab_general": "Umum",
+      "tab_links": "Link",
+      "tab_poster": "Poster",
       "tab_tags": "Tag",
       "tags_notice_multiple_edit": "Anda sedang mengedit tag untuk beberapa buku. Ini akan menggantikan tag yang ada dari setiap buku."
     },
@@ -328,7 +373,9 @@
       "button_confirm": "Simpan perubahan",
       "dialog_title": "Edit koleksi",
       "field_manual_ordering": "Urutkan manual",
-      "label_ordering": "Secara default, seri dalam koleksi akan diurutkan berdasarkan nama. Anda dapat mengaktifkan pemesanan manual untuk menentukan pesanan Anda sendiri."
+      "label_ordering": "Secara default, seri dalam koleksi akan diurutkan berdasarkan nama. Anda dapat mengaktifkan pemesanan manual untuk menentukan pesanan Anda sendiri.",
+      "tab_general": "Umum",
+      "tab_poster": "Poster"
     },
     "edit_library": {
       "button_browse": "Telusuri",
@@ -338,6 +385,9 @@
       "button_next": "Selanjutnya",
       "dialog_title_add": "Tambah Pustaka",
       "dialot_title_edit": "Edit Pustaka",
+      "field_analysis_analyze_dimensions": "Analisis dimensi halaman",
+      "field_analysis_hash_files": "Hitung hash untuk file",
+      "field_analysis_hash_pages": "Hitung hash untuk halaman",
       "field_convert_to_cbz": "Secara otomatis dikonversi ke CBZ",
       "field_import_barcode_isbn": "Barkode ISBN",
       "field_import_comicinfo_book": "Metadata buku",
@@ -357,6 +407,7 @@
       "field_series_cover": "Sampul seri",
       "file_browser_dialog_button_confirm": "Pilih",
       "file_browser_dialog_title": "Folder akar Pustaka",
+      "label_analysis": "Analisis",
       "label_file_management": "Manajemen berkas",
       "label_import_barcode_isbn": "Impor ISBN dalam barcode",
       "label_import_comicinfo": "Impor metadata untuk CBR/CBZ yang berisi berkas ComicInfo.xml",
@@ -367,14 +418,18 @@
       "label_series_cover": "Sampul seri",
       "tab_general": "Umum",
       "tab_metadata": "Metadata",
-      "tab_options": "Pilihan"
+      "tab_options": "Pilihan",
+      "tooltip_scanner_force_modified_time": "Aktifkan jika pustaka ada di Google Drive",
+      "tooltip_use_resources": "Dapat menghabiskan banyak sumber daya di pustaka yang besar atau perangkat keras yang lambat"
     },
     "edit_readlist": {
       "button_cancel": "Batal",
       "button_confirm": "Simpan perubahan",
       "dialog_title": "Edit daftar bacaan",
       "field_name": "Nama",
-      "field_summary": "Ringkasan"
+      "field_summary": "Ringkasan",
+      "tab_general": "Umum",
+      "tab_poster": "Poster"
     },
     "edit_series": {
       "button_cancel": "Batal",
@@ -384,6 +439,7 @@
       "field_age_rating": "Peringkat Usia",
       "field_age_rating_error": "Peringkat usia harus 0 atau lebih",
       "field_genres": "Genre",
+      "field_labels": "Label",
       "field_language": "Bahasa",
       "field_language_hint": "Tag bahasa IETF BCP 47",
       "field_publisher": "Penerbit",
@@ -398,6 +454,7 @@
       "mixed": "CAMPURAN",
       "tab_general": "Umum",
       "tab_poster": "Poster",
+      "tab_sharing": "Bagikan",
       "tab_tags": "Tag",
       "tags_notice_multiple_edit": "Anda sedang mengedit tag untuk beberapa seri. Ini akan menimpa tag yang ada dari setiap seri."
     },
@@ -407,15 +464,21 @@
       "dialog_title": "Edit pengguna",
       "label_roles_for": "Peran untuk {name}"
     },
-    "edit_user_shared_libraries": {
-      "button_cancel": "Batal",
-      "button_confirm": "Simpan perubahan",
-      "dialog_title": "Edit pustaka bersama",
-      "field_all_libraries": "Semua Pustaka",
-      "label_shared_with": "Dibagikan dengan {name}"
+    "edit_user_restrictions": {
+      "age_restriction": {
+        "allow_under": "Izinkan hanya di bawah",
+        "exclude_over": "Kecualikan lebih dari",
+        "none": "Tidak ada batasan"
+      },
+      "edit_restrictions_for": "Edit batasan untuk {name}",
+      "label_age_restriction": "Batasan usia",
+      "label_allow_only_labels": "Hanya izinkan label",
+      "label_exclude_labels": "Kecualikan label",
+      "tab_content_restrictions": "Batasan Konten",
+      "tab_shared_libraries": "Pustaka Bersama"
     },
     "empty_trash": {
-      "body": "Secara default, server media tidak langsung menghapus informasi untuk media. Ini membantu jika drive terputus sementara. Saat Anda mengosongkan sampah untuk perpustakaan, semua informasi tentang media yang hilang akan dihapus.",
+      "body": "Secara default, server media tidak langsung menghapus informasi untuk media. Ini akan membantu jika drive terputus sementara. Saat Anda mengosongkan sampah pustaka, semua informasi tentang media yang hilang akan dihapus.",
       "button_confirm": "Kosong",
       "title": "Kosongkan sampah untuk pustaka"
     },
@@ -474,6 +537,7 @@
         "height": "Tinggi",
         "index": "Indeks",
         "media_type": "Tipe media",
+        "size": "Ukuran",
         "width": "Lebar"
       },
       "title": "Detail Buku",
@@ -487,10 +551,43 @@
       "title_comparison": "Perbandingan Buku"
     }
   },
+  "duplicate_pages": {
+    "action_delete_auto": "Hapus otomatis",
+    "action_delete_manual": "Hapus manual",
+    "action_delete_matches": "Hapus kecocokan",
+    "action_ignore": "Abaikan",
+    "delete_to_save": "Hapus untuk mengosongkan {size}",
+    "deleted_count": "Dihapus {count} kali",
+    "filter": {
+      "count": "Hitung",
+      "delete_count": "Jumlah penghapusan",
+      "delete_size": "Ruang disimpan",
+      "size": "Ukuran",
+      "total_size": "Ukuran keseluruhan"
+    },
+    "info": "Menghapus halaman duplikat akan mengubah file Anda. Cadangkan file Anda dan gunakan penghapusan manual sebelum menggunakan penghapusan otomatis.",
+    "matches_n": "Tidak ada kecocokan | 1 kecocokan| {count} kecocokan",
+    "saved_size": "{size} terbebas",
+    "title": "Halaman duplikat",
+    "unknown_size": "Ukuran tidak diketahui"
+  },
+  "duplicates": {
+    "file_hash": "File hash",
+    "size": "Ukuran",
+    "title": "File Duplikat",
+    "url": "URL"
+  },
   "enums": {
     "copy_mode": {
       "HARDLINK": "Hardlink/Salin Berkas",
       "MOVE": "Pindahkan Berkas"
+    },
+    "historical_event_type": {
+      "BookConverted": "Buku dikonversi",
+      "BookFileDeleted": "Berkas buku dihapus",
+      "BookImported": "Pesan diimpor",
+      "DuplicatePageDeleted": "Halaman duplikat dihapus",
+      "SeriesFolderDeleted": "Folder seri dihapus"
     },
     "media_status": {
       "ERROR": "Kesalahan",
@@ -498,6 +595,11 @@
       "READY": "Siap",
       "UNKNOWN": "Tidak dikenal",
       "UNSUPPORTED": "Tidak didukung"
+    },
+    "page_hash_action": {
+      "DELETE_AUTO": "Hapus otomatis",
+      "DELETE_MANUAL": "Hapus manual",
+      "IGNORE": "Abaikan"
     },
     "reading_direction": {
       "LEFT_TO_RIGHT": "Kiri ke kanan",
@@ -529,11 +631,8 @@
     "ERR_1007": "Beberapa entri tidak dapat dianalisis",
     "ERR_1008": "Kesalahan tidak diketahui saat mendapatkan entri buku",
     "ERR_1009": "Daftar baca dengan nama tersebut sudah ada",
-    "ERR_1010": "Tidak ada buku yang cocok dalam permintaan daftar baca",
     "ERR_1011": "Tidak ada kecocokan unik untuk seri",
-    "ERR_1012": "Tidak ada kecocokan untuk seri",
     "ERR_1013": "Tidak ada kecocokan unik untuk nomor buku dalam seri",
-    "ERR_1014": "Tidak ada kecocokan untuk nomor buku dalam seri",
     "ERR_1015": "Kesalahan saat menghapus serialisasi ComicRack ReadingList",
     "ERR_1016": "Direktori tidak dapat diakses atau bukan direktori",
     "ERR_1017": "Tidak dapat memindai folder yang merupakan bagian dari perpustakaan yang ada",
@@ -550,6 +649,7 @@
   "filter": {
     "age_rating": "peringkat usia",
     "age_rating_none": "Tanpa rating",
+    "complete": "Selesai",
     "genre": "Genre",
     "in_progress": "Sedang Dibaca",
     "language": "Bahasa",
@@ -564,6 +664,16 @@
   "filter_drawer": {
     "filter": "Saring",
     "sort": "urutkan"
+  },
+  "history": {
+    "header": {
+      "book": "Buku",
+      "date": "Tanggal",
+      "details": "Rincian",
+      "series": "Seri",
+      "type": "Jenis"
+    },
+    "title": "Riwayat"
   },
   "home": {
     "theme": "Tema",
@@ -589,6 +699,9 @@
     "status": "Status",
     "url": "URL"
   },
+  "media_management": {
+    "title": "Manajemen Media"
+  },
   "menu": {
     "add_to_collection": "Tambahkan ke koleksi",
     "add_to_readlist": "Tambah ke daftar bacaan",
@@ -606,6 +719,15 @@
     "refresh_metadata": "Segarkan metadata",
     "scan_library_files": "Pindai berkas pustaka",
     "select_all": "Pilih semua"
+  },
+  "metrics": {
+    "library_books": "Buku per pustaka",
+    "library_disk_space": "Ruang disk pustaka",
+    "library_series": "Seri per pustaka",
+    "library_sidecars": "Sidecars per pustaka",
+    "tasks_executed": "Tugas dieksekusi",
+    "tasks_total_time": "Total waktu tugas",
+    "title": "Metrik"
   },
   "navigation": {
     "home": "Beranda",
@@ -652,7 +774,7 @@
   },
   "settings_user": {
     "change_password": "Ganti kata sandi",
-    "edit_shared_libraries": "Edit pustaka bersama",
+    "edit_restrictions": "Edit batasan",
     "edit_user": "Edit pengguna",
     "latest_activity": "Aktivitas terbaru: {date}",
     "no_recent_activity": "Tidak ada aktivitas terbaru",
@@ -677,10 +799,11 @@
   },
   "thumbnail_card": {
     "tooltip_delete": "Hapus",
+    "tooltip_generated": "Karya seni yang dihasilkan",
     "tooltip_mark_as_selected": "Tandai sebagai dipilih",
     "tooltip_selected": "Terpilih",
     "tooltip_sidecar": "Artwork lokal",
-    "tooltip_to_be_deleted": "Untuk dihapus",
+    "tooltip_to_be_deleted": "Akan dihapus",
     "tooltip_to_be_uploaded": "Untuk diunggah",
     "tooltip_too_big": "Berkas terlalu besar!",
     "tooltip_user_uploaded": "Unggahan pengguna"
@@ -694,6 +817,9 @@
   "users": {
     "authentication_activity": "Otentikasi Aktifitas",
     "users": "Pengguna"
+  },
+  "validation": {
+    "zero_or_more": "Harus lebih dari 0"
   },
   "welcome": {
     "add_library": "Tambah Pustaka",

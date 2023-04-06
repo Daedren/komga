@@ -32,7 +32,7 @@ private val logger = KotlinLogging.logger {}
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
 class TaskHandlerTest(
-  @Autowired private val taskReceiver: TaskReceiver,
+  @Autowired private val taskEmitter: TaskEmitter,
   @Autowired private val jmsTemplate: JmsTemplate,
   @Autowired private val jmsListenerEndpointRegistry: JmsListenerEndpointRegistry,
 ) {
@@ -63,11 +63,12 @@ class TaskHandlerTest(
   @Test
   fun `when similar tasks are submitted then only one is executed`() {
     every { mockBookRepository.findByIdOrNull(any()) } returns makeBook("id")
-    every { mockBookLifecycle.analyzeAndPersist(any()) } returns false
+    every { mockBookLifecycle.analyzeAndPersist(any()) } returns emptySet()
 
     jmsListenerEndpointRegistry.stop()
+    val book = makeBook("book")
     repeat(100) {
-      taskReceiver.analyzeBook("id")
+      taskEmitter.analyzeBook(book)
     }
     jmsListenerEndpointRegistry.start()
 
@@ -84,11 +85,11 @@ class TaskHandlerTest(
       Thread.sleep(1_00)
       makeBook(slot.captured)
     }
-    every { mockBookLifecycle.analyzeAndPersist(capture(calls)) } returns false
+    every { mockBookLifecycle.analyzeAndPersist(capture(calls)) } returns emptySet()
 
     jmsListenerEndpointRegistry.stop()
     (0..9).forEach {
-      taskReceiver.analyzeBook("$it", it)
+      taskEmitter.analyzeBook(makeBook("$it", id = "$it"), it)
     }
     jmsListenerEndpointRegistry.start()
 
@@ -111,7 +112,7 @@ class TaskHandlerTest(
 
     jmsListenerEndpointRegistry.stop()
     (0..9).forEach {
-      taskReceiver.refreshSeriesMetadata("$it", it)
+      taskEmitter.refreshSeriesMetadata("$it", it)
     }
     jmsListenerEndpointRegistry.start()
 

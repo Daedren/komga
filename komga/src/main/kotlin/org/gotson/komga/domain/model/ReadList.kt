@@ -8,6 +8,10 @@ import java.util.SortedMap
 data class ReadList(
   val name: String,
   val summary: String = "",
+  /**
+   * Indicates whether the read list is ordered manually
+   */
+  val ordered: Boolean = true,
 
   val bookIds: SortedMap<Int, String> = sortedMapOf(),
 
@@ -19,5 +23,5 @@ data class ReadList(
   /**
    * Indicates that the bookIds have been filtered and is not exhaustive.
    */
-  val filtered: Boolean = false
-) : Auditable(), Serializable
+  val filtered: Boolean = false,
+) : Auditable, Serializable

@@ -9,6 +9,7 @@ data class LibraryCreationDto(
   val importComicInfoSeries: Boolean = true,
   val importComicInfoCollection: Boolean = true,
   val importComicInfoReadList: Boolean = true,
+  val importComicInfoSeriesAppendVolume: Boolean = true,
   val importEpubBook: Boolean = true,
   val importEpubSeries: Boolean = true,
   val importMylarSeries: Boolean = true,
@@ -20,4 +21,7 @@ data class LibraryCreationDto(
   val convertToCbz: Boolean = false,
   val emptyTrashAfterScan: Boolean = false,
   val seriesCover: SeriesCoverDto = SeriesCoverDto.FIRST,
+  val hashFiles: Boolean = true,
+  val hashPages: Boolean = false,
+  val analyzeDimensions: Boolean = true,
 )

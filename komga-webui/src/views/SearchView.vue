@@ -14,6 +14,7 @@
       @mark-unread="markSelectedSeriesUnread"
       @add-to-collection="addToCollection"
       @edit="editMultipleSeries"
+      @delete="deleteSeries"
     />
 
     <multi-select-bar
@@ -25,6 +26,7 @@
       @add-to-readlist="addToReadList"
       @edit="editMultipleBooks"
       @bulk-edit="bulkEditMultipleBooks"
+      @delete="deleteBooks"
     />
 
     <multi-select-bar
@@ -60,7 +62,7 @@
           @scroll-changed="(percent) => scrollChanged(loaderSeries, percent)"
         >
           <template v-slot:prepend>
-            <div class="title">{{ $t('common.series') }}</div>
+            <div class="title">{{ $tc('common.series', 2) }}</div>
           </template>
           <template v-slot:content>
             <item-browser :items="loaderSeries.items"
@@ -84,6 +86,7 @@
           </template>
           <template v-slot:content>
             <item-browser :items="loaderBooks.items"
+                          :item-context="[ItemContext.SHOW_SERIES]"
                           nowrap
                           :edit-function="isAdmin ? singleEditBook : undefined"
                           :selected.sync="selectedBooks"
@@ -173,6 +176,8 @@ import {
 } from '@/types/komga-sse'
 import {throttle} from 'lodash'
 import {PageLoader} from '@/types/pageLoader'
+import {ItemContext} from '@/types/items'
+import {ReadListDto} from '@/types/komga-readlists'
 
 export default Vue.extend({
   name: 'SearchView',
@@ -185,6 +190,7 @@ export default Vue.extend({
   },
   data: () => {
     return {
+      ItemContext,
       loaderSeries: undefined as unknown as PageLoader<SeriesDto>,
       loaderBooks: undefined as unknown as PageLoader<BookDto>,
       loaderCollections: undefined as unknown as PageLoader<CollectionDto>,
@@ -246,7 +252,7 @@ export default Vue.extend({
       return this.$store.getters.meAdmin
     },
     fixedCardWidth(): number {
-      return this.$vuetify.breakpoint.name === 'xs' ? 120 : 150
+      return this.$vuetify.breakpoint.xs ? 120 : 150
     },
     showToolbar(): boolean {
       return this.selectedSeries.length === 0 && this.selectedBooks.length === 0 && this.selectedCollections.length === 0 && this.selectedReadLists.length === 0
@@ -335,6 +341,12 @@ export default Vue.extend({
     },
     bulkEditMultipleBooks() {
       this.$store.dispatch('dialogUpdateBulkBooks', this.selectedBooks)
+    },
+    deleteSeries() {
+      this.$store.dispatch('dialogDeleteSeries', this.selectedSeries)
+    },
+    deleteBooks() {
+      this.$store.dispatch('dialogDeleteBook', this.selectedBooks)
     },
     deleteCollections() {
       this.$store.dispatch('dialogDeleteCollection', this.selectedCollections)

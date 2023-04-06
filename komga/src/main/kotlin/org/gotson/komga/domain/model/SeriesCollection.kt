@@ -6,6 +6,9 @@ import java.time.LocalDateTime
 
 data class SeriesCollection(
   val name: String,
+  /**
+   * Indicates whether the collection is ordered manually
+   */
   val ordered: Boolean = false,
 
   val seriesIds: List<String> = emptyList(),
@@ -18,5 +21,5 @@ data class SeriesCollection(
   /**
    * Indicates that the seriesIds have been filtered and is not exhaustive.
    */
-  val filtered: Boolean = false
-) : Auditable(), Serializable
+  val filtered: Boolean = false,
+) : Auditable, Serializable
