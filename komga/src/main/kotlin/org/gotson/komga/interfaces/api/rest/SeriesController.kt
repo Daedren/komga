@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import jakarta.validation.Valid
 import mu.KotlinLogging
 import org.apache.commons.compress.archivers.zip.Zip64Mode
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
@@ -57,8 +58,6 @@ import org.gotson.komga.interfaces.api.rest.dto.GroupCountDto
 import org.gotson.komga.interfaces.api.rest.dto.SeriesDto
 import org.gotson.komga.interfaces.api.rest.dto.SeriesMetadataUpdateDto
 import org.gotson.komga.interfaces.api.rest.dto.SeriesThumbnailDto
-import org.gotson.komga.interfaces.api.rest.dto.TachiyomiReadProgressDto
-import org.gotson.komga.interfaces.api.rest.dto.TachiyomiReadProgressUpdateDto
 import org.gotson.komga.interfaces.api.rest.dto.TachiyomiReadProgressUpdateV2Dto
 import org.gotson.komga.interfaces.api.rest.dto.TachiyomiReadProgressV2Dto
 import org.gotson.komga.interfaces.api.rest.dto.restrictUrl
@@ -93,7 +92,6 @@ import java.io.OutputStream
 import java.net.URI
 import java.nio.charset.StandardCharsets.UTF_8
 import java.util.zip.Deflater
-import javax.validation.Valid
 
 private val logger = KotlinLogging.logger {}
 
@@ -141,7 +139,8 @@ class SeriesController(
     @RequestParam(name = "genre", required = false) genres: List<String>? = null,
     @RequestParam(name = "tag", required = false) tags: List<String>? = null,
     @RequestParam(name = "age_rating", required = false) ageRatings: List<String>? = null,
-    @RequestParam(name = "release_year", required = false) release_years: List<String>? = null,
+    @RequestParam(name = "release_year", required = false) releaseYears: List<String>? = null,
+    @RequestParam(name = "sharing_label", required = false) sharingLabels: List<String>? = null,
     @RequestParam(name = "deleted", required = false) deleted: Boolean? = null,
     @RequestParam(name = "complete", required = false) complete: Boolean? = null,
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
@@ -183,8 +182,9 @@ class SeriesController(
       genres = genres,
       tags = tags,
       ageRatings = ageRatings?.map { it.toIntOrNull() },
-      releaseYears = release_years,
+      releaseYears = releaseYears,
       authors = authors,
+      sharingLabels = sharingLabels,
     )
 
     return seriesDtoRepository.findAll(seriesSearch, principal.user.id, pageRequest, principal.user.restrictions)
@@ -216,7 +216,8 @@ class SeriesController(
     @RequestParam(name = "genre", required = false) genres: List<String>?,
     @RequestParam(name = "tag", required = false) tags: List<String>?,
     @RequestParam(name = "age_rating", required = false) ageRatings: List<String>?,
-    @RequestParam(name = "release_year", required = false) release_years: List<String>?,
+    @RequestParam(name = "release_year", required = false) releaseYears: List<String>?,
+    @RequestParam(name = "sharing_label", required = false) sharingLabels: List<String>? = null,
     @RequestParam(name = "deleted", required = false) deleted: Boolean?,
     @RequestParam(name = "complete", required = false) complete: Boolean?,
     @Parameter(hidden = true) @Authors authors: List<Author>?,
@@ -242,8 +243,9 @@ class SeriesController(
       genres = genres,
       tags = tags,
       ageRatings = ageRatings?.map { it.toIntOrNull() },
-      releaseYears = release_years,
+      releaseYears = releaseYears,
       authors = authors,
+      sharingLabels = sharingLabels,
     )
 
     return seriesDtoRepository.countByFirstCharacter(seriesSearch, principal.user.id, principal.user.restrictions)
@@ -596,17 +598,6 @@ class SeriesController(
     seriesLifecycle.deleteReadProgress(seriesId, principal.user)
   }
 
-  @Deprecated("Use v2 for proper handling of chapter number with numberSort")
-  @GetMapping("v1/series/{seriesId}/read-progress/tachiyomi")
-  fun getReadProgressTachiyomi(
-    @PathVariable seriesId: String,
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-  ): TachiyomiReadProgressDto {
-    principal.user.checkContentRestriction(seriesId)
-
-    return readProgressDtoRepository.findProgressBySeries(seriesId, principal.user.id)
-  }
-
   @GetMapping("v2/series/{seriesId}/read-progress/tachiyomi")
   fun getReadProgressTachiyomiV2(
     @PathVariable seriesId: String,
@@ -615,28 +606,6 @@ class SeriesController(
     principal.user.checkContentRestriction(seriesId)
 
     return readProgressDtoRepository.findProgressV2BySeries(seriesId, principal.user.id)
-  }
-
-  @Deprecated("Use v2 for proper handling of chapter number with numberSort")
-  @PutMapping("v1/series/{seriesId}/read-progress/tachiyomi")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  fun markReadProgressTachiyomi(
-    @PathVariable seriesId: String,
-    @Valid @RequestBody
-    readProgress: TachiyomiReadProgressUpdateDto,
-    @AuthenticationPrincipal principal: KomgaPrincipal,
-  ) {
-    principal.user.checkContentRestriction(seriesId)
-
-    bookDtoRepository.findAll(
-      BookSearchWithReadProgress(seriesIds = listOf(seriesId)),
-      principal.user.id,
-      UnpagedSorted(Sort.by(Sort.Order.asc("metadata.numberSort"))),
-    ).filterIndexed { index, _ -> index < readProgress.lastBookRead }
-      .forEach { book ->
-        if (book.readProgress?.completed != true)
-          bookLifecycle.markReadProgressCompleted(book.id, principal.user)
-      }
   }
 
   @PutMapping("v2/series/{seriesId}/read-progress/tachiyomi")

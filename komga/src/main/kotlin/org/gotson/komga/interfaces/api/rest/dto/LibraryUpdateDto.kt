@@ -1,6 +1,6 @@
 package org.gotson.komga.interfaces.api.rest.dto
 
-import javax.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotBlank
 
 data class LibraryUpdateDto(
   @get:NotBlank val name: String,
@@ -16,7 +16,6 @@ data class LibraryUpdateDto(
   val importLocalArtwork: Boolean,
   val importBarcodeIsbn: Boolean,
   val scanForceModifiedTime: Boolean,
-  val scanDeep: Boolean,
   val repairExtensions: Boolean,
   val convertToCbz: Boolean,
   val emptyTrashAfterScan: Boolean,

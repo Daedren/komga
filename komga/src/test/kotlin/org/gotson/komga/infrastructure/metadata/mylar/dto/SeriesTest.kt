@@ -2,17 +2,13 @@ package org.gotson.komga.infrastructure.metadata.mylar.dto
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@ExtendWith(SpringExtension::class)
 @SpringBootTest
 class SeriesTest(
   @Autowired private val mapper: ObjectMapper,
@@ -219,7 +215,7 @@ class SeriesTest(
     """.trimIndent()
     val thrown = catchThrowable { mapper.readValue<Series>(json) }
 
-    assertThat(thrown).isInstanceOf(MissingKotlinParameterException::class.java)
+    assertThat(thrown).isInstanceOf(MismatchedInputException::class.java)
   }
 
   @Test
@@ -250,6 +246,6 @@ class SeriesTest(
     """.trimIndent()
     val thrown = catchThrowable { mapper.readValue<Series>(json) }
 
-    assertThat(thrown).isInstanceOf(MissingKotlinParameterException::class.java)
+    assertThat(thrown).isInstanceOf(MismatchedInputException::class.java)
   }
 }

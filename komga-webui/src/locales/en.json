@@ -21,6 +21,11 @@
     "account_settings": "Account Settings",
     "change_password": "change password"
   },
+  "announcements": {
+    "mark_all_read": "Mark all as read",
+    "mark_read": "Mark as read",
+    "tab_title": "Announcements"
+  },
   "authentication_activity": {
     "datetime": "Date Time",
     "email": "Email",
@@ -425,7 +430,6 @@
       "field_name": "Name",
       "field_repair_extensions": "Automatically repair incorrect file extensions",
       "field_root_folder": "Root folder",
-      "field_scanner_deep_scan": "Deep scan",
       "field_scanner_empty_trash_after_scan": "Empty trash automatically after every scan",
       "field_scanner_force_directory_modified_time": "Force directory modified time",
       "field_series_cover": "Series cover",
@@ -580,16 +584,23 @@
     }
   },
   "duplicate_pages": {
+    "action_auto_delete_remaining": "Auto delete remaining ({count})",
     "action_delete_auto": "Auto delete",
     "action_delete_manual": "Manual delete",
     "action_delete_matches": "Delete matches",
     "action_ignore": "Ignore",
+    "action_ignore_remaining": "Ignore remaining ({count})",
+    "action_manual_delete_remaining": "Manual delete remaining ({count})",
+    "confirm_auto_delete_remaining": "All of the remaining page hashes on this page ({count}) will be marked for automatic deletion.",
+    "confirm_manual_delete_remaining": "All of the remaining page hashes on this page ({count}) will be marked for manual deletion.",
     "delete_to_save": "Delete to save {size}",
     "deleted_count": "Deleted {count} times",
+    "empty_title": "No duplicate pages found",
     "filter": {
       "count": "Count",
       "delete_count": "Deletion count",
       "delete_size": "Space saved",
+      "match_count": "Match count",
       "size": "Size",
       "total_size": "Total size"
     },
@@ -690,6 +701,7 @@
     "publisher": "publisher",
     "read": "Read",
     "release_date": "release date",
+    "sharing_label": "Sharing Label",
     "status": "status",
     "tag": "tag",
     "unread": "Unread"
@@ -751,6 +763,7 @@
     "mark_unread": "Mark as unread",
     "refresh_metadata": "Refresh metadata",
     "scan_library_files": "Scan library files",
+    "scan_library_files_deep": "Scan library files (deep)",
     "select_all": "Select all"
   },
   "metrics": {
@@ -802,6 +815,7 @@
       "button_cancel_all_tasks": "Cancel all tasks",
       "button_empty_trash": "Empty trash for all libraries",
       "button_scan_libraries": "Scan all libraries",
+      "button_scan_libraries_deep": "Scan all libraries (deep)",
       "button_shutdown": "Shut down",
       "notification_tasks_cancelled": "No tasks to cancel | One task cancelled | {count} tasks cancelled",
       "section_title": "Server Management"

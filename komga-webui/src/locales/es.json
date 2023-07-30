@@ -21,6 +21,11 @@
     "account_settings": "Ajustes de cuenta",
     "change_password": "cambiar contraseña"
   },
+  "announcements": {
+    "mark_all_read": "Marcar todo como leído",
+    "mark_read": "Marcar como leído",
+    "tab_title": "Anuncios"
+  },
   "authentication_activity": {
     "datetime": "Fecha y hora",
     "email": "Correo electrónico",
@@ -234,7 +239,7 @@
     "reset_filters": "Reiniciar filtros",
     "roles": "Funciones",
     "save_changes": "Guardar cambios",
-    "series": "Series | Series",
+    "series": "Serie | Series",
     "sidecars": "Sidecars",
     "tags": "Etiquetas",
     "unavailable": "No disponible",
@@ -256,15 +261,20 @@
     "book_number": "Número de libro: {name}",
     "book_series": "Serie: {name}",
     "button_import": "Importar",
-    "button_match": "Coincidencia",
+    "button_match": "Emparejar",
     "comicrack_preambule_html": "Puede importar Listas de lectura de ComicRack en formato <code>.cbl</code>.<br>Komga intentará hacer coincidir la serie y número de libro proporcionados con las series y libros en sus bibliotecas.",
+    "dialog_confirmation": {
+      "body": "{unmatched} / {total} libros no emparejados",
+      "create": "Crear de todos modos",
+      "title": "Algunos libros no están emparejados"
+    },
     "field_file_label": "Lista de lectura de ComicRack (.cbl)",
     "field_files_label": "Listas de lectura de ComicRack (.cbl)",
     "import_read_lists": "Importar listas de lectura",
     "imported_as": "Importado como {name}",
     "readlist_created": "Lista de lectura creada: {name}",
-    "requested_number": "Número requerido",
-    "requested_series": "Serie requerida",
+    "requested_number": "Número solicitado",
+    "requested_series": "Serie solicitada",
     "results_preambule": "El resultado de la importación se muestra abajo. También puede comprobar los libros sin emparejar para cada archivo proporcionado.",
     "size_limit": "El tamaño debe ser menor a {size} MB",
     "tab_title": "Importación de datos"
@@ -420,7 +430,6 @@
       "field_name": "Nombre",
       "field_repair_extensions": "Automáticamente reparar extensiones de archivo incorrectas",
       "field_root_folder": "Carpeta raíz",
-      "field_scanner_deep_scan": "Análisis profundo",
       "field_scanner_empty_trash_after_scan": "Vaciar papelera automáticamente luego de cada escaneo",
       "field_scanner_force_directory_modified_time": "Forzar fecha de modificación de directorio",
       "field_series_cover": "Portada de serie",
@@ -575,23 +584,30 @@
     }
   },
   "duplicate_pages": {
+    "action_auto_delete_remaining": "Borrar automáticamente los restantes ({count})",
     "action_delete_auto": "Borrado automático",
     "action_delete_manual": "Borrado manual",
     "action_delete_matches": "Borrar coincidencias",
     "action_ignore": "Ignorar",
+    "action_ignore_remaining": "Ignorar restantes ({count})",
+    "action_manual_delete_remaining": "Borrar manualmente los restantes ({count})",
+    "confirm_auto_delete_remaining": "Todos los hashes de página restantes de esta página ({count}) serán marcados para su borrado automático.",
+    "confirm_manual_delete_remaining": "Todos los hashes de página restantes de esta página ({count}) serán marcados para su borrado manual.",
     "delete_to_save": "Borrar para recuperar {size}",
     "deleted_count": "Borrado {count} veces",
+    "empty_title": "No se encontraron páginas duplicadas",
     "filter": {
       "count": "Cantidad",
       "delete_count": "Cantidad de borrados",
       "delete_size": "Espacio recuperado",
+      "match_count": "Cantidad de coincidencias",
       "size": "Tamaño",
       "total_size": "Tamaño total"
     },
     "info": "Borrar las páginas duplicadas modificará sus archivos. Respalde sus archivos y use el borrado manual antes de usar el borrado automático.",
-    "known": "Conocida",
+    "known": "Conocidas",
     "matches_n": "Sin resultados | 1 resultado | {count} resultados",
-    "new": "Nueva",
+    "new": "Nuevas",
     "saved_size": "Se recuperó {size}",
     "title": "Páginas duplicadas",
     "unknown_size": "Tamaño desconocido"
@@ -656,8 +672,6 @@
     "ERR_1007": "Algunas entradas no pudieron ser analizadas",
     "ERR_1008": "Error desconocido al obtener las entradas del libro",
     "ERR_1009": "Ya existe una lista de lectura con ese nombre",
-    "ERR_1011": "No hay coincidencia única para la serie",
-    "ERR_1013": "No hay coincidencia única para el número de libro dentro de la serie",
     "ERR_1015": "Error al deserializar ComicRack CBL",
     "ERR_1016": "Directorio no accesible o no es un directorio",
     "ERR_1017": "No se puede escanear una carpeta que es parte de una biblioteca existente",
@@ -672,9 +686,9 @@
     "ERR_1026": "Error de inicio de sesión de OpenID Connect: correo no verificado",
     "ERR_1027": "Error de inicio de sesión de OpenID Connect: sin atributo email_verified",
     "ERR_1028": "Error de inicio de sesión de OpenID Connect: sin atributo email",
-    "ERR_1029": "ComicRack CBL no contiene ningún Libro",
-    "ERR_1030": "ComicRack CBL no tiene ningún Nombre",
-    "ERR_1031": "ComicRack CBL al libro le falta una serie o un número"
+    "ERR_1029": "El ComicRack CBL no contiene ningún elemento Libro",
+    "ERR_1030": "El ComicRack CBL no tiene ningún elemento Nombre",
+    "ERR_1031": "Al libro del ComicRack CBL le falta la serie o el número"
   },
   "filter": {
     "age_rating": "clasificación de edad",
@@ -687,6 +701,7 @@
     "publisher": "editorial",
     "read": "Leído",
     "release_date": "fecha de publicación",
+    "sharing_label": "Etiqueta de compartido",
     "status": "estado",
     "tag": "etiqueta",
     "unread": "Sin leer"
@@ -748,11 +763,12 @@
     "mark_unread": "Marcar como no leído",
     "refresh_metadata": "Actualizar metadatos",
     "scan_library_files": "Escanear los archivos de la biblioteca",
+    "scan_library_files_deep": "Escanear los archivos de la biblioteca (en profundidad)",
     "select_all": "Seleccionar todo"
   },
   "metrics": {
     "library_books": "Libros por biblioteca",
-    "library_disk_space": "Espacio en disco de la biblioteca",
+    "library_disk_space": "Espacio en disco por biblioteca",
     "library_series": "Series por biblioteca",
     "library_sidecars": "Sidecars por biblioteca",
     "tasks_executed": "Tareas ejecutadas",
@@ -799,6 +815,7 @@
       "button_cancel_all_tasks": "Cancelar todas las tareas",
       "button_empty_trash": "Vaciar la papelera de todas las bibliotecas",
       "button_scan_libraries": "Escanear todas las bibliotecas",
+      "button_scan_libraries_deep": "Escanear todas las bibliotecas (en profundidad)",
       "button_shutdown": "Apagar",
       "notification_tasks_cancelled": "No hay tareas para cancelar | Una tarea cancelada | {count} tareas canceladas",
       "section_title": "Administración del servidor"

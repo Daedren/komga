@@ -1,5 +1,6 @@
 package org.gotson.komga.interfaces.api.rest
 
+import jakarta.validation.Valid
 import org.gotson.komga.application.tasks.HIGHEST_PRIORITY
 import org.gotson.komga.application.tasks.HIGH_PRIORITY
 import org.gotson.komga.application.tasks.TaskEmitter
@@ -31,11 +32,11 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import java.io.FileNotFoundException
-import javax.validation.Valid
 
 @RestController
 @RequestMapping("api/v1/libraries", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -90,7 +91,6 @@ class LibraryController(
           importLocalArtwork = library.importLocalArtwork,
           importBarcodeIsbn = library.importBarcodeIsbn,
           scanForceModifiedTime = library.scanForceModifiedTime,
-          scanDeep = library.scanDeep,
           repairExtensions = library.repairExtensions,
           convertToCbz = library.convertToCbz,
           emptyTrashAfterScan = library.emptyTrashAfterScan,
@@ -136,7 +136,6 @@ class LibraryController(
         importLocalArtwork = library.importLocalArtwork,
         importBarcodeIsbn = library.importBarcodeIsbn,
         scanForceModifiedTime = library.scanForceModifiedTime,
-        scanDeep = library.scanDeep,
         repairExtensions = library.repairExtensions,
         convertToCbz = library.convertToCbz,
         emptyTrashAfterScan = library.emptyTrashAfterScan,
@@ -173,9 +172,12 @@ class LibraryController(
   @PostMapping("{libraryId}/scan")
   @PreAuthorize("hasRole('$ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.ACCEPTED)
-  fun scan(@PathVariable libraryId: String) {
+  fun scan(
+    @PathVariable libraryId: String,
+    @RequestParam(required = false) deep: Boolean = false,
+  ) {
     libraryRepository.findByIdOrNull(libraryId)?.let { library ->
-      taskEmitter.scanLibrary(library.id, HIGHEST_PRIORITY)
+      taskEmitter.scanLibrary(library.id, deep, HIGHEST_PRIORITY)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
 

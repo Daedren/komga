@@ -21,6 +21,11 @@
     "account_settings": "Kontoinställningar",
     "change_password": "ändra lösenord"
   },
+  "announcements": {
+    "mark_all_read": "Markera alla som lästa",
+    "mark_read": "Markera som läst",
+    "tab_title": "Annonseringar"
+  },
   "authentication_activity": {
     "datetime": "Datum & Tid",
     "email": "E-post",
@@ -258,6 +263,11 @@
     "button_import": "Importera",
     "button_match": "Träff",
     "comicrack_preambule_html": "Du kan importera existerande ComicRack Läslistor i <code>.cbl</code>-format.<br>Komga kommer att försöka matcha innehållet med serier och böker i dina bibliotek.",
+    "dialog_confirmation": {
+      "body": "{unmatched} / {total} böcker är ej matchade",
+      "create": "Skapa ändå",
+      "title": "Några böcker är inte matchade"
+    },
     "field_file_label": "ComicRack Läslista (.cbl)",
     "field_files_label": "ComicRack Läslistor (.cbl)",
     "import_read_lists": "Importera Läslistor",
@@ -420,7 +430,6 @@
       "field_name": "Namn",
       "field_repair_extensions": "Reparera automatiskt felaktiga filtillägg",
       "field_root_folder": "Rotkatalog",
-      "field_scanner_deep_scan": "Djup skanning",
       "field_scanner_empty_trash_after_scan": "Töm papperskorgen automatiskt efter varje skanning",
       "field_scanner_force_directory_modified_time": "Tvinga katalogen att söka baserat på tidsstämpeln",
       "field_series_cover": "Serieomslag",
@@ -575,16 +584,23 @@
     }
   },
   "duplicate_pages": {
+    "action_auto_delete_remaining": "Ta bort återstående automatiskt ({count})",
     "action_delete_auto": "Automatisk radering",
     "action_delete_manual": "Manuell radering",
     "action_delete_matches": "Ta bort matchningar",
     "action_ignore": "Ignorera",
+    "action_ignore_remaining": "Ignorera återstående ({count})",
+    "action_manual_delete_remaining": "Återstående manuell radering ({count})",
+    "confirm_auto_delete_remaining": "Alla återstående sidhashar på den här sidan ({count}) kommer att markeras för automatisk radering.",
+    "confirm_manual_delete_remaining": "Alla återstående sidhashar på den här sidan ({count}) kommer att markeras för manuell radering.",
     "delete_to_save": "Radera för att spara {size}",
     "deleted_count": "Raderat {count} gånger",
+    "empty_title": "Inga dubbletter av sidor hittades",
     "filter": {
       "count": "Antal",
       "delete_count": "Antal gånger raderat",
       "delete_size": "Sparat utrymme",
+      "match_count": "Matcha antal",
       "size": "Storlek",
       "total_size": "Total storlek"
     },
@@ -656,9 +672,7 @@
     "ERR_1007": "Vissa poster kunde inte analyseras",
     "ERR_1008": "Okänt fel vid inhämtning av poster",
     "ERR_1009": "Det finns redan en läslista med det namnet",
-    "ERR_1011": "Ingen unik matchning för serier",
-    "ERR_1013": "Ingen unik matchning för boknummer inom serien",
-    "ERR_1015": "Fel vid avinstallation av ComicRack Läslista",
+    "ERR_1015": "Fel vid nedbrytning av ComicRack CBL",
     "ERR_1016": "Katalog inte tillgänglig eller är inte en katalog",
     "ERR_1017": "Kan inte skanna en mapp som är en del av ett befintligt bibliotek",
     "ERR_1018": "Filen hittades inte",
@@ -671,7 +685,10 @@
     "ERR_1025": "OAuth2 inloggningsfel: det finns ingen lokal användare med den e-postadressen",
     "ERR_1026": "OpenID Connect inloggningsfel: e-post är inte verifierad",
     "ERR_1027": "OpenID Connect inloggningsfel: inget email_verified attribut",
-    "ERR_1028": "OpenID connect inloggningsfel: inget e-post attribut"
+    "ERR_1028": "OpenID connect inloggningsfel: inget e-post attribut",
+    "ERR_1029": "ComicRack CBL innehåller inga bokelement",
+    "ERR_1030": "ComicRack CBL har inget namn-element",
+    "ERR_1031": "ComicRack CBL Book saknar serie eller nummer"
   },
   "filter": {
     "age_rating": "åldersgräns",
@@ -684,6 +701,7 @@
     "publisher": "utgivare",
     "read": "Läsa",
     "release_date": "utgivningsdatum",
+    "sharing_label": "Delningsetikett",
     "status": "status",
     "tag": "tag",
     "unread": "Olästa"
@@ -745,6 +763,7 @@
     "mark_unread": "Markera som oläst",
     "refresh_metadata": "Uppdatera metadata",
     "scan_library_files": "Skanna biblioteksfiler",
+    "scan_library_files_deep": "Skanna biblioteksfiler (djup)",
     "select_all": "Välj alla"
   },
   "metrics": {
@@ -796,6 +815,7 @@
       "button_cancel_all_tasks": "Avbryt alla aktiviteter",
       "button_empty_trash": "Töm papperskorgen för alla bibliotek",
       "button_scan_libraries": "Skanna alla bibliotek",
+      "button_scan_libraries_deep": "Skanna alla bibliotek (djup)",
       "button_shutdown": "Stäng av",
       "notification_tasks_cancelled": "Inga aktiviteter att avbryta | En aktivitet avbruten | {count} aktiviteter avbröts",
       "section_title": "Serverhantering"

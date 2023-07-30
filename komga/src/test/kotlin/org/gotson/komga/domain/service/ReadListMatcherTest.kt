@@ -24,12 +24,9 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@ExtendWith(SpringExtension::class)
 @SpringBootTest
 class ReadListMatcherTest(
   @Autowired private val seriesLifecycle: SeriesLifecycle,
@@ -230,7 +227,7 @@ class ReadListMatcherTest(
         seriesLifecycle.addBooks(s, booksSeries2)
         seriesLifecycle.sortBooks(s)
       }
-      val series2dupe = makeSeries(name = "joker", libraryId = library.id).also { s ->
+      makeSeries(name = "joker", libraryId = library.id).also { s ->
         seriesLifecycle.createSeries(s)
       }
 

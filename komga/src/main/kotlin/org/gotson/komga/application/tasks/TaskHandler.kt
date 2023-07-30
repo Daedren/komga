@@ -57,7 +57,7 @@ class TaskHandler(
         when (task) {
           is Task.ScanLibrary ->
             libraryRepository.findByIdOrNull(task.libraryId)?.let { library ->
-              libraryContentLifecycle.scanRootFolder(library)
+              libraryContentLifecycle.scanRootFolder(library, task.scanDeep)
               taskEmitter.analyzeUnknownAndOutdatedBooks(library)
               taskEmitter.repairExtensions(library, LOW_PRIORITY)
               taskEmitter.findBooksToConvert(library, LOWEST_PRIORITY)
@@ -165,6 +165,8 @@ class TaskHandler(
             } ?: logger.warn { "Cannot execute task $task: Book does not exist" }
 
           is Task.RebuildIndex -> searchIndexLifecycle.rebuildIndex(task.entities)
+
+          is Task.UpgradedIndex -> searchIndexLifecycle.upgradeIndex()
 
           is Task.DeleteBook -> {
             bookRepository.findByIdOrNull(task.bookId)?.let { book ->

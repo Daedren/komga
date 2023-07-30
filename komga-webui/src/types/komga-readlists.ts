@@ -5,8 +5,8 @@ export interface ReadListDto {
   ordered: boolean,
   filtered: boolean,
   bookIds: string[],
-  createdDate: string,
-  lastModifiedDate: string
+  createdDate: Date,
+  lastModifiedDate: Date
 }
 
 export interface ReadListCreationDto {
@@ -59,6 +59,7 @@ export interface ReadListRequestBookMatchDto {
 export interface ReadListRequestBookMatchSeriesDto {
   seriesId: string,
   title: string,
+  releaseDate?: string,
 }
 
 export interface ReadListRequestBookMatchBookDto {

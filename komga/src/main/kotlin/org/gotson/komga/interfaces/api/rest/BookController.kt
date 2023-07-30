@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import jakarta.validation.Valid
 import mu.KotlinLogging
 import org.apache.commons.io.IOUtils
 import org.gotson.komga.application.events.EventPublisher
@@ -85,7 +86,6 @@ import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.NoSuchFileException
 import java.time.LocalDate
 import java.time.ZoneOffset
-import javax.validation.Valid
 import kotlin.io.path.name
 
 private val logger = KotlinLogging.logger {}
@@ -265,10 +265,7 @@ class BookController(
 
   @ApiResponse(content = [Content(schema = Schema(type = "string", format = "binary"))])
   @GetMapping(
-    value = [
-      "api/v1/books/{bookId}/thumbnail",
-      "opds/v1.2/books/{bookId}/thumbnail",
-    ],
+    value = ["api/v1/books/{bookId}/thumbnail"],
     produces = [MediaType.IMAGE_JPEG_VALUE],
   )
   fun getBookThumbnail(
@@ -418,6 +415,7 @@ class BookController(
           HttpStatus.NOT_FOUND,
           "Book is outdated and must be re-analyzed",
         )
+
         Media.Status.ERROR -> throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book analysis failed")
         Media.Status.UNSUPPORTED -> throw ResponseStatusException(HttpStatus.NOT_FOUND, "Book format is not supported")
         Media.Status.READY -> media.pages.mapIndexed { index, bookPage ->

@@ -1,5 +1,7 @@
 package org.gotson.komga.infrastructure.configuration
 
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Positive
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.convert.DurationUnit
 import org.springframework.stereotype.Component
@@ -7,8 +9,6 @@ import org.springframework.validation.annotation.Validated
 import org.sqlite.SQLiteConfig.JournalMode
 import java.time.Duration
 import java.time.temporal.ChronoUnit
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.Positive
 
 @Component
 @ConfigurationProperties(prefix = "komga")
@@ -23,9 +23,6 @@ class KomgaProperties {
   var deleteEmptyReadLists: Boolean = true
 
   var deleteEmptyCollections: Boolean = true
-
-  @Deprecated("Deprecated since 0.143.0, you can configure this in the library options directly")
-  var fileHashing: Boolean = true
 
   @Positive
   var pageHashing: Int = 3

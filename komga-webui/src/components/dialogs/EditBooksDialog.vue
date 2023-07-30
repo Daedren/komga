@@ -158,7 +158,6 @@
                                       dense
                                       placeholder="YYYY-MM-DD"
                                       clearable
-                                      readonly
                                       :error-messages="releaseDateErrors"
                                       @blur="$v.form.releaseDate.$touch()"
                                       @change="form.releaseDateLock = true"
@@ -177,6 +176,8 @@
                       <v-date-picker v-model="form.releaseDate"
                                      :show-current="true"
                                      :show-adjacent-months="true"
+                                     :locale="$i18n.locale"
+                                     :first-day-of-week="$store.getters.getLocaleFirstDay()"
                                      @input="menuDate = false"
                                      @change="form.releaseDateLock = true"
                       />
