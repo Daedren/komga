@@ -19,6 +19,12 @@
   },
   "account_settings": {
     "account_settings": "Ajustes de cuenta",
+    "api_key": {
+      "created_date": "Fecha de creación: {date}",
+      "force_kobo_sync": "Forzar sinc. Kobo",
+      "generate_api_key": "Generar clave API",
+      "no_keys": "Aún no se han creado claves API"
+    },
     "change_password": "cambiar contraseña"
   },
   "announcements": {
@@ -27,6 +33,7 @@
     "tab_title": "Anuncios"
   },
   "authentication_activity": {
+    "api_key": "Clave API",
     "datetime": "Fecha y hora",
     "email": "Correo electrónico",
     "error": "Error",
@@ -199,16 +206,21 @@
     "books_n": "Sin libros | 1 libro | {count} libros",
     "books_total": "{count} / {total} libros",
     "cancel": "Cancelar",
+    "cbx": "Archivos de cómic",
     "choose_image": "Elegir una imagen",
     "close": "Cerrar",
     "collections": "Colecciones",
+    "copied": "¡Copiado!",
     "create": "Crear",
     "delete": "Eliminar",
+    "dimension": "anch: {width}, alt: {height}",
+    "discard": "Descartar",
     "disk_space": "Espacio en disco",
     "dismiss": "Descartar",
     "download": "Descargar",
     "drag_drop": "arrastrar y soltar",
     "email": "Correo electrónico",
+    "epub": "Epub",
     "filename": "Nombre de archivo",
     "filter_no_matches": "El filtro activo no tiene coincidencias",
     "genre": "Género",
@@ -216,12 +228,14 @@
     "go_to_library": "Ir a la biblioteca",
     "go_to_readlist": "Ir a la lista de lectura",
     "go_to_series": "Ir a la serie",
+    "i_understand": "Entiendo",
     "library": "Biblioteca",
     "locale_name": "Español",
     "locale_rtl": "false",
     "lock_all": "Bloquear todas",
     "n_selected": "{count} seleccionado(s)",
     "nothing_to_show": "Nada que mostrar",
+    "oneshot": "One-shot",
     "outdated": "Desactualizado",
     "page": "Página",
     "page_number": "Número de página",
@@ -229,12 +243,14 @@
     "pages_left": "No quedan páginas | Queda 1 página | Quedan {count} páginas",
     "pages_n": "Sin páginas | 1 página | {count} páginas",
     "password": "Contraseña",
+    "pdf": "PDF",
     "pending_tasks": "Sin tareas pendientes | 1 tarea pendiente | {count} tareas pendientes",
     "publisher": "Editorial",
     "read": "Leer",
     "read_on": "Leer la {date}",
     "readlist": "Lista de lectura",
     "readlists": "Listas de lectura",
+    "remember-me": "Recordarme",
     "required": "Requerido",
     "reset_filters": "Reiniciar filtros",
     "roles": "Funciones",
@@ -280,6 +296,14 @@
     "tab_title": "Importación de datos"
   },
   "dialog": {
+    "add_api_key": {
+      "button_confirm": "Generar",
+      "context": "Las claves API se pueden utilizar para autenticarse a través del protocolo Kobo Sync.",
+      "dialog_title": "Generar nueva clave API",
+      "field_comment": "Comentario",
+      "field_comment_hint": "¿Para qué es esta clave API?",
+      "info_copy": "Asegúrate de copiar tu clave API ahora. ¡No podrás verla de nuevo!"
+    },
     "add_to_collection": {
       "button_create": "Crear",
       "card_collection_subtitle": "Sin series | 1 serie | {count} series",
@@ -302,11 +326,7 @@
       "dialog_title": "Añadir usuario",
       "field_email": "Correo electrónico",
       "field_email_error": "Debe ser una dirección de correo electrónico válida",
-      "field_password": "Contraseña",
-      "field_role_administrator": "Administrador",
-      "field_role_file_download": "Descarga de archivos",
-      "field_role_page_streaming": "Streaming de páginas",
-      "label_roles": "Funciones"
+      "field_password": "Contraseña"
     },
     "analyze_library": {
       "body": "Analiza todos los archivos multimedia en la biblioteca. El análisis obtiene información sobre los medios. Dependiendo del tamaño de su biblioteca, esto podría tomar mucho tiempo.",
@@ -316,6 +336,12 @@
     "book_picker": {
       "filter": "Filtrar por número de libro, título o fecha de publicación",
       "title": "Seleccionar un libro"
+    },
+    "delete_apikey": {
+      "button_confirm": "Eliminar",
+      "confirm_delete": "Entiendo, eliminar la clave API «{name}»",
+      "dialog_title": "Eliminar clave API",
+      "warning_html": "Cualquier aplicación o script que use esta clave API no podrá acceder más a la API de Komga. No puedes deshacer esta acción."
     },
     "delete_book": {
       "button_confirm": "Borrar",
@@ -428,10 +454,13 @@
       "field_import_local_artwork": "Ilustración local",
       "field_import_mylar_series": "Metadatos de serie",
       "field_name": "Nombre",
+      "field_oneshotsdirectory": "Directorio de one-shots",
       "field_repair_extensions": "Automáticamente reparar extensiones de archivo incorrectas",
       "field_root_folder": "Carpeta raíz",
+      "field_scan_interval": "Intervalo de escaneo",
       "field_scanner_empty_trash_after_scan": "Vaciar papelera automáticamente luego de cada escaneo",
       "field_scanner_force_directory_modified_time": "Forzar fecha de modificación de directorio",
+      "field_scanner_scan_startup": "Escanear al iniciar",
       "field_series_cover": "Portada de serie",
       "file_browser_dialog_button_confirm": "Elegir",
       "file_browser_dialog_title": "Directorio raíz de la biblioteca",
@@ -442,11 +471,14 @@
       "label_import_epub": "Importar metadatos desde archivos EPUB",
       "label_import_local": "Importar recursos multimedia locales",
       "label_import_mylar": "Importar metadatos generados por Mylar",
+      "label_scan_directory_exclusions": "Exclusiones de directorios",
+      "label_scan_types": "Escanear por estos tipos de archivos",
       "label_scanner": "Escáner",
       "label_series_cover": "Portada de serie",
       "tab_general": "General",
       "tab_metadata": "Metadatos",
       "tab_options": "Opciones",
+      "tooltip_oneshotsdirectory": "Dejar vacío para deshabilitar",
       "tooltip_scanner_force_modified_time": "Habilitar si la biblioteca está en Google Drive",
       "tooltip_use_resources": "Puede consumir muchos recursos en bibliotecas grandes o hardware lento"
     },
@@ -529,6 +561,10 @@
       },
       "title": "Nombre de archivo destino"
     },
+    "force_kobo_sync": {
+      "dialog_title": "Forzar sinc. Kobo",
+      "warning_html": "Esto eliminará todo el historial de sincronización para esta clave API. Tu Kobo sincronizará todo en la próxima sincronización."
+    },
     "password_change": {
       "button_cancel": "Cancelar",
       "button_confirm": "Cambiar contraseña",
@@ -598,6 +634,8 @@
     "empty_title": "No se encontraron páginas duplicadas",
     "filter": {
       "count": "Cantidad",
+      "date_added": "Fecha en que se añadió",
+      "date_modified": "Fecha de modificación",
       "delete_count": "Cantidad de borrados",
       "delete_size": "Espacio recuperado",
       "match_count": "Cantidad de coincidencias",
@@ -622,6 +660,23 @@
     "copy_mode": {
       "HARDLINK": "Crear enlace físico/Copiar archivos",
       "MOVE": "Mover archivos"
+    },
+    "epubreader": {
+      "appearances": {
+        "day": "Día",
+        "night": "Noche",
+        "sepia": "Sepia"
+      },
+      "column_count": {
+        "auto": "Auto",
+        "one": "Uno",
+        "two": "Dos"
+      },
+      "reading_direction": {
+        "auto": "Automático",
+        "ltr": "Izquierda a derecha",
+        "rtl": "Derecha a izquierda"
+      }
     },
     "historical_event_type": {
       "BookConverted": "Libro convertido",
@@ -648,6 +703,14 @@
       "VERTICAL": "Vertical",
       "WEBTOON": "Webtoon"
     },
+    "scan_interval": {
+      "DAILY": "Diariamente",
+      "DISABLED": "Deshabilitado",
+      "EVERY_12H": "Cada 12 horas",
+      "EVERY_6H": "Cada 6 horas",
+      "HOURLY": "Cada hora",
+      "WEEKLY": "Semanalmente"
+    },
     "series_cover": {
       "FIRST": "El primero",
       "FIRST_UNREAD_OR_FIRST": "El primero sin leer de lo contrario el primero",
@@ -659,6 +722,43 @@
       "ENDED": "Finalizado",
       "HIATUS": "Interrumpido",
       "ONGOING": "En curso"
+    },
+    "thumbnail_size": {
+      "DEFAULT": "Por defecto (300px)",
+      "LARGE": "Grande (900px)",
+      "MEDIUM": "Mediano (600px)",
+      "XLARGE": "Extra grande (1200px)"
+    }
+  },
+  "epubreader": {
+    "current_chapter": "Capítulo actual",
+    "page_of": "Página {page} de {count}",
+    "settings": {
+      "column_count": "Número de columnas",
+      "layout": "Diseño",
+      "layout_paginated": "Paginado",
+      "layout_scroll": "Desplazarse",
+      "navigation_mode": "Modo de navegación",
+      "navigation_options": {
+        "both": "Ambos",
+        "buttons": "Botones",
+        "click": "Clic / Toque"
+      },
+      "page_margins": "Márgenes de la página",
+      "viewing_theme": "Tema de visualización"
+    },
+    "shortcuts": {
+      "cycle_pagination": "Alternar cantidad de columnas",
+      "cycle_viewing_theme": "Alternar tema de visualización",
+      "font_size_decrease": "Reducir el tamaño de la letra",
+      "font_size_increase": "Aumentar el tamaño de la letra",
+      "menus": "Menús",
+      "next": "Avanzar",
+      "previous": "Retroceder",
+      "reader_navigation": "Navegación del lector",
+      "scroll": "Cambiar el diseño para desplazarse",
+      "settings": "Ajustes",
+      "show_hide_toc": "Mostrar/ocultar índice de contenidos"
     }
   },
   "error_codes": {
@@ -688,7 +788,10 @@
     "ERR_1028": "Error de inicio de sesión de OpenID Connect: sin atributo email",
     "ERR_1029": "El ComicRack CBL no contiene ningún elemento Libro",
     "ERR_1030": "El ComicRack CBL no tiene ningún elemento Nombre",
-    "ERR_1031": "Al libro del ComicRack CBL le falta la serie o el número"
+    "ERR_1031": "Al libro del ComicRack CBL le falta la serie o el número",
+    "ERR_1032": "El archivo EPUB tiene un tipo de medio incorrecto",
+    "ERR_1033": "Faltan algunos datos",
+    "ERR_1034": "Una clave API con ese comentario ya existe"
   },
   "filter": {
     "age_rating": "clasificación de edad",
@@ -698,6 +801,7 @@
     "in_progress": "En progreso",
     "language": "idioma",
     "library": "biblioteca",
+    "oneshot": "One-shot",
     "publisher": "editorial",
     "read": "Leído",
     "release_date": "fecha de publicación",
@@ -823,6 +927,26 @@
     "tab_title": "Servidor"
   },
   "server_settings": {
+    "config_precedence": "Tiene prioridad sobre el archivo de configuración",
+    "dialog_regenerate_thumbnails": {
+      "body": "El tamaño de las miniaturas ha cambiado. ¿Quiere regenerar las miniaturas de los libros?",
+      "btn_alternate": "Sí, todos los libros",
+      "btn_cancel": "No",
+      "btn_confirm": "Sí, pero solo si son más grandes",
+      "title": "Regenerar miniaturas"
+    },
+    "hint_kobo_port": "Establecer solo en caso de problemas de sincronización con carátulas y descargas",
+    "label_delete_empty_collections": "Eliminar las colecciones vacías después de escanear",
+    "label_delete_empty_readlists": "Eliminar las listas de lectura vacías después de escanear",
+    "label_kepubify_path": "Ruta a kepubify",
+    "label_kobo_port": "Puerto externo Kobo Sync",
+    "label_kobo_proxy": "Hacer proxy a las solicitudes Kobo Sync hacia Kobo Store",
+    "label_rememberme_duration": "Duración de «recordarme» (en días)",
+    "label_server_context_path": "URL base",
+    "label_server_port": "Puerto del servidor",
+    "label_task_pool_size": "Hilos de tareas",
+    "label_thumbnail_size": "Tamaño de miniaturas",
+    "requires_restart": "Necesita reiniciar para tener efecto",
     "server_settings": "Ajustes del servidor"
   },
   "settings_user": {
@@ -868,14 +992,19 @@
   "user_roles": {
     "ADMIN": "Administrador",
     "FILE_DOWNLOAD": "Descarga de archivos",
+    "KOBO_SYNC": "Kobo Sync",
     "PAGE_STREAMING": "Streaming de páginas",
     "USER": "Usuario"
   },
   "users": {
+    "api_keys": "Claves API",
     "authentication_activity": "Actividad de autenticación",
     "users": "Usuarios"
   },
   "validation": {
+    "context_path": "Debe empezar con '/', no terminar con '/-_' y contener solo '/-_a-z0-9'",
+    "one_or_more": "Debe ser 1 o más",
+    "tcp_port": "Debe estar entre 1 y 65535",
     "zero_or_more": "Debe ser 0 o más"
   },
   "welcome": {

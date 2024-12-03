@@ -2,7 +2,7 @@ package org.gotson.komga.infrastructure.security.session
 
 import com.github.gotson.spring.session.caffeine.CaffeineIndexedSessionRepository
 import com.github.gotson.spring.session.caffeine.config.annotation.web.http.EnableCaffeineHttpSession
-import org.gotson.komga.infrastructure.configuration.KomgaProperties
+import org.springframework.boot.autoconfigure.web.ServerProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.core.session.SessionRegistry
@@ -16,7 +16,6 @@ import org.springframework.session.web.http.HttpSessionIdResolver
 @EnableCaffeineHttpSession
 @Configuration
 class SessionConfiguration {
-
   @Bean
   fun sessionCookieName() = "SESSION"
 
@@ -30,13 +29,16 @@ class SessionConfiguration {
     }
 
   @Bean
-  fun httpSessionIdResolver(sessionHeaderName: String, cookieSerializer: CookieSerializer): HttpSessionIdResolver =
+  fun httpSessionIdResolver(
+    sessionHeaderName: String,
+    cookieSerializer: CookieSerializer,
+  ): HttpSessionIdResolver =
     SmartHttpSessionIdResolver(sessionHeaderName, cookieSerializer)
 
   @Bean
-  fun customizeSessionRepository(komgaProperties: KomgaProperties) =
+  fun customizeSessionRepository(serverProperties: ServerProperties) =
     SessionRepositoryCustomizer<CaffeineIndexedSessionRepository> {
-      it.setDefaultMaxInactiveInterval(komgaProperties.sessionTimeout.seconds.toInt())
+      it.setDefaultMaxInactiveInterval(serverProperties.servlet.session.timeout.seconds.toInt())
     }
 
   @Bean

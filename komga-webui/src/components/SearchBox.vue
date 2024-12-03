@@ -76,7 +76,10 @@
 
           <v-list-item-content>
             <v-list-item-title>{{ data.item.metadata.title }}</v-list-item-title>
-            <v-list-item-subtitle>{{ data.item.seriesTitle }} - {{ data.item.metadata.number }}</v-list-item-subtitle>
+            <v-list-item-subtitle v-if="!data.item.oneshot">{{ data.item.seriesTitle }} - {{
+                data.item.metadata.number
+              }}
+            </v-list-item-subtitle>
             <v-list-item-subtitle>{{
                 $t('searchbox.in_library', {library: getLibraryName(data.item)})
               }}
@@ -144,6 +147,10 @@ export default Vue.extend({
         })
 
         if (val.type === 'series') this.$router.push({name: 'browse-series', params: {seriesId: val.id}})
+        else if (val.type === 'book' && val.oneshot) this.$router.push({
+          name: 'browse-oneshot',
+          params: {seriesId: val.seriesId},
+        })
         else if (val.type === 'book') this.$router.push({name: 'browse-book', params: {bookId: val.id}})
         else if (val.type === 'collection') this.$router.push({
           name: 'browse-collection',
@@ -195,7 +202,7 @@ export default Vue.extend({
     searchItems: debounce(async function (this: any, query: string) {
       if (query) {
         this.loading = true
-        this.series = (await this.$komgaSeries.getSeries(undefined, {size: this.pageSize}, query)).content
+        this.series = (await this.$komgaSeries.getSeries(undefined, {size: this.pageSize}, query, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, false)).content
         this.books = (await this.$komgaBooks.getBooks(undefined, {size: this.pageSize}, query)).content
         this.collections = (await this.$komgaCollections.getCollections(undefined, {size: this.pageSize}, query)).content
         this.readLists = (await this.$komgaReadLists.getReadLists(undefined, {size: this.pageSize}, query)).content

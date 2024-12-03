@@ -16,6 +16,12 @@ data class LibraryCreationDto(
   val importLocalArtwork: Boolean = true,
   val importBarcodeIsbn: Boolean = true,
   val scanForceModifiedTime: Boolean = false,
+  val scanInterval: ScanIntervalDto = ScanIntervalDto.EVERY_6H,
+  val scanOnStartup: Boolean = false,
+  val scanCbx: Boolean = true,
+  val scanPdf: Boolean = true,
+  val scanEpub: Boolean = true,
+  val scanDirectoryExclusions: Set<String> = emptySet(),
   val repairExtensions: Boolean = false,
   val convertToCbz: Boolean = false,
   val emptyTrashAfterScan: Boolean = false,
@@ -23,4 +29,5 @@ data class LibraryCreationDto(
   val hashFiles: Boolean = true,
   val hashPages: Boolean = false,
   val analyzeDimensions: Boolean = true,
+  val oneshotsDirectory: String? = null,
 )

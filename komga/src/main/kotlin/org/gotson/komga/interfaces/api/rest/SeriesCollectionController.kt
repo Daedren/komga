@@ -1,13 +1,13 @@
 package org.gotson.komga.interfaces.api.rest
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.validation.Valid
-import mu.KotlinLogging
-import org.gotson.komga.application.events.EventPublisher
 import org.gotson.komga.domain.model.Author
+import org.gotson.komga.domain.model.Dimension
 import org.gotson.komga.domain.model.DomainEvent
 import org.gotson.komga.domain.model.DuplicateNameException
 import org.gotson.komga.domain.model.ROLE_ADMIN
@@ -19,6 +19,7 @@ import org.gotson.komga.domain.model.ThumbnailSeriesCollection
 import org.gotson.komga.domain.persistence.SeriesCollectionRepository
 import org.gotson.komga.domain.persistence.ThumbnailSeriesCollectionRepository
 import org.gotson.komga.domain.service.SeriesCollectionLifecycle
+import org.gotson.komga.infrastructure.image.ImageAnalyzer
 import org.gotson.komga.infrastructure.jooq.UnpagedSorted
 import org.gotson.komga.infrastructure.mediacontainer.ContentDetector
 import org.gotson.komga.infrastructure.security.KomgaPrincipal
@@ -33,6 +34,7 @@ import org.gotson.komga.interfaces.api.rest.dto.SeriesDto
 import org.gotson.komga.interfaces.api.rest.dto.ThumbnailSeriesCollectionDto
 import org.gotson.komga.interfaces.api.rest.dto.restrictUrl
 import org.gotson.komga.interfaces.api.rest.dto.toDto
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -67,10 +69,10 @@ class SeriesCollectionController(
   private val collectionLifecycle: SeriesCollectionLifecycle,
   private val seriesDtoRepository: SeriesDtoRepository,
   private val contentDetector: ContentDetector,
+  private val imageAnalyzer: ImageAnalyzer,
   private val thumbnailSeriesCollectionRepository: ThumbnailSeriesCollectionRepository,
-  private val eventPublisher: EventPublisher,
+  private val eventPublisher: ApplicationEventPublisher,
 ) {
-
   @PageableWithoutSortAsQueryParam
   @GetMapping
   fun getAll(
@@ -80,18 +82,21 @@ class SeriesCollectionController(
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
     @Parameter(hidden = true) page: Pageable,
   ): Page<CollectionDto> {
-    val sort = when {
-      !searchTerm.isNullOrBlank() -> Sort.by("relevance")
-      else -> Sort.by(Sort.Order.asc("name"))
-    }
+    val sort =
+      when {
+        !searchTerm.isNullOrBlank() -> Sort.by("relevance")
+        else -> Sort.by(Sort.Order.asc("name"))
+      }
 
     val pageRequest =
-      if (unpaged) UnpagedSorted(sort)
-      else PageRequest.of(
-        page.pageNumber,
-        page.pageSize,
-        sort,
-      )
+      if (unpaged)
+        UnpagedSorted(sort)
+      else
+        PageRequest.of(
+          page.pageNumber,
+          page.pageSize,
+          sort,
+        )
 
     return collectionRepository.findAll(principal.user.getAuthorizedLibraryIds(libraryIds), principal.user.getAuthorizedLibraryIds(null), searchTerm, pageRequest, principal.user.restrictions)
       .map { it.toDto() }
@@ -152,7 +157,8 @@ class SeriesCollectionController(
   ): ThumbnailSeriesCollectionDto {
     collectionRepository.findByIdOrNull(id, principal.user.getAuthorizedLibraryIds(null))?.let { collection ->
 
-      if (!contentDetector.isImage(file.inputStream.buffered().use { contentDetector.detectMediaType(it) }))
+      val mediaType = file.inputStream.buffered().use { contentDetector.detectMediaType(it) }
+      if (!contentDetector.isImage(mediaType))
         throw ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
 
       return collectionLifecycle.addThumbnail(
@@ -161,6 +167,9 @@ class SeriesCollectionController(
           thumbnail = file.bytes,
           type = ThumbnailSeriesCollection.Type.USER_UPLOADED,
           selected = selected,
+          fileSize = file.bytes.size.toLong(),
+          mediaType = mediaType,
+          dimension = imageAnalyzer.getDimension(file.inputStream.buffered()) ?: Dimension(0, 0),
         ),
       ).toDto()
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
@@ -224,11 +233,12 @@ class SeriesCollectionController(
     collection: CollectionUpdateDto,
   ) {
     collectionRepository.findByIdOrNull(id)?.let { existing ->
-      val updated = existing.copy(
-        name = collection.name ?: existing.name,
-        ordered = collection.ordered ?: existing.ordered,
-        seriesIds = collection.seriesIds ?: existing.seriesIds,
-      )
+      val updated =
+        existing.copy(
+          name = collection.name ?: existing.name,
+          ordered = collection.ordered ?: existing.ordered,
+          seriesIds = collection.seriesIds ?: existing.seriesIds,
+        )
       try {
         collectionLifecycle.updateCollection(updated)
       } catch (e: DuplicateNameException) {
@@ -262,7 +272,7 @@ class SeriesCollectionController(
     @RequestParam(name = "genre", required = false) genres: List<String>?,
     @RequestParam(name = "tag", required = false) tags: List<String>?,
     @RequestParam(name = "age_rating", required = false) ageRatings: List<String>?,
-    @RequestParam(name = "release_years", required = false) releaseYears: List<String>?,
+    @RequestParam(name = "release_year", required = false) releaseYears: List<String>?,
     @RequestParam(name = "deleted", required = false) deleted: Boolean?,
     @RequestParam(name = "complete", required = false) complete: Boolean?,
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
@@ -271,31 +281,36 @@ class SeriesCollectionController(
   ): Page<SeriesDto> =
     collectionRepository.findByIdOrNull(id, principal.user.getAuthorizedLibraryIds(null), principal.user.restrictions)?.let { collection ->
       val sort =
-        if (collection.ordered) Sort.by(Sort.Order.asc("collection.number"))
-        else Sort.by(Sort.Order.asc("metadata.titleSort"))
+        if (collection.ordered)
+          Sort.by(Sort.Order.asc("collection.number"))
+        else
+          Sort.by(Sort.Order.asc("metadata.titleSort"))
 
       val pageRequest =
-        if (unpaged) UnpagedSorted(sort)
-        else PageRequest.of(
-          page.pageNumber,
-          page.pageSize,
-          sort,
-        )
+        if (unpaged)
+          UnpagedSorted(sort)
+        else
+          PageRequest.of(
+            page.pageNumber,
+            page.pageSize,
+            sort,
+          )
 
-      val seriesSearch = SeriesSearchWithReadProgress(
-        libraryIds = principal.user.getAuthorizedLibraryIds(libraryIds),
-        metadataStatus = metadataStatus,
-        readStatus = readStatus,
-        publishers = publishers,
-        deleted = deleted,
-        complete = complete,
-        languages = languages,
-        genres = genres,
-        tags = tags,
-        ageRatings = ageRatings?.map { it.toIntOrNull() },
-        releaseYears = releaseYears,
-        authors = authors,
-      )
+      val seriesSearch =
+        SeriesSearchWithReadProgress(
+          libraryIds = principal.user.getAuthorizedLibraryIds(libraryIds),
+          metadataStatus = metadataStatus,
+          publishers = publishers,
+          deleted = deleted,
+          complete = complete,
+          languages = languages,
+          genres = genres,
+          tags = tags,
+          ageRatings = ageRatings?.map { it.toIntOrNull() },
+          releaseYears = releaseYears,
+          readStatus = readStatus,
+          authors = authors,
+        )
 
       seriesDtoRepository.findAllByCollectionId(collection.id, seriesSearch, principal.user.id, pageRequest, principal.user.restrictions)
         .map { it.restrictUrl(!principal.user.roleAdmin) }

@@ -175,8 +175,14 @@
                        :key="i"
                        class="align-center text-caption"
                 >
-                  <v-col cols="4" sm="3" md="2" xl="1" class="py-0 text-uppercase" :class="i===0 ? 'pt-4' : i === series.metadata.alternateTitles.length - 1 ? 'pb-4' : ''">{{ a.label }}</v-col>
-                  <v-col cols="8" sm="9" md="10" xl="11" class="py-0" :class="i===0 ? 'pt-4' : i === series.metadata.alternateTitles.length - 1 ? 'pb-4' : ''">{{ a.title }}</v-col>
+                  <v-col cols="4" sm="3" md="2" xl="1" class="py-0 text-uppercase"
+                         :class="i===0 ? 'pt-4' : i === series.metadata.alternateTitles.length - 1 ? 'pb-4' : ''">
+                    {{ a.label }}
+                  </v-col>
+                  <v-col cols="8" sm="9" md="10" xl="11" class="py-0"
+                         :class="i===0 ? 'pt-4' : i === series.metadata.alternateTitles.length - 1 ? 'pb-4' : ''">
+                    {{ a.title }}
+                  </v-col>
                 </v-row>
               </read-more>
 
@@ -223,8 +229,16 @@
                  :key="i"
                  class="align-center text-caption"
           >
-            <v-col cols="4" class="py-0 text-uppercase" :class="i===0 ? 'pt-4' : i === series.metadata.alternateTitles.length - 1 ? 'pb-4' : ''">{{ a.label }}</v-col>
-            <v-col cols="8" class="py-0" :class="i===0 ? 'pt-4' : i === series.metadata.alternateTitles.length - 1 ? 'pb-4' : ''">{{ a.title }}</v-col>
+            <v-col cols="4" class="py-0 text-uppercase"
+                   :class="i===0 ? 'pt-4' : i === series.metadata.alternateTitles.length - 1 ? 'pb-4' : ''">{{
+                a.label
+              }}
+            </v-col>
+            <v-col cols="8" class="py-0"
+                   :class="i===0 ? 'pt-4' : i === series.metadata.alternateTitles.length - 1 ? 'pb-4' : ''">{{
+                a.title
+              }}
+            </v-col>
           </v-row>
         </read-more>
 
@@ -473,7 +487,7 @@ import SeriesActionsMenu from '@/components/menus/SeriesActionsMenu.vue'
 import PageSizeSelect from '@/components/PageSizeSelect.vue'
 import {parseQuerySort} from '@/functions/query-params'
 import {seriesFileUrl, seriesThumbnailUrl} from '@/functions/urls'
-import {ReadStatus, replaceCompositeReadStatus} from '@/types/enum-books'
+import {ReadStatus} from '@/types/enum-books'
 import {
   BOOK_ADDED,
   BOOK_CHANGED,
@@ -573,7 +587,7 @@ export default Vue.extend({
       return {
         readStatus: {
           values: [
-            {name: this.$t('filter.unread').toString(), value: ReadStatus.UNREAD_AND_IN_PROGRESS},
+            {name: this.$t('filter.unread').toString(), value: ReadStatus.UNREAD},
             {name: this.$t('filter.in_progress').toString(), value: ReadStatus.IN_PROGRESS},
             {name: this.$t('filter.read').toString(), value: ReadStatus.READ},
           ],
@@ -625,7 +639,7 @@ export default Vue.extend({
       }
     },
     languageDisplay(): string {
-      return tags(this.series.metadata.language).language().descriptions()[0]
+      return tags(this.series.metadata.language)?.language()?.descriptions()[0] || this.series.metadata.language
     },
     statusChip(): object {
       switch (this.series.metadata.status) {
@@ -821,7 +835,11 @@ export default Vue.extend({
     }, 1000),
     async loadSeries(seriesId: string) {
       this.$komgaSeries.getOneSeries(seriesId)
-        .then(v => this.series = v)
+        .then(v => {
+          this.series = v
+          // for the cases where we can't change the origin target route because we don't have the full BookDto
+          if (this.series.oneshot) this.$router.replace({name: 'browse-oneshot', params: {seriesId: this.seriesId}})
+        })
       this.$komgaSeries.getCollections(seriesId)
         .then(v => this.collections = v)
 
@@ -877,7 +895,7 @@ export default Vue.extend({
         }))
       })
 
-      const booksPage = await this.$komgaSeries.getBooks(seriesId, pageRequest, replaceCompositeReadStatus(this.filters.readStatus), this.filters.tag, authorsFilter)
+      const booksPage = await this.$komgaSeries.getBooks(seriesId, pageRequest, this.filters.readStatus, this.filters.tag, authorsFilter)
 
       this.totalPages = booksPage.totalPages
       this.totalElements = booksPage.totalElements
@@ -902,7 +920,7 @@ export default Vue.extend({
       this.$store.dispatch('dialogUpdateBulkBooks', this.$_.sortBy(this.selectedBooks, ['metadata.numberSort']))
     },
     addToReadList() {
-      this.$store.dispatch('dialogAddBooksToReadList', this.selectedBooks)
+      this.$store.dispatch('dialogAddBooksToReadList', this.selectedBooks.map(b => b.id))
     },
     async markSelectedRead() {
       await Promise.all(this.selectedBooks.map(b =>

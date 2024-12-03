@@ -17,6 +17,7 @@ export interface BookDto {
   metadata: BookMetadataDto,
   readProgress?: ReadProgressDto,
   deleted: boolean,
+  oneshot: boolean,
 
   // custom fields
   context: Context
@@ -26,7 +27,10 @@ export interface MediaDto {
   status: string,
   mediaType: string,
   pagesCount: number,
-  comment: string
+  comment: string,
+  mediaProfile: string,
+  epubDivinaCompatible: boolean,
+  epubIsKepub: boolean,
 }
 
 export interface PageDto {
@@ -142,5 +146,9 @@ export interface BookThumbnailDto {
   id: string,
   bookId: string,
   type: string,
-  selected: boolean
+  selected: boolean,
+  mediaType: string,
+  fileSize: number,
+  width: number,
+  height: number,
 }

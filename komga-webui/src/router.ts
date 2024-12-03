@@ -92,7 +92,7 @@ const router = new Router({
               path: '/settings/metrics',
               name: 'metrics',
               beforeEnter: adminGuard,
-              component: () => import(/* webpackChunkName: "metrics" */ './views/Metrics.vue'),
+              component: () => import(/* webpackChunkName: "metrics" */ './views/MetricsView.vue'),
             },
             {
               path: '/settings/announcements',
@@ -214,6 +214,12 @@ const router = new Router({
           props: (route) => ({bookId: route.params.bookId}),
         },
         {
+          path: '/oneshot/:seriesId',
+          name: 'browse-oneshot',
+          component: () => import(/* webpackChunkName: "browse-oneshot" */ './views/BrowseOneshot.vue'),
+          props: (route) => ({seriesId: route.params.seriesId}),
+        },
+        {
           path: '/search',
           name: 'search',
           component: () => import(/* webpackChunkName: "search" */ './views/SearchView.vue'),
@@ -254,7 +260,13 @@ const router = new Router({
     {
       path: '/book/:bookId/read',
       name: 'read-book',
-      component: () => import(/* webpackChunkName: "read-book" */ './views/BookReader.vue'),
+      component: () => import(/* webpackChunkName: "read-book" */ './views/DivinaReader.vue'),
+      props: (route) => ({bookId: route.params.bookId}),
+    },
+    {
+      path: '/book/:bookId/read-epub',
+      name: 'read-epub',
+      component: () => import(/* webpackChunkName: "read-epub" */ './views/EpubReader.vue'),
       props: (route) => ({bookId: route.params.bookId}),
     },
     {
@@ -275,7 +287,7 @@ const router = new Router({
 })
 
 router.beforeEach((to, from, next) => {
-  if (!['read-book', 'browse-book', 'browse-series'].includes(<string>to.name)) {
+  if (!['read-book', 'read-epub', 'browse-book', 'browse-series'].includes(<string>to.name)) {
     document.title = 'Komga'
   }
 

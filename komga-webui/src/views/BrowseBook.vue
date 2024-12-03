@@ -40,7 +40,7 @@
       <v-btn
         icon
         :disabled="$_.isEmpty(siblingPrevious)"
-        :to="{ name: 'browse-book', params: { bookId: previousId }, query: { context: context.origin, contextId: context.id}  }"
+        :to="{ name: siblingPrevious.oneshot ? 'browse-oneshot' : 'browse-book', params: { seriesId: siblingPrevious.seriesId, bookId: previousId }, query: { context: context.origin, contextId: context.id}  }"
       >
         <rtl-icon icon="mdi-chevron-left" rtl="mdi-chevron-right"/>
       </v-btn>
@@ -64,12 +64,13 @@
             <v-list-item
               v-for="(book, i) in siblings"
               :key="i"
-              :to="{ name: 'browse-book', params: { bookId: book.id }, query: { context: context.origin, contextId: context.id} }"
+              :to="{ name: book.oneshot ? 'browse-oneshot' : 'browse-book', params: { seriesId: book.seriesId, bookId: book.id }, query: { context: context.origin, contextId: context.id}  }"
             >
               <v-list-item-title class="text-wrap text-body-2">
-                <template v-if="contextReadList">{{ book.seriesTitle }} {{ book.metadata.number }}:
+                <template v-if="contextReadList && !book.oneshot">{{ book.seriesTitle }} {{ book.metadata.number }}:
                   {{ book.metadata.title }}
                 </template>
+                <template v-else-if="contextReadList && book.oneshot">{{ book.metadata.title }}</template>
                 <template v-else>{{ book.metadata.number }} - {{ book.metadata.title }}</template>
               </v-list-item-title>
             </v-list-item>
@@ -81,7 +82,7 @@
       <v-btn
         icon
         :disabled="$_.isEmpty(siblingNext)"
-        :to="{ name: 'browse-book', params: { bookId: nextId }, query: { context: context.origin, contextId: context.id}  }"
+        :to="{ name: siblingNext.oneshot ? 'browse-oneshot' : 'browse-book', params: { seriesId: siblingNext.seriesId, bookId: nextId }, query: { context: context.origin, contextId: context.id}  }"
       >
         <rtl-icon icon="mdi-chevron-right" rtl="mdi-chevron-left"/>
       </v-btn>
@@ -159,7 +160,10 @@
 
               <v-col cols="auto" v-if="book.metadata.releaseDate">
                 {{
-                  new Intl.DateTimeFormat($i18n.locale, {dateStyle: 'long', timeZone: 'UTC'}).format(new Date(book.metadata.releaseDate))
+                  new Intl.DateTimeFormat($i18n.locale, {
+                    dateStyle: 'long',
+                    timeZone: 'UTC'
+                  }).format(new Date(book.metadata.releaseDate))
                 }}
               </v-col>
 
@@ -190,7 +194,7 @@
                   <v-btn color="accent"
                          small
                          :title="$t('browse_book.read_book')"
-                         :to="{name: 'read-book', params: { bookId: bookId}, query: { context: context.origin, contextId: context.id}}"
+                         :to="{name: readRouteName, params: { bookId: bookId}, query: { context: context.origin, contextId: context.id}}"
                          :disabled="!canRead"
                   >
                     <v-icon left small>mdi-book-open-page-variant</v-icon>
@@ -201,7 +205,7 @@
                 <v-col cols="auto">
                   <v-btn small
                          :title="$t('browse_book.read_incognito')"
-                         :to="{name: 'read-book', params: { bookId: bookId}, query: { context: context.origin, contextId: context.id, incognito: true}}"
+                         :to="{name: readRouteName, params: { bookId: bookId}, query: { context: context.origin, contextId: context.id, incognito: true}}"
                          :disabled="!canRead"
                   >
                     <v-icon left small>mdi-incognito</v-icon>
@@ -236,7 +240,7 @@
             <v-btn color="accent"
                    small
                    :title="$t('browse_book.read_book')"
-                   :to="{name: 'read-book', params: { bookId: bookId}, query: { context: context.origin, contextId: context.id}}"
+                   :to="{name: readRouteName, params: { bookId: bookId}, query: { context: context.origin, contextId: context.id}}"
                    :disabled="!canRead"
             >
               <v-icon left small>mdi-book-open-page-variant</v-icon>
@@ -247,7 +251,7 @@
           <v-col cols="auto">
             <v-btn small
                    :title="$t('browse_book.read_incognito')"
-                   :to="{name: 'read-book', params: { bookId: bookId}, query: { context: context.origin, contextId: context.id, incognito: true}}"
+                   :to="{name: readRouteName, params: { bookId: bookId}, query: { context: context.origin, contextId: context.id, incognito: true}}"
                    :disabled="!canRead"
             >
               <v-icon left small>mdi-incognito</v-icon>
@@ -405,7 +409,7 @@ import BookActionsMenu from '@/components/menus/BookActionsMenu.vue'
 import ItemCard from '@/components/ItemCard.vue'
 import ToolbarSticky from '@/components/bars/ToolbarSticky.vue'
 import {groupAuthorsByRole} from '@/functions/authors'
-import {getBookFormatFromMediaType} from '@/functions/book-format'
+import {getBookFormatFromMedia, getBookReadRouteFromMedia} from '@/functions/book-format'
 import {getPagesLeft, getReadProgress, getReadProgressPercentage} from '@/functions/book-progress'
 import {getBookTitleCompact} from '@/functions/book-title'
 import {bookFileUrl, bookThumbnailUrl} from '@/functions/urls'
@@ -483,6 +487,9 @@ export default Vue.extend({
     next()
   },
   computed: {
+    readRouteName(): string {
+      return getBookReadRouteFromMedia(this.book.media)
+    },
     isAdmin(): boolean {
       return this.$store.getters.meAdmin
     },
@@ -502,7 +509,7 @@ export default Vue.extend({
       return bookFileUrl(this.bookId)
     },
     format(): BookFormat {
-      return getBookFormatFromMediaType(this.book.media.mediaType)
+      return getBookFormatFromMedia(this.book.media)
     },
     authorsByRole(): any {
       return groupAuthorsByRole(this.book.metadata.authors)
@@ -581,6 +588,11 @@ export default Vue.extend({
     },
     async loadBook(bookId: string) {
       this.book = await this.$komgaBooks.getBook(bookId)
+      // for the cases where we can't change the origin target route because we don't have the full BookDto
+      if (this.book.oneshot) await this.$router.replace({
+        name: 'browse-oneshot',
+        params: {seriesId: this.book.seriesId},
+      })
 
       // parse query params to get context and contextId
       if (this.$route.query.contextId && this.$route.query.context

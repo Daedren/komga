@@ -19,7 +19,13 @@
   },
   "account_settings": {
     "account_settings": "账户设置",
-    "change_password": "修改密码"
+    "api_key": {
+      "created_date": "创建日期：{date}",
+      "force_kobo_sync": "强制 Kobo 同步",
+      "generate_api_key": "生成 API 密钥",
+      "no_keys": "尚未创建 API 密钥"
+    },
+    "change_password": "更改密码"
   },
   "announcements": {
     "mark_all_read": "全部标为已读",
@@ -27,6 +33,7 @@
     "tab_title": "通知"
   },
   "authentication_activity": {
+    "api_key": "API 密钥",
     "datetime": "日期/时间",
     "email": "邮箱",
     "error": "错误",
@@ -36,12 +43,12 @@
     "user_agent": "用户代理"
   },
   "author_roles": {
-    "colorist": "上色者",
+    "colorist": "上色师",
     "cover": "封面",
     "editor": "主编",
-    "inker": "画图者",
-    "letterer": "嵌字者",
-    "penciller": "铅稿",
+    "inker": "上墨师",
+    "letterer": "嵌字师",
+    "penciller": "线稿师",
     "translator": "翻译者",
     "writer": "作者"
   },
@@ -58,8 +65,8 @@
     "button_scan": "扫描",
     "button_select_series": "选择系列",
     "field_import_path": "从文件夹导入",
-    "info_part1": "此屏幕允许您导入现有库之外的文件。只能将文件导入到现有序列，在这种情况下 Komga 会将文件移动或复制到所选序列的目录中。",
-    "info_part2": "如果您为一本书选择了一个编号，并且已经存在一本带有该编号的书，您可以比较这两本书。如果您决定导入该书。Komga 将使用新文件升级现有的书，有效地用新文件替换旧文件。",
+    "info_part1": "此屏幕允许您导入现有库之外的文件。您只能将文件导入到现有系列中，在这种情况下，Komga 会将文件移动或复制到所选系列的目录中。",
+    "info_part2": "如果您为一本书选择了一个编号，并且已经存在一本带有该编号的书，您可以比较这两本书。如果您决定导入该书。Komga 将使用新文件更新现有的书，有效的使用新文件替换旧文件。",
     "no_files_found": "未找到文件",
     "notification": {
       "go_to_book": "转到书籍",
@@ -94,9 +101,9 @@
     "move_next": "再次单击或按“下一步”前往下一本书。",
     "move_next_exit": "再次单击或按“下一步”退出阅读。",
     "move_previous": "再次单击或按“上一页”前往上一本书。",
-    "notification_poster_set_book": "图书海报现已设为当前页面。",
-    "notification_poster_set_readlist": "阅读清单海报现已设为当前页面。",
-    "notification_poster_set_series": "系列海报已设为当前页。",
+    "notification_poster_set_book": "书籍海报现已设为当前页。",
+    "notification_poster_set_readlist": "阅读列表海报现已设为当前页。",
+    "notification_poster_set_series": "系列海报现已设为当前页。",
     "paged_reader_layout": {
       "double": "双页",
       "double_no_cover": "双页 (无封面)",
@@ -113,7 +120,7 @@
       "width_shrink_only": "适合宽度（只收缩）"
     },
     "set_current_page_as_book_poster": "将当前页设为书籍海报",
-    "set_current_page_as_readlist_poster": "将当前页设为阅读清单海报",
+    "set_current_page_as_readlist_poster": "将当前页设为阅读列表海报",
     "set_current_page_as_series_poster": "将当前页设为系列海报",
     "settings": {
       "always_fullscreen": "始终全屏",
@@ -128,7 +135,7 @@
       "general": "常规",
       "gestures": "手势",
       "page_layout": "页面布局",
-      "paged": "页面",
+      "paged": "分页阅读器选项",
       "reading_mode": "阅读模式",
       "scale_type": "缩放模式",
       "side_padding": "边距",
@@ -149,7 +156,7 @@
       "previous_page": "上一页",
       "reader_navigation": "阅读方向",
       "right_to_left": "从右到左",
-      "settings": "设定",
+      "settings": "设置",
       "show_hide_help": "显示/隐藏帮助",
       "show_hide_settings": "显示/隐藏设置菜单",
       "show_hide_thumbnails": "显示/隐藏缩略图资源管理器",
@@ -163,7 +170,7 @@
     "comment": "注释",
     "download_file": "下载文件",
     "file": "文件来源",
-    "format": "格式",
+    "format": "文件格式",
     "isbn": "ISBN",
     "links": "链接",
     "navigation_within_readlist": "阅读列表 {name} 中的导航",
@@ -185,7 +192,7 @@
   "browse_series": {
     "earliest_year_from_release_dates": "这是该系列所有书发行日期最早的一年",
     "series_no_summary": "这个系列没有概要，所以我们为您挑选了一个！",
-    "summary_from_book": "书中的概要 {number}："
+    "summary_from_book": "书籍 {number} 的概要："
   },
   "collections_expansion_panel": {
     "manage_collection": "管理收藏",
@@ -199,29 +206,36 @@
     "books_n": "无书籍 | 1 本书 | {count} 本书",
     "books_total": "{count} / 共 {total} 本书",
     "cancel": "取消",
+    "cbx": "漫画书存档",
     "choose_image": "选择图片",
     "close": "关闭",
     "collections": "收藏",
+    "copied": "已复制！",
     "create": "创建",
     "delete": "删除",
+    "dimension": "宽:{width}, 高:{height}",
+    "discard": "弃置",
     "disk_space": "磁盘空间",
     "dismiss": "解除",
     "download": "下载",
     "drag_drop": "拖放",
     "email": "邮箱",
+    "epub": "Epub",
     "filename": "文件名",
-    "filter_no_matches": "过滤器没有匹配的结果",
+    "filter_no_matches": "筛选器没有匹配的结果",
     "genre": "风格",
     "go_to_collection": "转到收藏",
     "go_to_library": "转到库",
     "go_to_readlist": "转到阅读列表",
     "go_to_series": "转到系列",
-    "library": "书库",
+    "i_understand": "我明白",
+    "library": "库",
     "locale_name": "简体中文",
     "locale_rtl": "false",
     "lock_all": "锁定全部",
     "n_selected": "已选择 {count}",
-    "nothing_to_show": "没有什么可显示",
+    "nothing_to_show": "无任何项目",
+    "oneshot": "单行本",
     "outdated": "过时的",
     "page": "页面",
     "page_number": "页码",
@@ -229,14 +243,16 @@
     "pages_left": "无剩余页 | 剩余 1 页 | 剩余 {count} 页",
     "pages_n": "无页面 | 1 页 | {count} 页",
     "password": "密码",
+    "pdf": "PDF",
     "pending_tasks": "无挂起任务 | 1个挂起任务 | {count} 个挂起任务",
     "publisher": "出版商",
     "read": "阅读",
-    "read_on": "于 {date} 阅读",
+    "read_on": "阅读于 {date}",
     "readlist": "阅读列表",
     "readlists": "阅读列表",
+    "remember-me": "记住账号",
     "required": "必填",
-    "reset_filters": "重置过滤器",
+    "reset_filters": "重置筛选器",
     "roles": "角色",
     "save_changes": "保存更改",
     "series": "系列 | 系列",
@@ -245,13 +261,13 @@
     "unavailable": "不可用",
     "unlock_all": "解锁全部",
     "url": "URL",
-    "use_filter_panel_to_change_filter": "使用过滤器修改过滤项",
+    "use_filter_panel_to_change_filter": "使用筛选器修改筛选项",
     "year": "年"
   },
   "dashboard": {
     "keep_reading": "继续阅读",
     "on_deck": "导航",
-    "recently_added_books": "最近添加的书",
+    "recently_added_books": "最近添加的书籍",
     "recently_added_series": "最近添加的系列",
     "recently_read_books": "最近阅读的书籍",
     "recently_released_books": "最近发布的书籍",
@@ -280,6 +296,14 @@
     "tab_title": "数据导入"
   },
   "dialog": {
+    "add_api_key": {
+      "button_confirm": "生成",
+      "context": "API 密钥可用于通过 Kobo 同步协议进行身份验证。",
+      "dialog_title": "生成新的 API 密钥",
+      "field_comment": "注释",
+      "field_comment_hint": "此 API 密钥有何用途？",
+      "info_copy": "请务必立即复制您的 API 密钥。您将无法再看到它！"
+    },
     "add_to_collection": {
       "button_create": "创建",
       "card_collection_subtitle": "无系列 | 1 系列 | {count} 系列",
@@ -302,11 +326,7 @@
       "dialog_title": "添加用户",
       "field_email": "邮箱",
       "field_email_error": "必须是有效的电子邮件地址",
-      "field_password": "密码",
-      "field_role_administrator": "管理员",
-      "field_role_file_download": "允许下载",
-      "field_role_page_streaming": "允许浏览",
-      "label_roles": "角色"
+      "field_password": "密码"
     },
     "analyze_library": {
       "body": "分析库中的所有媒体文件。该分析获取有关媒体的信息。根据库的大小，这可能需要很长时间。",
@@ -314,8 +334,14 @@
       "title": "分析库"
     },
     "book_picker": {
-      "filter": "按序号、标题或发行日期过滤",
+      "filter": "按序号、标题或发行日期筛选",
       "title": "选择书籍"
+    },
+    "delete_apikey": {
+      "button_confirm": "删除",
+      "confirm_delete": "我明白，删除 API 密钥“{name}”",
+      "dialog_title": "删除 API 密钥",
+      "warning_html": "任何使用此 API 密钥的应用程序或脚本将无法再访问 Komga API。此操作无法撤消。"
     },
     "delete_book": {
       "button_confirm": "删除",
@@ -428,10 +454,13 @@
       "field_import_local_artwork": "本地图片(插图)",
       "field_import_mylar_series": "系列元数据",
       "field_name": "名称",
+      "field_oneshotsdirectory": "单行本目录",
       "field_repair_extensions": "自动修复不正确的文件扩展名",
       "field_root_folder": "根文件夹",
+      "field_scan_interval": "扫描间隔",
       "field_scanner_empty_trash_after_scan": "每次扫描后自动清理垃圾",
       "field_scanner_force_directory_modified_time": "强制目录修改时间",
+      "field_scanner_scan_startup": "启动时扫描",
       "field_series_cover": "系列封面",
       "file_browser_dialog_button_confirm": "选择",
       "file_browser_dialog_title": "库的根文件夹",
@@ -439,14 +468,17 @@
       "label_file_management": "文件管理",
       "label_import_barcode_isbn": "从条形码中导入 ISBN",
       "label_import_comicinfo": "导入含有 ComicInfo.xml 的 CBR/CBZ 压缩包",
-      "label_import_epub": "导入EPUB文件的元数据",
+      "label_import_epub": "导入 EPUB 文件的元数据",
       "label_import_local": "导入本地媒体",
       "label_import_mylar": "导入 Mylar 生成的元数据",
+      "label_scan_directory_exclusions": "目录排除",
+      "label_scan_types": "扫描文件类型",
       "label_scanner": "扫描器",
       "label_series_cover": "系列封面",
       "tab_general": "常规",
       "tab_metadata": "元数据",
       "tab_options": "选项",
+      "tooltip_oneshotsdirectory": "留空为禁用",
       "tooltip_scanner_force_modified_time": "如果库在谷歌云盘上则启用",
       "tooltip_use_resources": "大型库或老旧硬件上开启会消耗大量资源"
     },
@@ -497,8 +529,8 @@
     },
     "edit_user_restrictions": {
       "age_restriction": {
-        "allow_under": "仅允许适合多少岁以下人士的漫画",
-        "exclude_over": "排除适合高于多少岁人士的漫画",
+        "allow_under": "仅限定年龄以下",
+        "exclude_over": "排除超过限定年龄",
         "none": "无限制"
       },
       "edit_restrictions_for": "编辑 {name} 的限制",
@@ -509,9 +541,9 @@
       "tab_shared_libraries": "共享的库"
     },
     "empty_trash": {
-      "body": "默认情况下，媒体服务器不会立即删除媒体的信息。这对驱动器暂时断开连接的情况有所帮助。清理垃圾时，所有丢失媒体相关的信息都会被删除。",
+      "body": "默认情况下，媒体服务器不会立即删除媒体信息。如果驱动器暂时断开连接，这会有所帮助。清理垃圾时，所有丢失媒体相关的信息都会被删除。",
       "button_confirm": "清理",
-      "title": "清理书库垃圾"
+      "title": "清理库垃圾"
     },
     "file_browser": {
       "button_cancel": "取消",
@@ -529,10 +561,14 @@
       },
       "title": "目标文件名"
     },
+    "force_kobo_sync": {
+      "dialog_title": "强制 Kobo 同步",
+      "warning_html": "这将删除此 API 密钥的所有同步历史记录。您的 Kobo 将在下次同步时同步所有内容。"
+    },
     "password_change": {
       "button_cancel": "取消",
-      "button_confirm": "修改密码",
-      "dialog_title": "取消密码",
+      "button_confirm": "更改密码",
+      "dialog_title": "更改密码",
       "field_new_password": "新密码",
       "field_new_password_error": "需要新密码。",
       "field_repeat_password": "确认新密码",
@@ -569,7 +605,7 @@
         "height": "高",
         "index": "索引",
         "media_type": "媒体类型",
-        "size": "尺寸",
+        "size": "文件大小",
         "width": "宽"
       },
       "title": "书籍详情",
@@ -591,13 +627,15 @@
     "action_ignore": "忽略",
     "action_ignore_remaining": "其余忽略({count})",
     "action_manual_delete_remaining": "手动删除剩余（{count}）",
-    "confirm_auto_delete_remaining": "此页面上的所有剩余页面哈希值 ({count})都将被标记为自动删除。",
-    "confirm_manual_delete_remaining": "此页面上的所有剩余页面哈希({count})都将标记为手动删除。",
+    "confirm_auto_delete_remaining": "此页面上的所有剩余页面哈希值 ({count}) 都将被标记为自动删除。",
+    "confirm_manual_delete_remaining": "此页面上的所有剩余页面哈希 ({count}) 都将标记为手动删除。",
     "delete_to_save": "删除以节省 {size}",
     "deleted_count": "删除了 {count} 次",
     "empty_title": "未找到重复页面",
     "filter": {
       "count": "数目",
+      "date_added": "添加日期",
+      "date_modified": "修改日期",
       "delete_count": "删除计数",
       "delete_size": "节省的空间",
       "match_count": "匹配数",
@@ -622,6 +660,23 @@
     "copy_mode": {
       "HARDLINK": "硬链接/复制文件",
       "MOVE": "移动文件"
+    },
+    "epubreader": {
+      "appearances": {
+        "day": "日间",
+        "night": "夜间",
+        "sepia": "棕褐色"
+      },
+      "column_count": {
+        "auto": "自动",
+        "one": "一列",
+        "two": "两列"
+      },
+      "reading_direction": {
+        "auto": "自动",
+        "ltr": "从左到右",
+        "rtl": "从右到左"
+      }
     },
     "historical_event_type": {
       "BookConverted": "书籍已转换",
@@ -648,6 +703,14 @@
       "VERTICAL": "垂直模式",
       "WEBTOON": "Webtoon 模式"
     },
+    "scan_interval": {
+      "DAILY": "每日",
+      "DISABLED": "禁用",
+      "EVERY_12H": "每隔 12 小时",
+      "EVERY_6H": "每隔 6 小时",
+      "HOURLY": "每小时",
+      "WEEKLY": "每周"
+    },
     "series_cover": {
       "FIRST": "第一张",
       "FIRST_UNREAD_OR_FIRST": "第一张未读或第一张封面",
@@ -659,6 +722,43 @@
       "ENDED": "已完结",
       "HIATUS": "有生之年",
       "ONGOING": "连载中"
+    },
+    "thumbnail_size": {
+      "DEFAULT": "默认(300px)",
+      "LARGE": "大(900px)",
+      "MEDIUM": "中 (600px)",
+      "XLARGE": "超大 (1200px)"
+    }
+  },
+  "epubreader": {
+    "current_chapter": "当前章节",
+    "page_of": "页 {page} 共 {count}页",
+    "settings": {
+      "column_count": "列数",
+      "layout": "布局",
+      "layout_paginated": "分页",
+      "layout_scroll": "滚屏",
+      "navigation_mode": "导航模式",
+      "navigation_options": {
+        "both": "两者皆用",
+        "buttons": "按钮图标",
+        "click": "单击 / 点击"
+      },
+      "page_margins": "页边距",
+      "viewing_theme": "查看主题"
+    },
+    "shortcuts": {
+      "cycle_pagination": "列数切换",
+      "cycle_viewing_theme": "查看主题切换",
+      "font_size_decrease": "减小字体大小",
+      "font_size_increase": "增加字体大小",
+      "menus": "菜单",
+      "next": "下一页",
+      "previous": "上一页",
+      "reader_navigation": "阅读方向",
+      "scroll": "更改布局为滚屏",
+      "settings": "设置",
+      "show_hide_toc": "显示/隐藏目录"
     }
   },
   "error_codes": {
@@ -674,7 +774,7 @@
     "ERR_1009": "已存在该名称的阅读列表",
     "ERR_1015": "反序列化 ComicRack CBL 文件时出错",
     "ERR_1016": "目录不可访问",
-    "ERR_1017": "无法扫描作为现有库一部分的文件夹",
+    "ERR_1017": "无法扫描属于现有库的文件夹",
     "ERR_1018": "文件未找到",
     "ERR_1019": "无法导入属于现有库的文件",
     "ERR_1020": "要升级的书籍不属于提供的系列",
@@ -688,16 +788,20 @@
     "ERR_1028": "OpenID Connect 登录错误：没有 email 属性",
     "ERR_1029": "ComicRack CBL 文件中没有书籍",
     "ERR_1030": "ComicRack CBL 文件中没有书名元素",
-    "ERR_1031": "ComicRack CBL 文件中的书籍没有系列或书号"
+    "ERR_1031": "ComicRack CBL 文件中的书籍没有系列或书号",
+    "ERR_1032": "EPUB 文件的媒体类型错误",
+    "ERR_1033": "部分条目缺失",
+    "ERR_1034": "带有该注释的 API 密钥已存在"
   },
   "filter": {
     "age_rating": "年龄限制",
     "age_rating_none": "无",
     "complete": "完结",
     "genre": "风格",
-    "in_progress": "正在进行",
+    "in_progress": "继续阅读",
     "language": "语言",
     "library": "库",
+    "oneshot": "单行本",
     "publisher": "出版商",
     "read": "已读",
     "release_date": "发行日期",
@@ -707,7 +811,7 @@
     "unread": "未读"
   },
   "filter_drawer": {
-    "filter": "过滤",
+    "filter": "筛选",
     "sort": "排序"
   },
   "history": {
@@ -778,7 +882,7 @@
   "navigation": {
     "home": "主页",
     "libraries": "库",
-    "logout": "注销"
+    "logout": "退出登录"
   },
   "page_not_found": {
     "go_back_to_home_page": "返回主页",
@@ -802,7 +906,7 @@
   "search": {
     "no_results": "搜索没有任何结果",
     "search": "搜索",
-    "search_for_something_else": "尝试寻找其他的东西",
+    "search_for_something_else": "尝试搜索其他内容",
     "search_results_for": "“{name}” 的搜索结果"
   },
   "searchbox": {
@@ -813,16 +917,36 @@
   "server": {
     "server_management": {
       "button_cancel_all_tasks": "取消所有任务",
-      "button_empty_trash": "清理所有书库的垃圾",
-      "button_scan_libraries": "扫描所有书库",
+      "button_empty_trash": "清理所有库的垃圾",
+      "button_scan_libraries": "扫描所有库",
       "button_scan_libraries_deep": "扫描所有库（深度）",
-      "button_shutdown": "关机",
+      "button_shutdown": "关闭服务器",
       "notification_tasks_cancelled": "无可取消任务 | 取消了一个任务 | 取消了 {count} 个任务",
       "section_title": "服务器管理"
     },
     "tab_title": "服务器"
   },
   "server_settings": {
+    "config_precedence": "优先于配置文件",
+    "dialog_regenerate_thumbnails": {
+      "body": "缩略图大小已更改。您想重新生成书籍缩略图吗？",
+      "btn_alternate": "是，所有书籍",
+      "btn_cancel": "否",
+      "btn_confirm": "是，但前提是更大",
+      "title": "重新生成缩略图"
+    },
+    "hint_kobo_port": "仅在封面和下载同步出现问题时设置",
+    "label_delete_empty_collections": "扫描后删除空的收藏",
+    "label_delete_empty_readlists": "扫描后删除空的阅读列表",
+    "label_kepubify_path": "kepubify 的路径",
+    "label_kobo_port": "Kobo 同步外部端口",
+    "label_kobo_proxy": "代理 Kobo 同步请求至 Kobo 商店",
+    "label_rememberme_duration": "保持登录状态的时间（天数）",
+    "label_server_context_path": "基本网址",
+    "label_server_port": "服务器端口",
+    "label_task_pool_size": "任务线程",
+    "label_thumbnail_size": "缩略图尺寸",
+    "requires_restart": "需要重启才能生效",
     "server_settings": "服务器设置"
   },
   "settings_user": {
@@ -868,14 +992,19 @@
   "user_roles": {
     "ADMIN": "管理员",
     "FILE_DOWNLOAD": "允许下载",
+    "KOBO_SYNC": "Kobo 同步",
     "PAGE_STREAMING": "允许浏览",
     "USER": "用户"
   },
   "users": {
+    "api_keys": "API 密钥",
     "authentication_activity": "身份验证活动",
     "users": "用户"
   },
   "validation": {
+    "context_path": "必须以 '/' 开头，不能以 '/-_' 结尾，并且仅包含 '/-_a-z0-9'",
+    "one_or_more": "必须为 1 个或更多",
+    "tcp_port": "必须介于 1 和 65535 之间",
     "zero_or_more": "必须为 0 或更大"
   },
   "welcome": {

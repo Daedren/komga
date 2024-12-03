@@ -22,7 +22,6 @@ import org.springframework.web.server.ResponseStatusException
 class ClaimController(
   private val userDetailsLifecycle: KomgaUserLifecycle,
 ) {
-
   @GetMapping
   fun getClaimStatus() = ClaimStatus(userDetailsLifecycle.countUsers() > 0)
 
@@ -43,6 +42,9 @@ class ClaimController(
         email = email,
         password = password,
         roleAdmin = true,
+        roleFileDownload = true,
+        rolePageStreaming = true,
+        roleKoboSync = true,
       ),
     ).toDto()
   }

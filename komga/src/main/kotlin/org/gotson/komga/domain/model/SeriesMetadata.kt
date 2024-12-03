@@ -18,7 +18,6 @@ class SeriesMetadata(
   sharingLabels: Set<String> = emptySet(),
   val links: List<WebLink> = emptyList(),
   val alternateTitles: List<AlternateTitle> = emptyList(),
-
   val statusLock: Boolean = false,
   val titleLock: Boolean = false,
   val titleSortLock: Boolean = false,
@@ -33,9 +32,7 @@ class SeriesMetadata(
   val sharingLabelsLock: Boolean = false,
   val linksLock: Boolean = false,
   val alternateTitlesLock: Boolean = false,
-
   val seriesId: String = "",
-
   override val createdDate: LocalDateTime = LocalDateTime.now(),
   override val lastModifiedDate: LocalDateTime = createdDate,
 ) : Auditable {
@@ -43,7 +40,7 @@ class SeriesMetadata(
   val titleSort = titleSort.trim()
   val summary = summary.trim()
   val publisher = publisher.trim()
-  val language = language.trim().lowercase()
+  val language = BCP47TagValidator.normalize(language.trim())
   val tags = tags.lowerNotBlank().toSet()
   val genres = genres.lowerNotBlank().toSet()
   val sharingLabels = sharingLabels.lowerNotBlank().toSet()
@@ -116,7 +113,10 @@ class SeriesMetadata(
     )
 
   enum class Status {
-    ENDED, ONGOING, ABANDONED, HIATUS
+    ENDED,
+    ONGOING,
+    ABANDONED,
+    HIATUS,
   }
 
   enum class ReadingDirection {

@@ -1,9 +1,10 @@
 package org.gotson.komga.infrastructure.metadata.comicrack
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.validator.routines.ISBNValidator
 import org.gotson.komga.domain.model.Author
+import org.gotson.komga.domain.model.BCP47TagValidator
 import org.gotson.komga.domain.model.BookMetadataPatch
 import org.gotson.komga.domain.model.BookMetadataPatchCapability
 import org.gotson.komga.domain.model.BookWithMedia
@@ -17,7 +18,7 @@ import org.gotson.komga.infrastructure.metadata.BookMetadataProvider
 import org.gotson.komga.infrastructure.metadata.SeriesMetadataFromBookProvider
 import org.gotson.komga.infrastructure.metadata.comicrack.dto.ComicInfo
 import org.gotson.komga.infrastructure.metadata.comicrack.dto.Manga
-import org.gotson.komga.infrastructure.validation.BCP47TagValidator
+import org.gotson.komga.language.stripAccents
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.net.URI
@@ -33,8 +34,7 @@ class ComicInfoProvider(
   private val bookAnalyzer: BookAnalyzer,
   private val isbnValidator: ISBNValidator,
 ) : BookMetadataProvider, SeriesMetadataFromBookProvider {
-
-  override fun getCapabilities(): Set<BookMetadataPatchCapability> =
+  override val capabilities =
     setOf(
       BookMetadataPatchCapability.TITLE,
       BookMetadataPatchCapability.SUMMARY,
@@ -48,9 +48,10 @@ class ComicInfoProvider(
 
   override fun getBookMetadataFromBook(book: BookWithMedia): BookMetadataPatch? {
     getComicInfo(book)?.let { comicInfo ->
-      val releaseDate = comicInfo.year?.let {
-        LocalDate.of(comicInfo.year!!, comicInfo.month ?: 1, comicInfo.day ?: 1)
-      }
+      val releaseDate =
+        comicInfo.year?.let {
+          LocalDate.of(comicInfo.year!!, comicInfo.month ?: 1, comicInfo.day ?: 1)
+        }
 
       val authors = mutableListOf<Author>()
       comicInfo.writer?.splitWithRole("writer")?.let { authors += it }
@@ -88,15 +89,18 @@ class ComicInfoProvider(
         }
       }
 
-      val link = comicInfo.web?.let {
-        try {
-          val uri = URI(it)
-          listOf(WebLink(uri.host, uri))
-        } catch (e: Exception) {
-          logger.error(e) { "Could not parse Web element as valid URI: $it" }
-          null
-        }
-      }
+      val links =
+        comicInfo.web
+          ?.split(" ")
+          ?.filter { it.isNotBlank() }
+          ?.mapNotNull {
+            try {
+              URI(it.trim()).let { uri -> WebLink(uri.host, uri) }
+            } catch (e: Exception) {
+              logger.error(e) { "Could not parse Web element as valid URI: $it" }
+              null
+            }
+          }
 
       val tags = comicInfo.tags?.split(',')?.mapNotNull { it.trim().lowercase().ifBlank { null } }
 
@@ -110,7 +114,7 @@ class ComicInfoProvider(
         releaseDate = releaseDate,
         authors = authors.ifEmpty { null },
         readLists = readLists,
-        links = link,
+        links = links?.ifEmpty { null },
         tags = if (!tags.isNullOrEmpty()) tags.toSet() else null,
         isbn = isbn,
       )
@@ -118,26 +122,32 @@ class ComicInfoProvider(
     return null
   }
 
-  override fun getSeriesMetadataFromBook(book: BookWithMedia, library: Library): SeriesMetadataPatch? {
+  override val supportsAppendVolume = true
+
+  override fun getSeriesMetadataFromBook(
+    book: BookWithMedia,
+    appendVolumeToTitle: Boolean,
+  ): SeriesMetadataPatch? {
     getComicInfo(book)?.let { comicInfo ->
-      val readingDirection = when (comicInfo.manga) {
-        Manga.NO -> SeriesMetadata.ReadingDirection.LEFT_TO_RIGHT
-        Manga.YES_AND_RIGHT_TO_LEFT -> SeriesMetadata.ReadingDirection.RIGHT_TO_LEFT
-        else -> null
-      }
+      val readingDirection =
+        when (comicInfo.manga) {
+          Manga.NO -> SeriesMetadata.ReadingDirection.LEFT_TO_RIGHT
+          Manga.YES_AND_RIGHT_TO_LEFT -> SeriesMetadata.ReadingDirection.RIGHT_TO_LEFT
+          else -> null
+        }
 
       val genres = comicInfo.genre?.split(',')?.mapNotNull { it.trim().ifBlank { null } }
-      val series = if (library.importComicInfoSeriesAppendVolume) computeSeriesFromSeriesAndVolume(comicInfo.series, comicInfo.volume) else comicInfo.series
+      val series = if (appendVolumeToTitle) computeSeriesFromSeriesAndVolume(comicInfo.series, comicInfo.volume) else comicInfo.series
 
       return SeriesMetadataPatch(
         title = series,
-        titleSort = series,
+        titleSort = series?.stripAccents(),
         status = null,
         summary = null,
         readingDirection = readingDirection,
         publisher = comicInfo.publisher?.ifBlank { null },
         ageRating = comicInfo.ageRating?.ageRating,
-        language = if (comicInfo.languageISO != null && BCP47TagValidator.isValid(comicInfo.languageISO!!)) comicInfo.languageISO else null,
+        language = if (comicInfo.languageISO != null && BCP47TagValidator.isValid(comicInfo.languageISO!!)) BCP47TagValidator.normalize(comicInfo.languageISO!!) else null,
         genres = if (!genres.isNullOrEmpty()) genres.toSet() else null,
         totalBookCount = comicInfo.count,
         collections = comicInfo.seriesGroup?.split(',')?.mapNotNull { it.trim().ifBlank { null } }?.toSet() ?: emptySet(),
@@ -146,7 +156,10 @@ class ComicInfoProvider(
     return null
   }
 
-  override fun shouldLibraryHandlePatch(library: Library, target: MetadataPatchTarget): Boolean =
+  override fun shouldLibraryHandlePatch(
+    library: Library,
+    target: MetadataPatchTarget,
+  ): Boolean =
     when (target) {
       MetadataPatchTarget.BOOK -> library.importComicInfoBook
       MetadataPatchTarget.SERIES -> library.importComicInfoSeries
@@ -156,7 +169,7 @@ class ComicInfoProvider(
 
   private fun getComicInfo(book: BookWithMedia): ComicInfo? {
     try {
-      if (book.media.files.none { it == COMIC_INFO }) {
+      if (book.media.files.none { it.fileName == COMIC_INFO }) {
         logger.debug { "Book does not contain any $COMIC_INFO file: $book" }
         return null
       }
@@ -175,7 +188,10 @@ class ComicInfoProvider(
     }
 }
 
-fun computeSeriesFromSeriesAndVolume(series: String?, volume: Int?): String? =
+fun computeSeriesFromSeriesAndVolume(
+  series: String?,
+  volume: Int?,
+): String? =
   series?.ifBlank { null }?.let { s ->
     s + (volume?.let { if (it != 1) " ($it)" else "" } ?: "")
   }

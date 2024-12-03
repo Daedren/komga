@@ -1,12 +1,14 @@
 package org.gotson.komga.interfaces.api.rest
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.swagger.v3.oas.annotations.Parameter
 import jakarta.validation.Valid
-import mu.KotlinLogging
 import org.gotson.komga.domain.model.AgeRestriction
 import org.gotson.komga.domain.model.ContentRestrictions
+import org.gotson.komga.domain.model.DuplicateNameException
 import org.gotson.komga.domain.model.ROLE_ADMIN
 import org.gotson.komga.domain.model.ROLE_FILE_DOWNLOAD
+import org.gotson.komga.domain.model.ROLE_KOBO_SYNC
 import org.gotson.komga.domain.model.ROLE_PAGE_STREAMING
 import org.gotson.komga.domain.model.UserEmailAlreadyExistsException
 import org.gotson.komga.domain.persistence.AuthenticationActivityRepository
@@ -15,11 +17,14 @@ import org.gotson.komga.domain.persistence.LibraryRepository
 import org.gotson.komga.domain.service.KomgaUserLifecycle
 import org.gotson.komga.infrastructure.jooq.UnpagedSorted
 import org.gotson.komga.infrastructure.security.KomgaPrincipal
+import org.gotson.komga.interfaces.api.rest.dto.ApiKeyDto
+import org.gotson.komga.interfaces.api.rest.dto.ApiKeyRequestDto
 import org.gotson.komga.interfaces.api.rest.dto.AuthenticationActivityDto
 import org.gotson.komga.interfaces.api.rest.dto.PasswordUpdateDto
 import org.gotson.komga.interfaces.api.rest.dto.UserCreationDto
 import org.gotson.komga.interfaces.api.rest.dto.UserDto
 import org.gotson.komga.interfaces.api.rest.dto.UserUpdateDto
+import org.gotson.komga.interfaces.api.rest.dto.redacted
 import org.gotson.komga.interfaces.api.rest.dto.toDto
 import org.springdoc.core.converters.models.PageableAsQueryParam
 import org.springframework.core.env.Environment
@@ -54,11 +59,12 @@ class UserController(
   private val authenticationActivityRepository: AuthenticationActivityRepository,
   env: Environment,
 ) {
-
   private val demo = env.activeProfiles.contains("demo")
 
   @GetMapping("me")
-  fun getMe(@AuthenticationPrincipal principal: KomgaPrincipal): UserDto =
+  fun getMe(
+    @AuthenticationPrincipal principal: KomgaPrincipal,
+  ): UserDto =
     principal.toDto()
 
   @PatchMapping("me/password")
@@ -114,28 +120,49 @@ class UserController(
     @AuthenticationPrincipal principal: KomgaPrincipal,
   ) {
     userRepository.findByIdOrNull(id)?.let { existing ->
-      val updatedUser = with(patch) {
-        existing.copy(
-          roleAdmin = if (isSet("roles")) roles!!.contains(ROLE_ADMIN) else existing.roleAdmin,
-          roleFileDownload = if (isSet("roles")) roles!!.contains(ROLE_FILE_DOWNLOAD) else existing.roleFileDownload,
-          rolePageStreaming = if (isSet("roles")) roles!!.contains(ROLE_PAGE_STREAMING) else existing.rolePageStreaming,
-          sharedAllLibraries = if (isSet("sharedLibraries")) sharedLibraries!!.all else existing.sharedAllLibraries,
-          sharedLibrariesIds = if (isSet("sharedLibraries")) {
-            if (sharedLibraries!!.all) emptySet()
-            else libraryRepository.findAllByIds(sharedLibraries!!.libraryIds).map { it.id }.toSet()
-          } else existing.sharedLibrariesIds,
-          restrictions = ContentRestrictions(
-            ageRestriction = if (isSet("ageRestriction")) {
-              if (ageRestriction == null) null
-              else AgeRestriction(ageRestriction!!.age, ageRestriction!!.restriction)
-            } else existing.restrictions.ageRestriction,
-            labelsAllow = if (isSet("labelsAllow")) labelsAllow
-              ?: emptySet() else existing.restrictions.labelsAllow,
-            labelsExclude = if (isSet("labelsExclude")) labelsExclude
-              ?: emptySet() else existing.restrictions.labelsExclude,
-          ),
-        )
-      }
+      val updatedUser =
+        with(patch) {
+          existing.copy(
+            roleAdmin = if (isSet("roles")) roles!!.contains(ROLE_ADMIN) else existing.roleAdmin,
+            roleFileDownload = if (isSet("roles")) roles!!.contains(ROLE_FILE_DOWNLOAD) else existing.roleFileDownload,
+            rolePageStreaming = if (isSet("roles")) roles!!.contains(ROLE_PAGE_STREAMING) else existing.rolePageStreaming,
+            roleKoboSync = if (isSet("roles")) roles!!.contains(ROLE_KOBO_SYNC) else existing.roleKoboSync,
+            sharedAllLibraries = if (isSet("sharedLibraries")) sharedLibraries!!.all else existing.sharedAllLibraries,
+            sharedLibrariesIds =
+              if (isSet("sharedLibraries")) {
+                if (sharedLibraries!!.all)
+                  emptySet()
+                else
+                  libraryRepository.findAllByIds(sharedLibraries!!.libraryIds).map { it.id }.toSet()
+              } else {
+                existing.sharedLibrariesIds
+              },
+            restrictions =
+              ContentRestrictions(
+                ageRestriction =
+                  if (isSet("ageRestriction")) {
+                    if (ageRestriction == null)
+                      null
+                    else
+                      AgeRestriction(ageRestriction!!.age, ageRestriction!!.restriction)
+                  } else {
+                    existing.restrictions.ageRestriction
+                  },
+                labelsAllow =
+                  if (isSet("labelsAllow"))
+                    labelsAllow
+                      ?: emptySet()
+                  else
+                    existing.restrictions.labelsAllow,
+                labelsExclude =
+                  if (isSet("labelsExclude"))
+                    labelsExclude
+                      ?: emptySet()
+                  else
+                    existing.restrictions.labelsExclude,
+              ),
+          )
+        }
       userLifecycle.updateUser(updatedUser)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }
@@ -164,16 +191,20 @@ class UserController(
   ): Page<AuthenticationActivityDto> {
     if (demo && !principal.user.roleAdmin) throw ResponseStatusException(HttpStatus.FORBIDDEN)
     val sort =
-      if (page.sort.isSorted) page.sort
-      else Sort.by(Sort.Order.desc("dateTime"))
+      if (page.sort.isSorted)
+        page.sort
+      else
+        Sort.by(Sort.Order.desc("dateTime"))
 
     val pageRequest =
-      if (unpaged) UnpagedSorted(sort)
-      else PageRequest.of(
-        page.pageNumber,
-        page.pageSize,
-        sort,
-      )
+      if (unpaged)
+        UnpagedSorted(sort)
+      else
+        PageRequest.of(
+          page.pageNumber,
+          page.pageSize,
+          sort,
+        )
 
     return authenticationActivityRepository.findAllByUser(principal.user, pageRequest).map { it.toDto() }
   }
@@ -186,16 +217,20 @@ class UserController(
     @Parameter(hidden = true) page: Pageable,
   ): Page<AuthenticationActivityDto> {
     val sort =
-      if (page.sort.isSorted) page.sort
-      else Sort.by(Sort.Order.desc("dateTime"))
+      if (page.sort.isSorted)
+        page.sort
+      else
+        Sort.by(Sort.Order.desc("dateTime"))
 
     val pageRequest =
-      if (unpaged) UnpagedSorted(sort)
-      else PageRequest.of(
-        page.pageNumber,
-        page.pageSize,
-        sort,
-      )
+      if (unpaged)
+        UnpagedSorted(sort)
+      else
+        PageRequest.of(
+          page.pageNumber,
+          page.pageSize,
+          sort,
+        )
 
     return authenticationActivityRepository.findAll(pageRequest).map { it.toDto() }
   }
@@ -205,9 +240,43 @@ class UserController(
   fun getLatestAuthenticationActivityForUser(
     @PathVariable id: String,
     @AuthenticationPrincipal principal: KomgaPrincipal,
+    @RequestParam(required = false, name = "apikey_id") apiKeyId: String?,
   ): AuthenticationActivityDto =
     userRepository.findByIdOrNull(id)?.let { user ->
-      authenticationActivityRepository.findMostRecentByUser(user)?.toDto()
+      authenticationActivityRepository.findMostRecentByUser(user, apiKeyId)?.toDto()
         ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+
+  @GetMapping("me/api-keys")
+  fun getApiKeys(
+    @AuthenticationPrincipal principal: KomgaPrincipal,
+  ): Collection<ApiKeyDto> {
+    if (demo) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+    return userRepository.findApiKeyByUserId(principal.user.id).map { it.toDto().redacted() }
+  }
+
+  @PostMapping("me/api-keys")
+  fun createApiKey(
+    @AuthenticationPrincipal principal: KomgaPrincipal,
+    @Valid @RequestBody apiKeyRequest: ApiKeyRequestDto,
+  ): ApiKeyDto {
+    if (demo) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+    return try {
+      userLifecycle.createApiKey(principal.user, apiKeyRequest.comment)?.toDto()
+    } catch (e: DuplicateNameException) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.code)
+    }
+      ?: throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to generate API key")
+  }
+
+  @DeleteMapping("me/api-keys/{keyId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  fun deleteApiKey(
+    @AuthenticationPrincipal principal: KomgaPrincipal,
+    @PathVariable keyId: String,
+  ) {
+    if (!userRepository.existsApiKeyByIdAndUserId(keyId, principal.user.id))
+      throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    userRepository.deleteApiKeyByIdAndUserId(keyId, principal.user.id)
+  }
 }

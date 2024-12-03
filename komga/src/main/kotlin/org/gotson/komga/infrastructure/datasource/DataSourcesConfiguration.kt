@@ -7,43 +7,68 @@ import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.sqlite.SQLiteDataSource
 import javax.sql.DataSource
 
 @Configuration
 class DataSourcesConfiguration(
   private val komgaProperties: KomgaProperties,
 ) {
-
   @Bean("sqliteDataSource")
   @Primary
-  fun sqliteDataSource(): DataSource {
-    val extraPragmas = komgaProperties.database.pragmas.let {
-      if (it.isEmpty()) ""
-      else "?" + it.map { (key, value) -> "$key=$value" }.joinToString(separator = "&")
+  fun sqliteDataSource(): DataSource =
+    buildDataSource("SqliteMainPool", SqliteUdfDataSource::class.java, komgaProperties.database)
+
+  @Bean("tasksDataSource")
+  fun tasksDataSource(): DataSource =
+    buildDataSource("SqliteTasksPool", SQLiteDataSource::class.java, komgaProperties.tasksDb)
+      .apply {
+        // force pool size to 1 for tasks datasource
+        this.maximumPoolSize = 1
+      }
+
+  private fun buildDataSource(
+    poolName: String,
+    dataSourceClass: Class<out SQLiteDataSource>,
+    databaseProps: KomgaProperties.Database,
+  ): HikariDataSource {
+    val extraPragmas =
+      databaseProps.pragmas.let {
+        if (it.isEmpty())
+          ""
+        else
+          "?" + it.map { (key, value) -> "$key=$value" }.joinToString(separator = "&")
+      }
+
+    val dataSource =
+      DataSourceBuilder.create()
+        .driverClassName("org.sqlite.JDBC")
+        .url("jdbc:sqlite:${databaseProps.file}$extraPragmas")
+        .type(dataSourceClass)
+        .build()
+
+    with(dataSource) {
+      setEnforceForeignKeys(true)
+      setGetGeneratedKeys(false)
     }
-
-    val sqliteUdfDataSource = DataSourceBuilder.create()
-      .driverClassName("org.sqlite.JDBC")
-      .url("jdbc:sqlite:${komgaProperties.database.file}$extraPragmas")
-      .type(SqliteUdfDataSource::class.java)
-      .build()
-
-    sqliteUdfDataSource.setEnforceForeignKeys(true)
-    with(komgaProperties.database) {
-      journalMode?.let { sqliteUdfDataSource.setJournalMode(it.name) }
-      busyTimeout?.let { sqliteUdfDataSource.config.busyTimeout = it.toMillis().toInt() }
+    with(databaseProps) {
+      journalMode?.let { dataSource.setJournalMode(it.name) }
+      busyTimeout?.let { dataSource.config.busyTimeout = it.toMillis().toInt() }
     }
 
     val poolSize =
-      if (komgaProperties.database.file.contains(":memory:")) 1
-      else if (komgaProperties.database.poolSize != null) komgaProperties.database.poolSize!!
-      else Runtime.getRuntime().availableProcessors().coerceAtMost(komgaProperties.database.maxPoolSize)
+      if (databaseProps.file.contains(":memory:") || databaseProps.file.contains("mode=memory"))
+        1
+      else if (databaseProps.poolSize != null)
+        databaseProps.poolSize!!
+      else
+        Runtime.getRuntime().availableProcessors().coerceAtMost(databaseProps.maxPoolSize)
 
     return HikariDataSource(
       HikariConfig().apply {
-        dataSource = sqliteUdfDataSource
-        poolName = "SqliteUdfPool"
-        maximumPoolSize = poolSize
+        this.dataSource = dataSource
+        this.poolName = poolName
+        this.maximumPoolSize = poolSize
       },
     )
   }

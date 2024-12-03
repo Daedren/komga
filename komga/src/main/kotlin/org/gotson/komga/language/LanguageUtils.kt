@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalUnit
 import java.util.Date
@@ -45,12 +46,43 @@ fun Iterable<String>.lowerNotBlank() =
 fun <T> Iterable<T>.toSetOrNull() =
   this.toSet().ifEmpty { null }
 
-fun LocalDateTime.notEquals(other: LocalDateTime, precision: TemporalUnit = ChronoUnit.MILLIS) =
+fun LocalDateTime.notEquals(
+  other: LocalDateTime,
+  precision: TemporalUnit = ChronoUnit.MILLIS,
+) =
   this.truncatedTo(precision) != other.truncatedTo(precision)
 
 fun String.stripAccents(): String = StringUtils.stripAccents(this)
 
 fun LocalDate.toDate(): Date = Date.from(this.atStartOfDay(ZoneId.of("Z")).toInstant())
 
+/**
+ * Converts a LocalDateTime (current timezone) to a LocalDateTime (UTC)
+ * Warning: this is not idempotent
+ */
 fun LocalDateTime.toUTC(): LocalDateTime =
   atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
+
+/**
+ * Converts a LocalDateTime (current timezone) to a ZonedDateTime
+ */
+fun LocalDateTime.toUTCZoned(): ZonedDateTime =
+  atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC)
+
+/**
+ * Converts a LocalDateTime (UTC) to a ZonedDateTime
+ */
+fun LocalDateTime.toZonedDateTime(): ZonedDateTime =
+  this.atZone(ZoneId.of("Z")).withZoneSameInstant(ZoneId.systemDefault())
+
+/**
+ * Converts a LocalDateTime (UTC) to a LocalDateTime (current timezone)
+ */
+fun LocalDateTime.toCurrentTimeZone(): LocalDateTime =
+  this.atZone(ZoneId.of("Z")).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()
+
+fun Iterable<String>.contains(
+  s: String,
+  ignoreCase: Boolean = false,
+): Boolean =
+  any { it.equals(s, ignoreCase) }

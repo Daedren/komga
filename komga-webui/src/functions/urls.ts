@@ -38,6 +38,13 @@ export function bookPageThumbnailUrl(bookId: string, page: number): string {
   return `${urls.originNoSlash}/api/v1/books/${bookId}/pages/${page}/thumbnail`
 }
 
+export function bookManifestUrl(bookId: string): string {
+  return `${urls.originNoSlash}/api/v1/books/${bookId}/manifest`
+}
+
+export function bookPositionsUrl(bookId: string): string {
+  return `${urls.originNoSlash}/api/v1/books/${bookId}/positions`
+}
 export function seriesFileUrl(seriesId: string): string {
   return `${urls.originNoSlash}/api/v1/series/${seriesId}/file`
 }

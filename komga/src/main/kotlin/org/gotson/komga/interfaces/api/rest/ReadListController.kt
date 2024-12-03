@@ -1,19 +1,19 @@
 package org.gotson.komga.interfaces.api.rest
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.validation.Valid
-import mu.KotlinLogging
 import org.apache.commons.compress.archivers.zip.Zip64Mode
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils
-import org.gotson.komga.application.events.EventPublisher
 import org.gotson.komga.domain.model.Author
 import org.gotson.komga.domain.model.BookSearchWithReadProgress
 import org.gotson.komga.domain.model.CodedException
+import org.gotson.komga.domain.model.Dimension
 import org.gotson.komga.domain.model.DomainEvent
 import org.gotson.komga.domain.model.DuplicateNameException
 import org.gotson.komga.domain.model.Media
@@ -28,6 +28,7 @@ import org.gotson.komga.domain.persistence.ReadListRepository
 import org.gotson.komga.domain.persistence.ThumbnailReadListRepository
 import org.gotson.komga.domain.service.BookLifecycle
 import org.gotson.komga.domain.service.ReadListLifecycle
+import org.gotson.komga.infrastructure.image.ImageAnalyzer
 import org.gotson.komga.infrastructure.jooq.UnpagedSorted
 import org.gotson.komga.infrastructure.mediacontainer.ContentDetector
 import org.gotson.komga.infrastructure.security.KomgaPrincipal
@@ -47,6 +48,7 @@ import org.gotson.komga.interfaces.api.rest.dto.ThumbnailReadListDto
 import org.gotson.komga.interfaces.api.rest.dto.restrictUrl
 import org.gotson.komga.interfaces.api.rest.dto.toDto
 import org.gotson.komga.language.toIndexedMap
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.core.io.FileSystemResource
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -91,10 +93,10 @@ class ReadListController(
   private val readProgressDtoRepository: ReadProgressDtoRepository,
   private val thumbnailReadListRepository: ThumbnailReadListRepository,
   private val contentDetector: ContentDetector,
+  private val imageAnalyzer: ImageAnalyzer,
   private val bookLifecycle: BookLifecycle,
-  private val eventPublisher: EventPublisher,
+  private val eventPublisher: ApplicationEventPublisher,
 ) {
-
   @PageableWithoutSortAsQueryParam
   @GetMapping
   fun getAll(
@@ -104,19 +106,22 @@ class ReadListController(
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
     @Parameter(hidden = true) page: Pageable,
   ): Page<ReadListDto> {
-    val sort = when {
-      page.sort.isSorted -> page.sort
-      !searchTerm.isNullOrBlank() -> Sort.by("relevance")
-      else -> Sort.by(Sort.Order.asc("name"))
-    }
+    val sort =
+      when {
+        page.sort.isSorted -> page.sort
+        !searchTerm.isNullOrBlank() -> Sort.by("relevance")
+        else -> Sort.by(Sort.Order.asc("name"))
+      }
 
     val pageRequest =
-      if (unpaged) UnpagedSorted(sort)
-      else PageRequest.of(
-        page.pageNumber,
-        page.pageSize,
-        sort,
-      )
+      if (unpaged)
+        UnpagedSorted(sort)
+      else
+        PageRequest.of(
+          page.pageNumber,
+          page.pageSize,
+          sort,
+        )
 
     return readListRepository.findAll(principal.user.getAuthorizedLibraryIds(libraryIds), principal.user.getAuthorizedLibraryIds(null), searchTerm, pageRequest, principal.user.restrictions)
       .map { it.toDto() }
@@ -177,7 +182,8 @@ class ReadListController(
   ): ThumbnailReadListDto {
     readListRepository.findByIdOrNull(id, principal.user.getAuthorizedLibraryIds(null), principal.user.restrictions)?.let { readList ->
 
-      if (!contentDetector.isImage(file.inputStream.buffered().use { contentDetector.detectMediaType(it) }))
+      val mediaType = file.inputStream.buffered().use { contentDetector.detectMediaType(it) }
+      if (!contentDetector.isImage(mediaType))
         throw ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
 
       return readListLifecycle.addThumbnail(
@@ -186,6 +192,9 @@ class ReadListController(
           thumbnail = file.bytes,
           type = ThumbnailReadList.Type.USER_UPLOADED,
           selected = selected,
+          fileSize = file.bytes.size.toLong(),
+          mediaType = mediaType,
+          dimension = imageAnalyzer.getDimension(file.inputStream.buffered()) ?: Dimension(0, 0),
         ),
       ).toDto()
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
@@ -261,12 +270,13 @@ class ReadListController(
     readList: ReadListUpdateDto,
   ) {
     readListRepository.findByIdOrNull(id)?.let { existing ->
-      val updated = existing.copy(
-        name = readList.name ?: existing.name,
-        summary = readList.summary ?: existing.summary,
-        ordered = readList.ordered ?: existing.ordered,
-        bookIds = readList.bookIds?.toIndexedMap() ?: existing.bookIds,
-      )
+      val updated =
+        existing.copy(
+          name = readList.name ?: existing.name,
+          summary = readList.summary ?: existing.summary,
+          ordered = readList.ordered ?: existing.ordered,
+          bookIds = readList.bookIds?.toIndexedMap() ?: existing.bookIds,
+        )
       try {
         readListLifecycle.updateReadList(updated)
       } catch (e: DuplicateNameException) {
@@ -303,25 +313,30 @@ class ReadListController(
   ): Page<BookDto> =
     readListRepository.findByIdOrNull(id, principal.user.getAuthorizedLibraryIds(null))?.let { readList ->
       val sort =
-        if (readList.ordered) Sort.by(Sort.Order.asc("readList.number"))
-        else Sort.by(Sort.Order.asc("metadata.releaseDate"))
+        if (readList.ordered)
+          Sort.by(Sort.Order.asc("readList.number"))
+        else
+          Sort.by(Sort.Order.asc("metadata.releaseDate"))
 
       val pageRequest =
-        if (unpaged) UnpagedSorted(sort)
-        else PageRequest.of(
-          page.pageNumber,
-          page.pageSize,
-          sort,
-        )
+        if (unpaged)
+          UnpagedSorted(sort)
+        else
+          PageRequest.of(
+            page.pageNumber,
+            page.pageSize,
+            sort,
+          )
 
-      val bookSearch = BookSearchWithReadProgress(
-        libraryIds = principal.user.getAuthorizedLibraryIds(libraryIds),
-        readStatus = readStatus,
-        mediaStatus = mediaStatus,
-        deleted = deleted,
-        tags = tags,
-        authors = authors,
-      )
+      val bookSearch =
+        BookSearchWithReadProgress(
+          libraryIds = principal.user.getAuthorizedLibraryIds(libraryIds),
+          readStatus = readStatus,
+          mediaStatus = mediaStatus,
+          deleted = deleted,
+          tags = tags,
+          authors = authors,
+        )
 
       bookDtoRepository.findAllByReadListId(
         readList.id,
@@ -409,41 +424,44 @@ class ReadListController(
   ): ResponseEntity<StreamingResponseBody> {
     readListRepository.findByIdOrNull(id, principal.user.getAuthorizedLibraryIds(null))?.let { readList ->
 
-      val books = readList.bookIds
-        .mapNotNull { bookRepository.findByIdOrNull(it.value)?.let { book -> it.key to book } }
-        .toMap()
+      val books =
+        readList.bookIds
+          .mapNotNull { bookRepository.findByIdOrNull(it.value)?.let { book -> it.key to book } }
+          .toMap()
 
-      val streamingResponse = StreamingResponseBody { responseStream: OutputStream ->
-        ZipArchiveOutputStream(responseStream).use { zipStream ->
-          zipStream.setMethod(ZipArchiveOutputStream.DEFLATED)
-          zipStream.setLevel(Deflater.NO_COMPRESSION)
-          zipStream.setUseZip64(Zip64Mode.Always)
-          books.forEach { (index, book) ->
-            val file = FileSystemResource(book.path)
-            if (!file.exists()) {
-              logger.warn { "Book file not found, skipping archive entry: ${file.path}" }
-              return@forEach
-            }
+      val streamingResponse =
+        StreamingResponseBody { responseStream: OutputStream ->
+          ZipArchiveOutputStream(responseStream).use { zipStream ->
+            zipStream.setMethod(ZipArchiveOutputStream.DEFLATED)
+            zipStream.setLevel(Deflater.NO_COMPRESSION)
+            zipStream.setUseZip64(Zip64Mode.Always)
+            books.forEach { (index, book) ->
+              val file = FileSystemResource(book.path)
+              if (!file.exists()) {
+                logger.warn { "Book file not found, skipping archive entry: ${file.path}" }
+                return@forEach
+              }
 
-            logger.debug { "Adding file to zip archive: ${file.path}" }
-            file.inputStream.use {
-              zipStream.putArchiveEntry(ZipArchiveEntry("${index + 1} - ${file.filename}"))
-              IOUtils.copyLarge(it, zipStream, ByteArray(8192))
-              zipStream.closeArchiveEntry()
+              logger.debug { "Adding file to zip archive: ${file.path}" }
+              file.inputStream.use {
+                zipStream.putArchiveEntry(ZipArchiveEntry("${index + 1} - ${file.filename}"))
+                IOUtils.copyLarge(it, zipStream, ByteArray(8192))
+                zipStream.closeArchiveEntry()
+              }
             }
           }
         }
-      }
 
       return ResponseEntity.ok()
         .headers(
           HttpHeaders().apply {
-            contentDisposition = ContentDisposition.builder("attachment")
-              .filename(readList.name + ".zip", UTF_8)
-              .build()
+            contentDisposition =
+              ContentDisposition.builder("attachment")
+                .filename(readList.name + ".zip", UTF_8)
+                .build()
           },
         )
-        .contentType(MediaType.parseMediaType(ZIP.value))
+        .contentType(MediaType.parseMediaType(ZIP.type))
         .body(streamingResponse)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
   }

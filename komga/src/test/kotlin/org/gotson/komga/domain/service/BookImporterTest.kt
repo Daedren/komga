@@ -10,12 +10,16 @@ import io.mockk.verify
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.gotson.komga.application.tasks.TaskEmitter
+import org.gotson.komga.domain.model.Book
 import org.gotson.komga.domain.model.BookPage
 import org.gotson.komga.domain.model.CopyMode
+import org.gotson.komga.domain.model.Dimension
 import org.gotson.komga.domain.model.KomgaUser
+import org.gotson.komga.domain.model.MarkSelectedPreference
 import org.gotson.komga.domain.model.Media
 import org.gotson.komga.domain.model.PathContainedInPath
 import org.gotson.komga.domain.model.ReadList
+import org.gotson.komga.domain.model.ThumbnailBook
 import org.gotson.komga.domain.model.makeBook
 import org.gotson.komga.domain.model.makeLibrary
 import org.gotson.komga.domain.model.makeSeries
@@ -57,7 +61,6 @@ class BookImporterTest(
   @Autowired private val readListRepository: ReadListRepository,
   @Autowired private val readListLifecycle: ReadListLifecycle,
 ) {
-
   private val library = makeLibrary("lib", "file:/library")
   private val user1 = KomgaUser("user1@example.org", "", false)
   private val user2 = KomgaUser("user2@example.org", "", false)
@@ -82,8 +85,8 @@ class BookImporterTest(
 
   @BeforeEach
   fun initMocks() {
-    every { mockTackReceiver.refreshBookMetadata(any(), any(), any()) } just Runs
-    every { mockTackReceiver.refreshBookLocalArtwork(any(), any()) } just Runs
+    every { mockTackReceiver.refreshBookMetadata(any<Book>(), any(), any()) } just Runs
+    every { mockTackReceiver.refreshBookLocalArtwork(any<Book>(), any()) } just Runs
   }
 
   @AfterEach
@@ -97,9 +100,10 @@ class BookImporterTest(
     val sourceFile = Paths.get("/non-existent")
 
     // when
-    val thrown = Assertions.catchThrowable {
-      bookImporter.importBook(sourceFile, makeSeries("a series"), CopyMode.COPY)
-    }
+    val thrown =
+      Assertions.catchThrowable {
+        bookImporter.importBook(sourceFile, makeSeries("a series"), CopyMode.COPY)
+      }
 
     // then
     assertThat(thrown).hasCauseInstanceOf(FileNotFoundException::class.java)
@@ -117,9 +121,10 @@ class BookImporterTest(
       val series = makeSeries("dest", url = destDir.toUri().toURL())
 
       // when
-      val thrown = Assertions.catchThrowable {
-        bookImporter.importBook(sourceFile, series, CopyMode.COPY)
-      }
+      val thrown =
+        Assertions.catchThrowable {
+          bookImporter.importBook(sourceFile, series, CopyMode.COPY)
+        }
 
       // then
       assertThat(thrown).hasCauseInstanceOf(FileAlreadyExistsException::class.java)
@@ -138,9 +143,10 @@ class BookImporterTest(
       val series = makeSeries("dest").copy(url = destDir.toUri().toURL())
 
       // when
-      val thrown = Assertions.catchThrowable {
-        bookImporter.importBook(sourceFile, series, CopyMode.COPY, destinationName = "dest")
-      }
+      val thrown =
+        Assertions.catchThrowable {
+          bookImporter.importBook(sourceFile, series, CopyMode.COPY, destinationName = "dest")
+        }
 
       // then
       assertThat(thrown).hasCauseInstanceOf(FileAlreadyExistsException::class.java)
@@ -161,9 +167,10 @@ class BookImporterTest(
       libraryRepository.insert(libraryJimfs)
 
       // when
-      val thrown = Assertions.catchThrowable {
-        bookImporter.importBook(sourceFile, series, CopyMode.COPY)
-      }
+      val thrown =
+        Assertions.catchThrowable {
+          bookImporter.importBook(sourceFile, series, CopyMode.COPY)
+        }
 
       // then
       assertThat(thrown).isInstanceOf(PathContainedInPath::class.java)
@@ -180,16 +187,18 @@ class BookImporterTest(
       val sourceFile = sourceDir.resolve("2.cbz").createFile()
       val destDir = fs.getPath("/library/series").createDirectories()
 
-      val existingBooks = listOf(
-        makeBook("1", libraryId = library.id),
-        makeBook("3", libraryId = library.id),
-      )
-      val series = makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
-        .also { series ->
-          seriesLifecycle.createSeries(series)
-          seriesLifecycle.addBooks(series, existingBooks)
-          seriesLifecycle.sortBooks(series)
-        }
+      val existingBooks =
+        listOf(
+          makeBook("1", libraryId = library.id),
+          makeBook("3", libraryId = library.id),
+        )
+      val series =
+        makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
+          .also { series ->
+            seriesLifecycle.createSeries(series)
+            seriesLifecycle.addBooks(series, existingBooks)
+            seriesLifecycle.sortBooks(series)
+          }
 
       // when
       bookImporter.importBook(sourceFile, series, CopyMode.COPY)
@@ -223,22 +232,24 @@ class BookImporterTest(
       sourceDir.resolve("BOOK 2-1.jpg").createFile()
       val destDir = fs.getPath("/library/series").createDirectories()
 
-      val existingBooks = listOf(
-        makeBook("1", libraryId = library.id),
-        makeBook("3", libraryId = library.id),
-      )
-      val series = makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
-        .also { series ->
-          seriesLifecycle.createSeries(series)
-          seriesLifecycle.addBooks(series, existingBooks)
-          seriesLifecycle.sortBooks(series)
-        }
+      val existingBooks =
+        listOf(
+          makeBook("1", libraryId = library.id),
+          makeBook("3", libraryId = library.id),
+        )
+      val series =
+        makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
+          .also { series ->
+            seriesLifecycle.createSeries(series)
+            seriesLifecycle.addBooks(series, existingBooks)
+            seriesLifecycle.sortBooks(series)
+          }
 
       // when
       bookImporter.importBook(sourceFile, series, CopyMode.COPY)
 
       // then
-      verify(exactly = 2) { mockTackReceiver.refreshBookLocalArtwork(any()) }
+      verify(exactly = 2) { mockTackReceiver.refreshBookLocalArtwork(any<Book>()) }
 
       assertThat(destDir.resolve("book 2.cbz")).exists()
       assertThat(destDir.resolve("book 2.jpg")).exists()
@@ -256,22 +267,24 @@ class BookImporterTest(
       sourceDir.resolve("BOOK 2-1.jpg").createFile()
       val destDir = fs.getPath("/library/series").createDirectories()
 
-      val existingBooks = listOf(
-        makeBook("1", libraryId = library.id),
-        makeBook("3", libraryId = library.id),
-      )
-      val series = makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
-        .also { series ->
-          seriesLifecycle.createSeries(series)
-          seriesLifecycle.addBooks(series, existingBooks)
-          seriesLifecycle.sortBooks(series)
-        }
+      val existingBooks =
+        listOf(
+          makeBook("1", libraryId = library.id),
+          makeBook("3", libraryId = library.id),
+        )
+      val series =
+        makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
+          .also { series ->
+            seriesLifecycle.createSeries(series)
+            seriesLifecycle.addBooks(series, existingBooks)
+            seriesLifecycle.sortBooks(series)
+          }
 
       // when
       bookImporter.importBook(sourceFile, series, CopyMode.COPY, destinationName = "book 5")
 
       // then
-      verify(exactly = 2) { mockTackReceiver.refreshBookLocalArtwork(any()) }
+      verify(exactly = 2) { mockTackReceiver.refreshBookLocalArtwork(any<Book>()) }
 
       assertThat(destDir.resolve("book 5.cbz")).exists()
       assertThat(destDir.resolve("book 5.jpg")).exists()
@@ -291,16 +304,18 @@ class BookImporterTest(
       val existingSidecar2 = destDir.resolve("4-1.jpg").createFile()
 
       val bookToUpgrade = makeBook("2", libraryId = library.id, url = existingFile.toUri().toURL())
-      val otherBooks = listOf(
-        makeBook("1", libraryId = library.id),
-        makeBook("3", libraryId = library.id),
-      )
-      val series = makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
-        .also { series ->
-          seriesLifecycle.createSeries(series)
-          seriesLifecycle.addBooks(series, listOf(bookToUpgrade) + otherBooks)
-          seriesLifecycle.sortBooks(series)
-        }
+      val otherBooks =
+        listOf(
+          makeBook("1", libraryId = library.id),
+          makeBook("3", libraryId = library.id),
+        )
+      val series =
+        makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
+          .also { series ->
+            seriesLifecycle.createSeries(series)
+            seriesLifecycle.addBooks(series, listOf(bookToUpgrade) + otherBooks)
+            seriesLifecycle.sortBooks(series)
+          }
 
       // when
       bookImporter.importBook(sourceFile, series, CopyMode.MOVE, upgradeBookId = bookToUpgrade.id)
@@ -335,16 +350,18 @@ class BookImporterTest(
       val existingFile = destDir.resolve("4.cbz").createFile()
 
       val bookToUpgrade = makeBook("2", libraryId = library.id, url = existingFile.toUri().toURL())
-      val otherBooks = listOf(
-        makeBook("1", libraryId = library.id),
-        makeBook("3", libraryId = library.id),
-      )
-      val series = makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
-        .also { series ->
-          seriesLifecycle.createSeries(series)
-          seriesLifecycle.addBooks(series, listOf(bookToUpgrade) + otherBooks)
-          seriesLifecycle.sortBooks(series)
-        }
+      val otherBooks =
+        listOf(
+          makeBook("1", libraryId = library.id),
+          makeBook("3", libraryId = library.id),
+        )
+      val series =
+        makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
+          .also { series ->
+            seriesLifecycle.createSeries(series)
+            seriesLifecycle.addBooks(series, listOf(bookToUpgrade) + otherBooks)
+            seriesLifecycle.sortBooks(series)
+          }
 
       metadataRepository.findById(bookToUpgrade.id).let {
         metadataRepository.update(
@@ -357,6 +374,8 @@ class BookImporterTest(
           ),
         )
       }
+
+      bookLifecycle.addThumbnailForBook(ThumbnailBook(ByteArray(10), type = ThumbnailBook.Type.USER_UPLOADED, mediaType = "image/jpeg", fileSize = 10L, dimension = Dimension(1, 1), bookId = bookToUpgrade.id), MarkSelectedPreference.YES)
 
       // when
       bookImporter.importBook(sourceFile, series, CopyMode.MOVE, upgradeBookId = bookToUpgrade.id)
@@ -381,6 +400,11 @@ class BookImporterTest(
         assertThat(numberSortLock).isTrue
       }
 
+      val thumbnail = bookLifecycle.getThumbnail(books[2].id)
+      assertThat(thumbnail).isNotNull
+      assertThat(thumbnail!!.type).isEqualTo(ThumbnailBook.Type.USER_UPLOADED)
+      assertThat(thumbnail.fileSize).isEqualTo(10L)
+
       assertThat(sourceFile).doesNotExist()
     }
   }
@@ -395,16 +419,18 @@ class BookImporterTest(
       val existingFile = destDir.resolve("2.cbz").createFile()
 
       val bookToUpgrade = makeBook("2", libraryId = library.id, url = existingFile.toUri().toURL())
-      val otherBooks = listOf(
-        makeBook("1", libraryId = library.id),
-        makeBook("3", libraryId = library.id),
-      )
-      val series = makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
-        .also { series ->
-          seriesLifecycle.createSeries(series)
-          seriesLifecycle.addBooks(series, listOf(bookToUpgrade) + otherBooks)
-          seriesLifecycle.sortBooks(series)
-        }
+      val otherBooks =
+        listOf(
+          makeBook("1", libraryId = library.id),
+          makeBook("3", libraryId = library.id),
+        )
+      val series =
+        makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
+          .also { series ->
+            seriesLifecycle.createSeries(series)
+            seriesLifecycle.addBooks(series, listOf(bookToUpgrade) + otherBooks)
+            seriesLifecycle.sortBooks(series)
+          }
 
       // when
       bookImporter.importBook(sourceFile, series, CopyMode.COPY, destinationName = "2", upgradeBookId = bookToUpgrade.id)
@@ -435,18 +461,20 @@ class BookImporterTest(
       val existingFile = destDir.resolve("1.cbz").createFile()
 
       val bookToUpgrade = makeBook("1", libraryId = library.id, url = existingFile.toUri().toURL())
-      val series = makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
-        .also { series ->
-          seriesLifecycle.createSeries(series)
-          seriesLifecycle.addBooks(series, listOf(bookToUpgrade))
-          seriesLifecycle.sortBooks(series)
-        }
+      val series =
+        makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
+          .also { series ->
+            seriesLifecycle.createSeries(series)
+            seriesLifecycle.addBooks(series, listOf(bookToUpgrade))
+            seriesLifecycle.sortBooks(series)
+          }
 
       mediaRepository.findById(bookToUpgrade.id).let { media ->
         mediaRepository.update(
           media.copy(
             status = Media.Status.READY,
             pages = (1..10).map { BookPage("$it", "image/jpeg") },
+            pageCount = 10,
           ),
         )
       }
@@ -483,17 +511,19 @@ class BookImporterTest(
       val existingFile = destDir.resolve("1.cbz").createFile()
 
       val bookToUpgrade = makeBook("1", libraryId = library.id, url = existingFile.toUri().toURL())
-      val series = makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
-        .also { series ->
-          seriesLifecycle.createSeries(series)
-          seriesLifecycle.addBooks(series, listOf(bookToUpgrade))
-          seriesLifecycle.sortBooks(series)
-        }
+      val series =
+        makeSeries("series", url = destDir.toUri().toURL(), libraryId = library.id)
+          .also { series ->
+            seriesLifecycle.createSeries(series)
+            seriesLifecycle.addBooks(series, listOf(bookToUpgrade))
+            seriesLifecycle.sortBooks(series)
+          }
 
-      val readList = ReadList(
-        name = "readlist",
-        bookIds = listOf(bookToUpgrade.id).toIndexedMap(),
-      )
+      val readList =
+        ReadList(
+          name = "readlist",
+          bookIds = listOf(bookToUpgrade.id).toIndexedMap(),
+        )
       readListLifecycle.addReadList(readList)
 
       // when

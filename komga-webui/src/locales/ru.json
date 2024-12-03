@@ -19,9 +19,20 @@
   },
   "account_settings": {
     "account_settings": "Настройки Аккаунта",
+    "api_key": {
+      "created_date": "Дата создания: {date}",
+      "generate_api_key": "Сгенерировать API ключ",
+      "no_keys": "Ни одного ключа API еще не создано"
+    },
     "change_password": "изменить пароль"
   },
+  "announcements": {
+    "mark_all_read": "Пометить всё как прочитанное",
+    "mark_read": "Пометить как прочитанное",
+    "tab_title": "Объявления"
+  },
   "authentication_activity": {
+    "api_key": "API Ключ",
     "datetime": "Дата / Время",
     "email": "Эл. почта",
     "error": "Ошибка",
@@ -174,7 +185,8 @@
   },
   "browse_readlist": {
     "edit_elements": "Редактировать элементы",
-    "edit_readlist": "Редактировать список чтения"
+    "edit_readlist": "Редактировать список чтения",
+    "manual_ordering": "ручная сортировка"
   },
   "browse_series": {
     "earliest_year_from_release_dates": "Это самая ранняя дата выпуска из всех книг в этой серии",
@@ -188,22 +200,30 @@
   "common": {
     "age": "Возраст",
     "all_libraries": "Все Библиотеки",
+    "book": "Книга",
     "books": "Книги",
     "books_n": "Книг нет | 1 книга | {count} книг",
     "books_total": "{count} / {total} книг",
     "cancel": "Отмена",
+    "cbx": "Архивы комиксов",
     "choose_image": "Выберите изображение",
     "close": "Закрыть",
     "collections": "Коллекции",
+    "copied": "Скопировано!",
     "create": "Создать",
     "delete": "Удалить",
+    "dimension": "шир.: {width} выс.: {height}",
+    "discard": "Отмена",
     "disk_space": "Дисковое пространство",
     "dismiss": "Отклонить",
     "download": "Скачать",
+    "drag_drop": "перетащить",
     "email": "Эл. почта",
+    "epub": "Epub",
     "filename": "Имя файла",
     "filter_no_matches": "Нет совпадений по заданному фильтру",
     "genre": "Жанр",
+    "go_to_collection": "Перейти к коллекции",
     "go_to_library": "Вернуться к библиотеке",
     "go_to_readlist": "Перейти к списку чтения",
     "go_to_series": "Перейти к серии",
@@ -217,12 +237,17 @@
     "page": "Страница",
     "page_number": "Номер страницы",
     "pages": "страниц",
+    "pages_left": "Страниц не осталось | осталась 1 страница | осталось {count} страниц",
     "pages_n": "Страниц нет | 1 страница | {count} страниц",
     "password": "Пароль",
-    "pending_tasks": "Нет незавершенных задач | 1 незавершенная задача | Незавершенных задач: {count}",
+    "pdf": "PDF",
+    "pending_tasks": "Нет незавершенных задач | 1 незавершенная задача | {count} незавершенных задач",
     "publisher": "Издатель",
     "read": "Читать",
+    "read_on": "Читать {date}",
+    "readlist": "Список чтения",
     "readlists": "Списки чтения",
+    "remember-me": "Запомнить",
     "required": "Необходимо",
     "reset_filters": "Сбросить фильтры",
     "roles": "Роли",
@@ -248,6 +273,7 @@
     "book_number": "Номер книги: {name}",
     "book_series": "Серия: {name}",
     "button_import": "Импортировать",
+    "button_match": "Сопоставить",
     "comicrack_preambule_html": "Вы можете импортировать существующие списки чтения из ComicRack в формате <code>.cbl</code>.<br>Komga попытается сопоставить предоставленные серии и номера книг с сериями и книгами в ваших библиотеках.",
     "field_files_label": "Списки чтения ComicRack (.cbl)",
     "import_read_lists": "Импорт Списков чтения",
@@ -279,11 +305,7 @@
       "dialog_title": "Добавить Пользователя",
       "field_email": "Эл. почта",
       "field_email_error": "Адрес эл. почты должен быть действительным",
-      "field_password": "Пароль",
-      "field_role_administrator": "Администратор",
-      "field_role_file_download": "Скачивание файлов",
-      "field_role_page_streaming": "Потоковый просмотр страниц",
-      "label_roles": "Роли"
+      "field_password": "Пароль"
     },
     "analyze_library": {
       "body": "Анализирует все медиафайлы в библиотеке. В ходе анализа фиксируется информация о медиафайлах. В зависимости от размера вашей библиотеки на это может потребоваться больше времени.",

@@ -11,6 +11,7 @@ import org.assertj.core.api.Assertions.catchThrowable
 import org.gotson.komga.application.tasks.TaskEmitter
 import org.gotson.komga.domain.model.Book
 import org.gotson.komga.domain.model.BookMetadataPatchCapability
+import org.gotson.komga.domain.model.Dimension
 import org.gotson.komga.domain.model.DirectoryNotFoundException
 import org.gotson.komga.domain.model.KomgaUser
 import org.gotson.komga.domain.model.MarkSelectedPreference
@@ -19,6 +20,7 @@ import org.gotson.komga.domain.model.ReadList
 import org.gotson.komga.domain.model.Series
 import org.gotson.komga.domain.model.SeriesCollection
 import org.gotson.komga.domain.model.ThumbnailBook
+import org.gotson.komga.domain.model.ThumbnailSeries
 import org.gotson.komga.domain.model.makeBook
 import org.gotson.komga.domain.model.makeBookPage
 import org.gotson.komga.domain.model.makeLibrary
@@ -74,7 +76,6 @@ class LibraryContentLifecycleTest(
   @Autowired private val seriesDtoRepository: SeriesDtoRepository,
   @Autowired private val thumbnailBookRepository: ThumbnailBookRepository,
 ) {
-
   @MockkBean
   private lateinit var mockScanner: FileSystemScanner
 
@@ -96,8 +97,8 @@ class LibraryContentLifecycleTest(
 
   @BeforeEach
   fun beforeEach() {
-    every { mockTaskEmitter.refreshBookMetadata(any(), any()) } just Runs
-    every { mockTaskEmitter.refreshSeriesMetadata(any(), any()) } just Runs
+    every { mockTaskEmitter.refreshBookMetadata(any<Book>(), any()) } just Runs
+    every { mockTaskEmitter.refreshSeriesMetadata(any<String>(), any()) } just Runs
   }
 
   @AfterAll
@@ -514,10 +515,11 @@ class LibraryContentLifecycleTest(
       val library = makeLibrary().copy(emptyTrashAfterScan = true)
       libraryRepository.insert(library)
 
-      every { mockScanner.scanRootFolder(any()) } returns mapOf(
-        makeSeries(name = "series") to listOf(makeBook("book1"), makeBook("book3")),
-        makeSeries(name = "series2") to listOf(makeBook("book2")),
-      ).toScanResult() andThenThrows DirectoryNotFoundException("")
+      every { mockScanner.scanRootFolder(any()) } returns
+        mapOf(
+          makeSeries(name = "series") to listOf(makeBook("book1"), makeBook("book3")),
+          makeSeries(name = "series2") to listOf(makeBook("book2")),
+        ).toScanResult() andThenThrows DirectoryNotFoundException("")
 
       libraryContentLifecycle.scanRootFolder(library)
 
@@ -565,6 +567,8 @@ class LibraryContentLifecycleTest(
       bookRepository.findByIdOrNull(book2.id)?.let {
         bookRepository.update(it.copy(fileHash = "sameHash"))
         mediaRepository.update(mediaRepository.findById(it.id).copy(status = Media.Status.READY))
+        bookMetadataRepository.update(bookMetadataRepository.findById(it.id).copy(tags = setOf("my-tag")))
+        bookLifecycle.addThumbnailForBook(ThumbnailBook(ByteArray(10), type = ThumbnailBook.Type.USER_UPLOADED, mediaType = "image/jpeg", fileSize = 10L, dimension = Dimension(1, 1), bookId = it.id), MarkSelectedPreference.YES)
       }
 
       every { mockHasher.computeHash(any<Path>()) } returns "sameHash"
@@ -586,6 +590,11 @@ class LibraryContentLifecycleTest(
 
       with(allBooks.last()) {
         assertThat(mediaRepository.findById(id).status).`as` { "Book media should be kept intact" }.isEqualTo(Media.Status.READY)
+        assertThat(bookMetadataRepository.findById(id).tags).containsExactlyInAnyOrder("my-tag")
+        val thumbnail = bookLifecycle.getThumbnail(id)
+        assertThat(thumbnail).isNotNull
+        assertThat(thumbnail!!.type).isEqualTo(ThumbnailBook.Type.USER_UPLOADED)
+        assertThat(thumbnail.fileSize).isEqualTo(10L)
       }
     }
 
@@ -608,6 +617,11 @@ class LibraryContentLifecycleTest(
         mediaRepository.findById(book.id).let { mediaRepository.update(it.copy(status = Media.Status.READY)) }
       }
 
+      seriesRepository.findAll().forEach { series ->
+        seriesMetadataRepository.findById(series.id).let { seriesMetadataRepository.update(it.copy(language = "en")) }
+        seriesLifecycle.addThumbnailForSeries(ThumbnailSeries(ByteArray(10), type = ThumbnailSeries.Type.USER_UPLOADED, mediaType = "image/jpeg", fileSize = 10L, dimension = Dimension(1, 1), seriesId = series.id), MarkSelectedPreference.YES)
+      }
+
       val slot = slot<Path>()
       every { mockHasher.computeHash(capture(slot)) } answers {
         "HASH-${slot.captured.nameWithoutExtension}"
@@ -626,6 +640,15 @@ class LibraryContentLifecycleTest(
 
       assertThat(allSeries.map { it.deletedDate }).containsOnlyNulls()
       assertThat(allSeries).hasSize(1)
+
+      allSeries.forEach { series ->
+        assertThat(seriesMetadataRepository.findById(series.id).language).isEqualTo("en")
+        val thumbnail = seriesLifecycle.getSelectedThumbnail(series.id)
+        assertThat(thumbnail).isNotNull
+        assertThat(thumbnail!!.type).isEqualTo(ThumbnailSeries.Type.USER_UPLOADED)
+        assertThat(thumbnail.fileSize).isEqualTo(10L)
+      }
+
       assertThat(allBooks.map { it.deletedDate }).containsOnlyNulls()
       assertThat(allBooks).hasSize(2)
 
@@ -656,8 +679,8 @@ class LibraryContentLifecycleTest(
       bookRepository.findByIdOrNull(book.id)?.let {
         bookRepository.update(it.copy(fileHash = "sameHash"))
         mediaRepository.update(mediaRepository.findById(it.id).copy(status = Media.Status.READY))
-        bookLifecycle.addThumbnailForBook(ThumbnailBook(thumbnail = ByteArray(0), type = ThumbnailBook.Type.GENERATED, bookId = book.id), MarkSelectedPreference.NO)
-        bookLifecycle.addThumbnailForBook(ThumbnailBook(url = URL("file:/sidecar"), type = ThumbnailBook.Type.SIDECAR, bookId = book.id), MarkSelectedPreference.NO)
+        bookLifecycle.addThumbnailForBook(ThumbnailBook(thumbnail = ByteArray(0), type = ThumbnailBook.Type.GENERATED, bookId = book.id, fileSize = 0, mediaType = "", dimension = Dimension(0, 0)), MarkSelectedPreference.NO)
+        bookLifecycle.addThumbnailForBook(ThumbnailBook(url = URL("file:/sidecar"), type = ThumbnailBook.Type.SIDECAR, bookId = book.id, fileSize = 0, mediaType = "", dimension = Dimension(0, 0)), MarkSelectedPreference.NO)
       }
 
       every { mockHasher.computeHash(any<Path>()) } returns "sameHash"
@@ -677,8 +700,8 @@ class LibraryContentLifecycleTest(
       with(allBooks.last()) {
         assertThat(name).`as` { "Book name should have changed to match the filename" }.isEqualTo("book3")
         assertThat(mediaRepository.findById(id).status).`as` { "Book media should be kept intact" }.isEqualTo(Media.Status.READY)
-        assertThat(thumbnailBookRepository.findAllByBookIdAndType(id, ThumbnailBook.Type.SIDECAR)).hasSize(0)
-        assertThat(thumbnailBookRepository.findAllByBookIdAndType(id, ThumbnailBook.Type.GENERATED)).hasSize(1)
+        assertThat(thumbnailBookRepository.findAllByBookIdAndType(id, setOf(ThumbnailBook.Type.SIDECAR))).hasSize(0)
+        assertThat(thumbnailBookRepository.findAllByBookIdAndType(id, setOf(ThumbnailBook.Type.GENERATED))).hasSize(1)
       }
     }
 
@@ -702,8 +725,8 @@ class LibraryContentLifecycleTest(
       bookRepository.findByIdOrNull(book.id)?.let {
         bookRepository.update(it.copy(fileHash = "sameHash"))
         mediaRepository.update(mediaRepository.findById(it.id).copy(status = Media.Status.READY))
-        bookLifecycle.addThumbnailForBook(ThumbnailBook(thumbnail = ByteArray(0), type = ThumbnailBook.Type.GENERATED, bookId = book.id), MarkSelectedPreference.NO)
-        bookLifecycle.addThumbnailForBook(ThumbnailBook(url = URL("file:/sidecar"), type = ThumbnailBook.Type.SIDECAR, bookId = book.id), MarkSelectedPreference.NO)
+        bookLifecycle.addThumbnailForBook(ThumbnailBook(thumbnail = ByteArray(0), type = ThumbnailBook.Type.GENERATED, bookId = book.id, fileSize = 0, mediaType = "", dimension = Dimension(0, 0)), MarkSelectedPreference.NO)
+        bookLifecycle.addThumbnailForBook(ThumbnailBook(url = URL("file:/sidecar"), type = ThumbnailBook.Type.SIDECAR, bookId = book.id, fileSize = 0, mediaType = "", dimension = Dimension(0, 0)), MarkSelectedPreference.NO)
       }
 
       every { mockHasher.computeHash(any<Path>()) } returns "sameHash"
@@ -723,8 +746,8 @@ class LibraryContentLifecycleTest(
       with(allBooks.last()) {
         assertThat(name).`as` { "Book name should have changed to match the filename" }.isEqualTo("book3")
         assertThat(mediaRepository.findById(id).status).`as` { "Book media should be kept intact" }.isEqualTo(Media.Status.READY)
-        assertThat(thumbnailBookRepository.findAllByBookIdAndType(id, ThumbnailBook.Type.SIDECAR)).hasSize(0)
-        assertThat(thumbnailBookRepository.findAllByBookIdAndType(id, ThumbnailBook.Type.GENERATED)).hasSize(1)
+        assertThat(thumbnailBookRepository.findAllByBookIdAndType(id, setOf(ThumbnailBook.Type.SIDECAR))).hasSize(0)
+        assertThat(thumbnailBookRepository.findAllByBookIdAndType(id, setOf(ThumbnailBook.Type.GENERATED))).hasSize(1)
       }
     }
 
@@ -893,7 +916,7 @@ class LibraryContentLifecycleTest(
 
       // then
       verify(exactly = 1) { mockHasher.computeHash(any<Path>()) }
-      verify(exactly = 1) { mockTaskEmitter.refreshBookMetadata(withArg { assertThat(it.id).isEqualTo(bookRenamed.id) }, setOf(BookMetadataPatchCapability.TITLE)) }
+      verify(exactly = 1) { mockTaskEmitter.refreshBookMetadata(withArg<Book> { assertThat(it.id).isEqualTo(bookRenamed.id) }, setOf(BookMetadataPatchCapability.TITLE)) }
 
       val allSeries = seriesRepository.findAll()
       val allBooks = bookRepository.findAll().sortedBy { it.number }
@@ -1276,7 +1299,7 @@ class LibraryContentLifecycleTest(
       libraryContentLifecycle.scanRootFolder(library) // rename
 
       // then
-      verify(exactly = 1) { mockTaskEmitter.refreshBookMetadata(withArg { assertThat(it.id).isEqualTo(book2Moved.id) }, setOf(BookMetadataPatchCapability.TITLE)) }
+      verify(exactly = 1) { mockTaskEmitter.refreshBookMetadata(withArg<Book> { assertThat(it.id).isEqualTo(book2Moved.id) }, setOf(BookMetadataPatchCapability.TITLE)) }
 
       val allSeries = seriesRepository.findAll()
       val allBooks = bookRepository.findAll().sortedBy { it.number }

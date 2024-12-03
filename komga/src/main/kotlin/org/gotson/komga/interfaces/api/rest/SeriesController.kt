@@ -1,5 +1,6 @@
 package org.gotson.komga.interfaces.api.rest
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.Parameters
@@ -8,18 +9,17 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.validation.Valid
-import mu.KotlinLogging
 import org.apache.commons.compress.archivers.zip.Zip64Mode
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.io.IOUtils
-import org.gotson.komga.application.events.EventPublisher
 import org.gotson.komga.application.tasks.HIGHEST_PRIORITY
 import org.gotson.komga.application.tasks.HIGH_PRIORITY
 import org.gotson.komga.application.tasks.TaskEmitter
 import org.gotson.komga.domain.model.AlternateTitle
 import org.gotson.komga.domain.model.Author
 import org.gotson.komga.domain.model.BookSearchWithReadProgress
+import org.gotson.komga.domain.model.Dimension
 import org.gotson.komga.domain.model.DomainEvent
 import org.gotson.komga.domain.model.KomgaUser
 import org.gotson.komga.domain.model.MarkSelectedPreference
@@ -40,6 +40,7 @@ import org.gotson.komga.domain.persistence.SeriesRepository
 import org.gotson.komga.domain.persistence.ThumbnailSeriesRepository
 import org.gotson.komga.domain.service.BookLifecycle
 import org.gotson.komga.domain.service.SeriesLifecycle
+import org.gotson.komga.infrastructure.image.ImageAnalyzer
 import org.gotson.komga.infrastructure.jooq.UnpagedSorted
 import org.gotson.komga.infrastructure.mediacontainer.ContentDetector
 import org.gotson.komga.infrastructure.security.KomgaPrincipal
@@ -48,7 +49,7 @@ import org.gotson.komga.infrastructure.swagger.PageableAsQueryParam
 import org.gotson.komga.infrastructure.swagger.PageableWithoutSortAsQueryParam
 import org.gotson.komga.infrastructure.web.Authors
 import org.gotson.komga.infrastructure.web.DelimitedPair
-import org.gotson.komga.interfaces.api.checkContentRestriction
+import org.gotson.komga.interfaces.api.ContentRestrictionChecker
 import org.gotson.komga.interfaces.api.persistence.BookDtoRepository
 import org.gotson.komga.interfaces.api.persistence.ReadProgressDtoRepository
 import org.gotson.komga.interfaces.api.persistence.SeriesDtoRepository
@@ -57,11 +58,12 @@ import org.gotson.komga.interfaces.api.rest.dto.CollectionDto
 import org.gotson.komga.interfaces.api.rest.dto.GroupCountDto
 import org.gotson.komga.interfaces.api.rest.dto.SeriesDto
 import org.gotson.komga.interfaces.api.rest.dto.SeriesMetadataUpdateDto
-import org.gotson.komga.interfaces.api.rest.dto.SeriesThumbnailDto
 import org.gotson.komga.interfaces.api.rest.dto.TachiyomiReadProgressUpdateV2Dto
 import org.gotson.komga.interfaces.api.rest.dto.TachiyomiReadProgressV2Dto
+import org.gotson.komga.interfaces.api.rest.dto.ThumbnailSeriesDto
 import org.gotson.komga.interfaces.api.rest.dto.restrictUrl
 import org.gotson.komga.interfaces.api.rest.dto.toDto
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.core.io.FileSystemResource
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -108,11 +110,12 @@ class SeriesController(
   private val bookDtoRepository: BookDtoRepository,
   private val collectionRepository: SeriesCollectionRepository,
   private val readProgressDtoRepository: ReadProgressDtoRepository,
-  private val eventPublisher: EventPublisher,
+  private val eventPublisher: ApplicationEventPublisher,
   private val contentDetector: ContentDetector,
+  private val imageAnalyzer: ImageAnalyzer,
   private val thumbnailsSeriesRepository: ThumbnailSeriesRepository,
+  private val contentRestrictionChecker: ContentRestrictionChecker,
 ) {
-
   @PageableAsQueryParam
   @AuthorsAsQueryParam
   @Parameters(
@@ -143,6 +146,7 @@ class SeriesController(
     @RequestParam(name = "sharing_label", required = false) sharingLabels: List<String>? = null,
     @RequestParam(name = "deleted", required = false) deleted: Boolean? = null,
     @RequestParam(name = "complete", required = false) complete: Boolean? = null,
+    @RequestParam(name = "oneshot", required = false) oneshot: Boolean? = null,
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
     @Parameter(hidden = true) @Authors authors: List<Author>? = null,
     @Parameter(hidden = true) page: Pageable,
@@ -155,37 +159,42 @@ class SeriesController(
       }
 
     val pageRequest =
-      if (unpaged) UnpagedSorted(sort)
-      else PageRequest.of(
-        page.pageNumber,
-        page.pageSize,
-        sort,
-      )
+      if (unpaged)
+        UnpagedSorted(sort)
+      else
+        PageRequest.of(
+          page.pageNumber,
+          page.pageSize,
+          sort,
+        )
 
-    val seriesSearch = SeriesSearchWithReadProgress(
-      libraryIds = principal.user.getAuthorizedLibraryIds(libraryIds),
-      collectionIds = collectionIds,
-      searchTerm = searchTerm,
-      searchRegex = searchRegex?.let {
-        when (it.second.lowercase()) {
-          "title" -> Pair(it.first, SeriesSearch.SearchField.TITLE)
-          "title_sort" -> Pair(it.first, SeriesSearch.SearchField.TITLE_SORT)
-          else -> null
-        }
-      },
-      metadataStatus = metadataStatus,
-      readStatus = readStatus,
-      publishers = publishers,
-      deleted = deleted,
-      complete = complete,
-      languages = languages,
-      genres = genres,
-      tags = tags,
-      ageRatings = ageRatings?.map { it.toIntOrNull() },
-      releaseYears = releaseYears,
-      authors = authors,
-      sharingLabels = sharingLabels,
-    )
+    val seriesSearch =
+      SeriesSearchWithReadProgress(
+        libraryIds = principal.user.getAuthorizedLibraryIds(libraryIds),
+        collectionIds = collectionIds,
+        searchTerm = searchTerm,
+        searchRegex =
+          searchRegex?.let {
+            when (it.second.lowercase()) {
+              "title" -> Pair(it.first, SeriesSearch.SearchField.TITLE)
+              "title_sort" -> Pair(it.first, SeriesSearch.SearchField.TITLE_SORT)
+              else -> null
+            }
+          },
+        metadataStatus = metadataStatus,
+        publishers = publishers,
+        deleted = deleted,
+        complete = complete,
+        oneshot = oneshot,
+        languages = languages,
+        genres = genres,
+        tags = tags,
+        ageRatings = ageRatings?.map { it.toIntOrNull() },
+        releaseYears = releaseYears,
+        readStatus = readStatus,
+        authors = authors,
+        sharingLabels = sharingLabels,
+      )
 
     return seriesDtoRepository.findAll(seriesSearch, principal.user.id, pageRequest, principal.user.restrictions)
       .map { it.restrictUrl(!principal.user.roleAdmin) }
@@ -220,33 +229,37 @@ class SeriesController(
     @RequestParam(name = "sharing_label", required = false) sharingLabels: List<String>? = null,
     @RequestParam(name = "deleted", required = false) deleted: Boolean?,
     @RequestParam(name = "complete", required = false) complete: Boolean?,
+    @RequestParam(name = "oneshot", required = false) oneshot: Boolean? = null,
     @Parameter(hidden = true) @Authors authors: List<Author>?,
     @Parameter(hidden = true) page: Pageable,
   ): List<GroupCountDto> {
-    val seriesSearch = SeriesSearchWithReadProgress(
-      libraryIds = principal.user.getAuthorizedLibraryIds(libraryIds),
-      collectionIds = collectionIds,
-      searchTerm = searchTerm,
-      searchRegex = searchRegex?.let {
-        when (it.second.lowercase()) {
-          "title" -> Pair(it.first, SeriesSearch.SearchField.TITLE)
-          "title_sort" -> Pair(it.first, SeriesSearch.SearchField.TITLE_SORT)
-          else -> null
-        }
-      },
-      metadataStatus = metadataStatus,
-      readStatus = readStatus,
-      publishers = publishers,
-      deleted = deleted,
-      complete = complete,
-      languages = languages,
-      genres = genres,
-      tags = tags,
-      ageRatings = ageRatings?.map { it.toIntOrNull() },
-      releaseYears = releaseYears,
-      authors = authors,
-      sharingLabels = sharingLabels,
-    )
+    val seriesSearch =
+      SeriesSearchWithReadProgress(
+        libraryIds = principal.user.getAuthorizedLibraryIds(libraryIds),
+        collectionIds = collectionIds,
+        searchTerm = searchTerm,
+        searchRegex =
+          searchRegex?.let {
+            when (it.second.lowercase()) {
+              "title" -> Pair(it.first, SeriesSearch.SearchField.TITLE)
+              "title_sort" -> Pair(it.first, SeriesSearch.SearchField.TITLE_SORT)
+              else -> null
+            }
+          },
+        metadataStatus = metadataStatus,
+        publishers = publishers,
+        deleted = deleted,
+        complete = complete,
+        oneshot = oneshot,
+        languages = languages,
+        genres = genres,
+        tags = tags,
+        ageRatings = ageRatings?.map { it.toIntOrNull() },
+        releaseYears = releaseYears,
+        readStatus = readStatus,
+        authors = authors,
+        sharingLabels = sharingLabels,
+      )
 
     return seriesDtoRepository.countByFirstCharacter(seriesSearch, principal.user.id, principal.user.restrictions)
   }
@@ -258,23 +271,27 @@ class SeriesController(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @RequestParam(name = "library_id", required = false) libraryIds: List<String>?,
     @RequestParam(name = "deleted", required = false) deleted: Boolean?,
+    @RequestParam(name = "oneshot", required = false) oneshot: Boolean? = null,
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
     @Parameter(hidden = true) page: Pageable,
   ): Page<SeriesDto> {
     val sort = Sort.by(Sort.Order.desc("lastModified"))
 
     val pageRequest =
-      if (unpaged) UnpagedSorted(sort)
-      else PageRequest.of(
-        page.pageNumber,
-        page.pageSize,
-        sort,
-      )
+      if (unpaged)
+        UnpagedSorted(sort)
+      else
+        PageRequest.of(
+          page.pageNumber,
+          page.pageSize,
+          sort,
+        )
 
     return seriesDtoRepository.findAll(
       SeriesSearchWithReadProgress(
         libraryIds = principal.user.getAuthorizedLibraryIds(libraryIds),
         deleted = deleted,
+        oneshot = oneshot,
       ),
       principal.user.id,
       pageRequest,
@@ -289,23 +306,27 @@ class SeriesController(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @RequestParam(name = "library_id", required = false) libraryIds: List<String>? = null,
     @RequestParam(name = "deleted", required = false) deleted: Boolean? = null,
+    @RequestParam(name = "oneshot", required = false) oneshot: Boolean? = null,
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
     @Parameter(hidden = true) page: Pageable,
   ): Page<SeriesDto> {
     val sort = Sort.by(Sort.Order.desc("created"))
 
     val pageRequest =
-      if (unpaged) UnpagedSorted(sort)
-      else PageRequest.of(
-        page.pageNumber,
-        page.pageSize,
-        sort,
-      )
+      if (unpaged)
+        UnpagedSorted(sort)
+      else
+        PageRequest.of(
+          page.pageNumber,
+          page.pageSize,
+          sort,
+        )
 
     return seriesDtoRepository.findAll(
       SeriesSearchWithReadProgress(
         libraryIds = principal.user.getAuthorizedLibraryIds(libraryIds),
         deleted = deleted,
+        oneshot = oneshot,
       ),
       principal.user.id,
       pageRequest,
@@ -320,23 +341,27 @@ class SeriesController(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @RequestParam(name = "library_id", required = false) libraryIds: List<String>? = null,
     @RequestParam(name = "deleted", required = false) deleted: Boolean? = null,
+    @RequestParam(name = "oneshot", required = false) oneshot: Boolean? = null,
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
     @Parameter(hidden = true) page: Pageable,
   ): Page<SeriesDto> {
     val sort = Sort.by(Sort.Order.desc("lastModified"))
 
     val pageRequest =
-      if (unpaged) UnpagedSorted(sort)
-      else PageRequest.of(
-        page.pageNumber,
-        page.pageSize,
-        sort,
-      )
+      if (unpaged)
+        UnpagedSorted(sort)
+      else
+        PageRequest.of(
+          page.pageNumber,
+          page.pageSize,
+          sort,
+        )
 
     return seriesDtoRepository.findAllRecentlyUpdated(
       SeriesSearchWithReadProgress(
         libraryIds = principal.user.getAuthorizedLibraryIds(libraryIds),
         deleted = deleted,
+        oneshot = oneshot,
       ),
       principal.user.id,
       principal.user.restrictions,
@@ -350,7 +375,7 @@ class SeriesController(
     @PathVariable(name = "seriesId") id: String,
   ): SeriesDto =
     seriesDtoRepository.findByIdOrNull(id, principal.user.id)?.let {
-      principal.user.checkContentRestriction(it)
+      contentRestrictionChecker.checkContentRestriction(principal.user, it)
       it.restrictUrl(!principal.user.roleAdmin)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
@@ -383,7 +408,7 @@ class SeriesController(
   fun getSeriesThumbnails(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @PathVariable(name = "seriesId") seriesId: String,
-  ): Collection<SeriesThumbnailDto> {
+  ): Collection<ThumbnailSeriesDto> {
     principal.user.checkContentRestriction(seriesId)
 
     return thumbnailsSeriesRepository.findAllBySeriesId(seriesId)
@@ -396,9 +421,12 @@ class SeriesController(
     @PathVariable(name = "seriesId") seriesId: String,
     @RequestParam("file") file: MultipartFile,
     @RequestParam("selected") selected: Boolean = true,
-  ): SeriesThumbnailDto {
+  ): ThumbnailSeriesDto {
     val series = seriesRepository.findByIdOrNull(seriesId) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
-    if (!contentDetector.isImage(file.inputStream.buffered().use { contentDetector.detectMediaType(it) }))
+    if (series.oneshot) throw ResponseStatusException(HttpStatus.BAD_REQUEST)
+
+    val mediaType = file.inputStream.buffered().use { contentDetector.detectMediaType(it) }
+    if (!contentDetector.isImage(mediaType))
       throw ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
 
     return seriesLifecycle.addThumbnailForSeries(
@@ -406,6 +434,9 @@ class SeriesController(
         seriesId = series.id,
         thumbnail = file.bytes,
         type = ThumbnailSeries.Type.USER_UPLOADED,
+        fileSize = file.bytes.size.toLong(),
+        mediaType = mediaType,
+        dimension = imageAnalyzer.getDimension(file.inputStream.buffered()) ?: Dimension(0, 0),
       ),
       if (selected) MarkSelectedPreference.YES else MarkSelectedPreference.NO,
     ).toDto()
@@ -459,16 +490,20 @@ class SeriesController(
     principal.user.checkContentRestriction(seriesId)
 
     val sort =
-      if (page.sort.isSorted) page.sort
-      else Sort.by(Sort.Order.asc("metadata.numberSort"))
+      if (page.sort.isSorted)
+        page.sort
+      else
+        Sort.by(Sort.Order.asc("metadata.numberSort"))
 
     val pageRequest =
-      if (unpaged) UnpagedSorted(sort)
-      else PageRequest.of(
-        page.pageNumber,
-        page.pageSize,
-        sort,
-      )
+      if (unpaged)
+        UnpagedSorted(sort)
+      else
+        PageRequest.of(
+          page.pageNumber,
+          page.pageSize,
+          sort,
+        )
 
     return bookDtoRepository.findAll(
       BookSearchWithReadProgress(
@@ -498,20 +533,21 @@ class SeriesController(
   @PostMapping("v1/series/{seriesId}/analyze")
   @PreAuthorize("hasRole('$ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.ACCEPTED)
-  fun analyze(@PathVariable seriesId: String) {
-    bookRepository.findAllBySeriesId(seriesId).forEach {
-      taskEmitter.analyzeBook(it, HIGH_PRIORITY)
-    }
+  fun analyze(
+    @PathVariable seriesId: String,
+  ) {
+    taskEmitter.analyzeBook(bookRepository.findAllBySeriesId(seriesId), HIGH_PRIORITY)
   }
 
   @PostMapping("v1/series/{seriesId}/metadata/refresh")
   @PreAuthorize("hasRole('$ROLE_ADMIN')")
   @ResponseStatus(HttpStatus.ACCEPTED)
-  fun refreshMetadata(@PathVariable seriesId: String) {
-    bookRepository.findAllBySeriesId(seriesId).forEach {
-      taskEmitter.refreshBookMetadata(it, priority = HIGH_PRIORITY)
-      taskEmitter.refreshBookLocalArtwork(it, priority = HIGH_PRIORITY)
-    }
+  fun refreshMetadata(
+    @PathVariable seriesId: String,
+  ) {
+    val books = bookRepository.findAllBySeriesId(seriesId)
+    taskEmitter.refreshBookMetadata(books, priority = HIGH_PRIORITY)
+    taskEmitter.refreshBookLocalArtwork(books, priority = HIGH_PRIORITY)
     taskEmitter.refreshSeriesLocalArtwork(seriesId, priority = HIGH_PRIORITY)
   }
 
@@ -527,48 +563,64 @@ class SeriesController(
     @AuthenticationPrincipal principal: KomgaPrincipal,
   ) =
     seriesMetadataRepository.findByIdOrNull(seriesId)?.let { existing ->
-      val updated = with(newMetadata) {
-        existing.copy(
-          status = status ?: existing.status,
-          statusLock = statusLock ?: existing.statusLock,
-          title = title ?: existing.title,
-          titleLock = titleLock ?: existing.titleLock,
-          titleSort = titleSort ?: existing.titleSort,
-          titleSortLock = titleSortLock ?: existing.titleSortLock,
-          summary = summary ?: existing.summary,
-          summaryLock = summaryLock ?: existing.summaryLock,
-          language = language ?: existing.language,
-          languageLock = languageLock ?: existing.languageLock,
-          readingDirection = if (isSet("readingDirection")) readingDirection else existing.readingDirection,
-          readingDirectionLock = readingDirectionLock ?: existing.readingDirectionLock,
-          publisher = publisher ?: existing.publisher,
-          publisherLock = publisherLock ?: existing.publisherLock,
-          ageRating = if (isSet("ageRating")) ageRating else existing.ageRating,
-          ageRatingLock = ageRatingLock ?: existing.ageRatingLock,
-          genres = if (isSet("genres")) {
-            if (genres != null) genres!! else emptySet()
-          } else existing.genres,
-          genresLock = genresLock ?: existing.genresLock,
-          tags = if (isSet("tags")) {
-            if (tags != null) tags!! else emptySet()
-          } else existing.tags,
-          tagsLock = tagsLock ?: existing.tagsLock,
-          totalBookCount = if (isSet("totalBookCount")) totalBookCount else existing.totalBookCount,
-          totalBookCountLock = totalBookCountLock ?: existing.totalBookCountLock,
-          sharingLabels = if (isSet("sharingLabels")) {
-            if (sharingLabels != null) sharingLabels!! else emptySet()
-          } else existing.sharingLabels,
-          sharingLabelsLock = sharingLabelsLock ?: existing.sharingLabelsLock,
-          links = if (isSet("links")) {
-            if (links != null) links!!.map { WebLink(it.label!!, URI(it.url!!)) } else emptyList()
-          } else existing.links,
-          linksLock = linksLock ?: existing.linksLock,
-          alternateTitles = if (isSet("alternateTitles")) {
-            if (alternateTitles != null) alternateTitles!!.map { AlternateTitle(it.label!!, it.title!!) } else emptyList()
-          } else existing.alternateTitles,
-          alternateTitlesLock = alternateTitlesLock ?: existing.alternateTitlesLock,
-        )
-      }
+      val updated =
+        with(newMetadata) {
+          existing.copy(
+            status = status ?: existing.status,
+            statusLock = statusLock ?: existing.statusLock,
+            title = title ?: existing.title,
+            titleLock = titleLock ?: existing.titleLock,
+            titleSort = titleSort ?: existing.titleSort,
+            titleSortLock = titleSortLock ?: existing.titleSortLock,
+            summary = summary ?: existing.summary,
+            summaryLock = summaryLock ?: existing.summaryLock,
+            language = language ?: existing.language,
+            languageLock = languageLock ?: existing.languageLock,
+            readingDirection = if (isSet("readingDirection")) readingDirection else existing.readingDirection,
+            readingDirectionLock = readingDirectionLock ?: existing.readingDirectionLock,
+            publisher = publisher ?: existing.publisher,
+            publisherLock = publisherLock ?: existing.publisherLock,
+            ageRating = if (isSet("ageRating")) ageRating else existing.ageRating,
+            ageRatingLock = ageRatingLock ?: existing.ageRatingLock,
+            genres =
+              if (isSet("genres")) {
+                if (genres != null) genres!! else emptySet()
+              } else {
+                existing.genres
+              },
+            genresLock = genresLock ?: existing.genresLock,
+            tags =
+              if (isSet("tags")) {
+                if (tags != null) tags!! else emptySet()
+              } else {
+                existing.tags
+              },
+            tagsLock = tagsLock ?: existing.tagsLock,
+            totalBookCount = if (isSet("totalBookCount")) totalBookCount else existing.totalBookCount,
+            totalBookCountLock = totalBookCountLock ?: existing.totalBookCountLock,
+            sharingLabels =
+              if (isSet("sharingLabels")) {
+                if (sharingLabels != null) sharingLabels!! else emptySet()
+              } else {
+                existing.sharingLabels
+              },
+            sharingLabelsLock = sharingLabelsLock ?: existing.sharingLabelsLock,
+            links =
+              if (isSet("links")) {
+                if (links != null) links!!.map { WebLink(it.label!!, URI(it.url!!)) } else emptyList()
+              } else {
+                existing.links
+              },
+            linksLock = linksLock ?: existing.linksLock,
+            alternateTitles =
+              if (isSet("alternateTitles")) {
+                if (alternateTitles != null) alternateTitles!!.map { AlternateTitle(it.label!!, it.title!!) } else emptyList()
+              } else {
+                existing.alternateTitles
+              },
+            alternateTitlesLock = alternateTitlesLock ?: existing.alternateTitlesLock,
+          )
+        }
       seriesMetadataRepository.update(updated)
 
       seriesRepository.findByIdOrNull(seriesId)?.let { eventPublisher.publishEvent(DomainEvent.SeriesUpdated(it)) }
@@ -638,37 +690,39 @@ class SeriesController(
 
     val books = bookRepository.findAllBySeriesId(seriesId)
 
-    val streamingResponse = StreamingResponseBody { responseStream: OutputStream ->
-      ZipArchiveOutputStream(responseStream).use { zipStream ->
-        zipStream.setMethod(ZipArchiveOutputStream.DEFLATED)
-        zipStream.setLevel(Deflater.NO_COMPRESSION)
-        zipStream.setUseZip64(Zip64Mode.Always)
-        books.forEach { book ->
-          val file = FileSystemResource(book.path)
-          if (!file.exists()) {
-            logger.warn { "Book file not found, skipping archive entry: ${file.path}" }
-            return@forEach
-          }
+    val streamingResponse =
+      StreamingResponseBody { responseStream: OutputStream ->
+        ZipArchiveOutputStream(responseStream).use { zipStream ->
+          zipStream.setMethod(ZipArchiveOutputStream.DEFLATED)
+          zipStream.setLevel(Deflater.NO_COMPRESSION)
+          zipStream.setUseZip64(Zip64Mode.Always)
+          books.forEach { book ->
+            val file = FileSystemResource(book.path)
+            if (!file.exists()) {
+              logger.warn { "Book file not found, skipping archive entry: ${file.path}" }
+              return@forEach
+            }
 
-          logger.debug { "Adding file to zip archive: ${file.path}" }
-          file.inputStream.use {
-            zipStream.putArchiveEntry(ZipArchiveEntry(file.filename))
-            IOUtils.copyLarge(it, zipStream, ByteArray(8192))
-            zipStream.closeArchiveEntry()
+            logger.debug { "Adding file to zip archive: ${file.path}" }
+            file.inputStream.use {
+              zipStream.putArchiveEntry(ZipArchiveEntry(file.filename))
+              IOUtils.copyLarge(it, zipStream, ByteArray(8192))
+              zipStream.closeArchiveEntry()
+            }
           }
         }
       }
-    }
 
     return ResponseEntity.ok()
       .headers(
         HttpHeaders().apply {
-          contentDisposition = ContentDisposition.builder("attachment")
-            .filename(seriesMetadataRepository.findById(seriesId).title + ".zip", UTF_8)
-            .build()
+          contentDisposition =
+            ContentDisposition.builder("attachment")
+              .filename(seriesMetadataRepository.findById(seriesId).title + ".zip", UTF_8)
+              .build()
         },
       )
-      .contentType(MediaType.parseMediaType(ZIP.value))
+      .contentType(MediaType.parseMediaType(ZIP.type))
       .body(streamingResponse)
   }
 
@@ -691,13 +745,14 @@ class SeriesController(
    * @throws[ResponseStatusException] if the user cannot access the content
    */
   private fun KomgaUser.checkContentRestriction(seriesId: String) {
-    if (!sharedAllLibraries) {
+    if (!canAccessAllLibraries()) {
       seriesRepository.getLibraryId(seriesId)?.let {
         if (!canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
       } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
     }
-    if (restrictions.isRestricted) seriesMetadataRepository.findById(seriesId).let {
-      if (!isContentAllowed(it.ageRating, it.sharingLabels)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-    }
+    if (restrictions.isRestricted)
+      seriesMetadataRepository.findById(seriesId).let {
+        if (!isContentAllowed(it.ageRating, it.sharingLabels)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+      }
   }
 }

@@ -1,31 +1,27 @@
 komga:
-  remember-me:
-    key: changeMe!
-    validity: 30d
-#  libraries-scan-cron: "*/5 * * * * ?" #every 5 seconds
-  libraries-scan-cron: "-" #disable
-  libraries-scan-startup: false
   database:
-    file: ":memory:"
+    file: "file:database?mode=memory"
+  tasks-db:
+    file: "file:tasks?mode=memory"
   cors.allowed-origins:
     - http://localhost:8081
-#  task-consumers: 5
-#  task-consumers-max: 20
-#  delete-empty-collections: true
-#  delete-empty-read-lists: true
   oauth2-account-creation: false
   config-dir: ${rootDir}/config-dir
 logging:
   level:
     org.apache.activemq.audit.message: WARN
     org.gotson.komga: DEBUG
+#    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+#    reactor.netty.http.client: DEBUG
 #    org.jooq: DEBUG
 #    org.jooq.tools.LoggerListener: DEBUG
 #    web: DEBUG
 #    com.zaxxer.hikari: DEBUG
-#    org.springframework.jms: DEBUG
 #    org.springframework.boot.autoconfigure: DEBUG
 #    org.springframework.security.web.FilterChainProxy: DEBUG
+#    org.springframework.security.web.authentication.rememberme: DEBUG
+#    org.springframework.boot.context.config.ConfigDataEnvironment: TRACE
+#    org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor: TRACE
   logback:
     rollingpolicy:
       max-history: 1

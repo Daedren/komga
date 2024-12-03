@@ -9,7 +9,7 @@
       <v-toolbar-title v-if="collection">
         <span>{{ collection.name }}</span>
         <v-chip label class="mx-4">
-          <span style="font-size: 1.1rem">{{ collection.seriesIds.length }}</span>
+          <span style="font-size: 1.1rem">{{ totalElements }}</span>
         </v-chip>
         <span v-if="collection.ordered"
               class="font-italic text-overline"
@@ -47,12 +47,14 @@
     <multi-select-bar
       v-model="selectedSeries"
       kind="series"
+      :oneshots="selectedOneshots"
       show-select-all
       @unselect-all="selectedSeries = []"
       @select-all="selectedSeries = series"
       @mark-read="markSelectedRead"
       @mark-unread="markSelectedUnread"
       @add-to-collection="addToCollection"
+      @add-to-readlist="addToReadList"
       @edit="editMultipleSeries"
       @delete="deleteSeries"
     />
@@ -146,7 +148,7 @@ import {
 import Vue from 'vue'
 import MultiSelectBar from '@/components/bars/MultiSelectBar.vue'
 import {LIBRARIES_ALL} from '@/types/library'
-import {ReadStatus, replaceCompositeReadStatus} from '@/types/enum-books'
+import {ReadStatus} from '@/types/enum-books'
 import {SeriesStatus, SeriesStatusKeyValue} from '@/types/enum-series'
 import {mergeFilterParams, toNameValue} from '@/functions/filter'
 import FilterDrawer from '@/components/FilterDrawer.vue'
@@ -154,9 +156,9 @@ import FilterPanels from '@/components/FilterPanels.vue'
 import FilterList from '@/components/FilterList.vue'
 import {Location} from 'vue-router'
 import EmptyState from '@/components/EmptyState.vue'
-import {SeriesDto} from '@/types/komga-series'
+import {Oneshot, SeriesDto} from '@/types/komga-series'
 import {authorRoles} from '@/types/author-roles'
-import {AuthorDto, BookDto} from '@/types/komga-books'
+import {AuthorDto} from '@/types/komga-books'
 import {CollectionSseDto, ReadProgressSeriesSseDto, SeriesSseDto} from '@/types/komga-sse'
 import {throttle} from 'lodash'
 import {LibraryDto} from '@/types/komga-libraries'
@@ -276,7 +278,7 @@ export default Vue.extend({
       return {
         readStatus: {
           values: [
-            {name: this.$i18n.t('filter.unread').toString(), value: ReadStatus.UNREAD_AND_IN_PROGRESS},
+            {name: this.$i18n.t('filter.unread').toString(), value: ReadStatus.UNREAD},
             {name: this.$t('filter.in_progress').toString(), value: ReadStatus.IN_PROGRESS},
             {name: this.$t('filter.read').toString(), value: ReadStatus.READ},
           ],
@@ -321,6 +323,9 @@ export default Vue.extend({
     },
     filterActive(): boolean {
       return Object.keys(this.filters).some(x => this.filters[x].length !== 0)
+    },
+    selectedOneshots(): boolean {
+      return this.selectedSeries.every(s => s.oneshot)
     },
   },
   methods: {
@@ -435,9 +440,6 @@ export default Vue.extend({
 
       this.setWatches()
     },
-    // reloadSeries: throttle(function (this: any) {
-    //   this.loadSeries(this.collectionId)
-    // }, 1000),
     async loadPage(collectionId: string, page: number) {
       this.selectedSeries = []
 
@@ -456,7 +458,7 @@ export default Vue.extend({
       })
 
       const complete = parseBooleanFilter(this.filters.complete)
-      const seriesPage = await this.$komgaCollections.getSeries(collectionId, pageRequest, this.filters.library, this.filters.status, replaceCompositeReadStatus(this.filters.readStatus), this.filters.genre, this.filters.tag, this.filters.language, this.filters.publisher, this.filters.ageRating, this.filters.releaseDate, authorsFilter, complete)
+      const seriesPage = await this.$komgaCollections.getSeries(collectionId, pageRequest, this.filters.library, this.filters.status, this.filters.readStatus, this.filters.genre, this.filters.tag, this.filters.language, this.filters.publisher, this.filters.ageRating, this.filters.releaseDate, authorsFilter, complete)
 
       this.totalPages = seriesPage.totalPages
       this.totalElements = seriesPage.totalElements
@@ -469,21 +471,6 @@ export default Vue.extend({
     reloadPage: throttle(function (this: any) {
       this.loadPage(this.collectionId, this.page)
     }, 1000),
-    // async loadSeries(collectionId: string) {
-    //   let authorsFilter = [] as AuthorDto[]
-    //   authorRoles.forEach((role: string) => {
-    //     if (role in this.filters) this.filters[role].forEach((name: string) => authorsFilter.push({
-    //       name: name,
-    //       role: role,
-    //     }))
-    //   })
-    //
-    //   const complete = parseBooleanFilter(this.filters.complete)
-    //   this.series = (await this.$komgaCollections.getSeries(collectionId, {unpaged: true} as PageRequest, this.filters.library, this.filters.status, replaceCompositeReadStatus(this.filters.readStatus), this.filters.genre, this.filters.tag, this.filters.language, this.filters.publisher, this.filters.ageRating, this.filters.releaseDate, authorsFilter, complete)).content
-    //   this.series.forEach((x: SeriesDto) => x.context = {origin: ContextOrigin.COLLECTION, id: collectionId})
-    //   this.seriesCopy = [...this.series]
-    //   this.selectedSeries = []
-    // },
     async loadCollection(collectionId: string) {
       this.$komgaCollections.getOneCollection(collectionId)
         .then(v => this.collection = v)
@@ -503,11 +490,20 @@ export default Vue.extend({
       this.$router.replace(loc).catch((_: any) => {
       })
     },
-    editSingleSeries(series: SeriesDto) {
-      this.$store.dispatch('dialogUpdateSeries', series)
+    async editSingleSeries(series: SeriesDto) {
+      if (series.oneshot) {
+        const book = (await this.$komgaSeries.getBooks(series.id)).content[0]
+        this.$store.dispatch('dialogUpdateOneshots', {series: series, book: book})
+      } else
+        this.$store.dispatch('dialogUpdateSeries', series)
     },
-    editMultipleSeries() {
-      this.$store.dispatch('dialogUpdateSeries', this.selectedSeries)
+    async editMultipleSeries() {
+      if (this.selectedSeries.every(s => s.oneshot)) {
+        const books = await Promise.all(this.selectedSeries.map(s => this.$komgaSeries.getBooks(s.id)))
+        const oneshots = this.selectedSeries.map((s, index) => ({series: s, book: books[index].content[0]} as Oneshot))
+        this.$store.dispatch('dialogUpdateOneshots', oneshots)
+      } else
+        this.$store.dispatch('dialogUpdateSeries', this.selectedSeries)
     },
     deleteSeries() {
       this.$store.dispatch('dialogDeleteSeries', this.selectedSeries)
@@ -525,7 +521,11 @@ export default Vue.extend({
       this.selectedSeries = []
     },
     addToCollection() {
-      this.$store.dispatch('dialogAddSeriesToCollection', this.selectedSeries)
+      this.$store.dispatch('dialogAddSeriesToCollection', this.selectedSeries.map(s => s.id))
+    },
+    async addToReadList() {
+      const books = await Promise.all(this.selectedSeries.map(s => this.$komgaSeries.getBooks(s.id)))
+      this.$store.dispatch('dialogAddBooksToReadList', books.map(b => b.content[0].id))
     },
     async startEditElements() {
       this.filters = {}

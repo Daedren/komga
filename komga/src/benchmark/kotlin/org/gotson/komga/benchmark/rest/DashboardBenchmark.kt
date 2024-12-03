@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit
 
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 class DashboardBenchmark : AbstractRestBenchmark() {
-
   companion object {
     lateinit var bookLatestReleaseDate: LocalDate
   }
@@ -33,6 +32,16 @@ class DashboardBenchmark : AbstractRestBenchmark() {
       if (page.totalElements < DEFAULT_PAGE_SIZE) {
         bookController.getAllBooks(principal, readStatus = listOf(ReadStatus.UNREAD), page = Pageable.ofSize(DEFAULT_PAGE_SIZE)).content.forEach { book ->
           bookController.markReadProgress(book.id, ReadProgressUpdateDto(2, false), principal)
+        }
+      }
+    }
+
+    // mark some books read for on deck
+    bookController.getBooksOnDeck(principal, page = Pageable.ofSize(DEFAULT_PAGE_SIZE)).let { page ->
+      if (page.totalElements < DEFAULT_PAGE_SIZE) {
+        seriesController.getAllSeries(principal, readStatus = listOf(ReadStatus.UNREAD), oneshot = false, page = Pageable.ofSize(DEFAULT_PAGE_SIZE)).content.forEach { series ->
+          val book = seriesController.getAllBooksBySeries(principal, series.id, page = Pageable.ofSize(1)).content.first()
+          bookController.markReadProgress(book.id, ReadProgressUpdateDto(null, true), principal)
         }
       }
     }

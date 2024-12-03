@@ -11,19 +11,16 @@ logging:
     name: \${komga.config-dir}/logs/komga.log
   level:
     org.apache.activemq.audit: WARN
+    org.apache.fontbox.cff.Type1CharString: ERROR
 
 komga:
-  libraries-scan-cron: "0 0 */8 * * ?"
-  libraries-scan-directory-exclusions:
-    - "#recycle"  # Synology
-    - "@eaDir"    # Synology
-    - "@Recycle"  # Qnap
   database:
     file: \${komga.config-dir}/database.sqlite
   lucene:
     data-directory: \${komga.config-dir}/lucene
-  session-timeout: 7d
   config-dir: \${user.home}/.komga
+  tasks-db:
+    file: \${komga.config-dir}/tasks.sqlite
 
 spring:
   flyway:
@@ -32,12 +29,15 @@ spring:
     mixed: true
     placeholders:
       library-file-hashing: \${komga.file-hashing:true}
+      library-scan-startup: \${komga.libraries-scan-startup:false}
+      delete-empty-collections: \${komga.delete-empty-collections:true}
+      delete-empty-read-lists: \${komga.delete-empty-read-lists:true}
   thymeleaf:
     prefix: classpath:/public/
   mvc:
-    throw-exception-if-no-handler-found: true
     async:
       request-timeout: 1h
+  # Deprecated - to remove along with ArtemisCleanup.kt
   artemis:
     broker-url: tcp://localhost:18515
     embedded:
@@ -91,8 +91,10 @@ springdoc:
   group-configs:
     - group: REST API
       paths-to-match: /api/**
-    - group: OPDS
-      paths-to-match: /opds/**
+    - group: OPDS v1
+      paths-to-match: /opds/v1.2/**
+    - group: OPDS v2
+      paths-to-match: /opds/v2/**
   swagger-ui:
     groups-order: desc
     operations-sorter: alpha

@@ -20,6 +20,452 @@
     }
   ],
   "paths": {
+    "/kobo/{authToken}/{*path}": {
+      "get": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "catchAll",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json;charset\u003dutf-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/JsonNode"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "catchAll_2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json;charset\u003dutf-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/JsonNode"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "catchAll_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json;charset\u003dutf-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/JsonNode"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "catchAll_4",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json;charset\u003dutf-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/JsonNode"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "catchAll_3",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json;charset\u003dutf-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/JsonNode"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/books/{bookId}/progression": {
+      "get": {
+        "tags": [
+          "common-book-controller"
+        ],
+        "operationId": "getProgression",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.readium.progression+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/R2Progression"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "common-book-controller"
+        ],
+        "operationId": "markProgression",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/R2Progression"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/books/{bookId}/progression": {
+      "get": {
+        "tags": [
+          "common-book-controller"
+        ],
+        "operationId": "getProgression_1",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.readium.progression+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/R2Progression"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "common-book-controller"
+        ],
+        "operationId": "markProgression_1",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/R2Progression"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/kobo/{authToken}/v1/library/{bookId}/state": {
+      "get": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "getState",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json;charset\u003dutf-8": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "updateState",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Kobo-deviceid",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadingStateStateUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json;charset\u003dutf-8": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/series/{seriesId}/read-progress/tachiyomi": {
       "get": {
         "tags": [
@@ -448,7 +894,8 @@
           "204": {
             "description": "No Content"
           }
-        }
+        },
+        "deprecated": true
       },
       "delete": {
         "tags": [
@@ -465,6 +912,47 @@
             }
           }
         ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "library-controller"
+        ],
+        "operationId": "patchOne",
+        "parameters": [
+          {
+            "name": "libraryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LibraryUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "400": {
             "description": "Bad Request",
@@ -564,6 +1052,39 @@
         }
       }
     },
+    "/api/v1/books/thumbnails": {
+      "put": {
+        "tags": [
+          "book-controller"
+        ],
+        "operationId": "regenerateThumbnails",
+        "parameters": [
+          {
+            "name": "for_bigger_result_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    },
     "/api/v1/announcements": {
       "get": {
         "tags": [
@@ -625,6 +1146,46 @@
           },
           "204": {
             "description": "No Content"
+          }
+        }
+      }
+    },
+    "/kobo/{authToken}/v1/auth/device": {
+      "post": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "authDevice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JsonNode"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json;charset\u003dutf-8": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         }
       }
@@ -693,6 +1254,77 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/me/api-keys": {
+      "get": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "getApiKeys",
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApiKeyDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "createApiKey",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiKeyRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyDto"
                 }
               }
             }
@@ -817,7 +1449,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/SeriesThumbnailDto"
+                    "$ref": "#/components/schemas/ThumbnailSeriesDto"
                   }
                 }
               }
@@ -882,7 +1514,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SeriesThumbnailDto"
+                  "$ref": "#/components/schemas/ThumbnailSeriesDto"
                 }
               }
             }
@@ -2268,6 +2900,67 @@
         }
       }
     },
+    "/api/v1/settings": {
+      "get": {
+        "tags": [
+          "settings-controller"
+        ],
+        "operationId": "getSettings",
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "settings-controller"
+        ],
+        "operationId": "updateSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsUpdateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/api/v1/series/{seriesId}/metadata": {
       "patch": {
         "tags": [
@@ -2691,6 +3384,1625 @@
         }
       }
     },
+    "/opds/v2/series/{id}": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getOneSeries",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/search": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getSearchResults",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/readlists/{id}": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getOneReadList",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/{id}/series/latest": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getLatestSeries",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/series/latest": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getLatestSeries_1",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/readlists": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getLibrariesReadLists",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/{id}/readlists": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getLibrariesReadLists_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/{id}/on-deck": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getOnDeck",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/on-deck": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getOnDeck_1",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/{id}/keep-reading": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getKeepReading",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/keep-reading": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getKeepReading_1",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/collections": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getLibrariesCollections",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/{id}/collections": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getLibrariesCollections_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/browse": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getLibrariesBrowse",
+        "parameters": [
+          {
+            "name": "publisher",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/{id}/browse": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getLibrariesBrowse_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "publisher",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/books/latest": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getLatestBooks",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/{id}/books/latest": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getLatestBooks_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries/{id}": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getLibrariesRecommended",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/libraries": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getLibrariesRecommended_1",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/catalog": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getLibrariesRecommended_2",
+        "parameters": [],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/collections/{id}": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getOneCollection",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Zero-based page index (0..N)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/books/{bookId}/resource/{*resource}": {
+      "get": {
+        "tags": [
+          "common-book-controller"
+        ],
+        "operationId": "getBookResource",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resource",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/books/{bookId}/resource/{*resource}": {
+      "get": {
+        "tags": [
+          "common-book-controller"
+        ],
+        "operationId": "getBookResource_1",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resource",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/books/{bookId}/pages/{pageNumber}": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getBookPage",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "convert",
+            "in": "query",
+            "description": "Convert the image to the provided format.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "jpeg",
+                "png"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "default response",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/books/{bookId}/pages/{pageNumber}/raw": {
+      "get": {
+        "tags": [
+          "common-book-controller"
+        ],
+        "operationId": "getBookPageRaw",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/books/{bookId}/pages/{pageNumber}/raw": {
+      "get": {
+        "tags": [
+          "common-book-controller"
+        ],
+        "operationId": "getBookPageRaw_1",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/books/{bookId}/manifest": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getWebPubManifest",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds-publication+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WPPublicationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/books/{bookId}/manifest/pdf": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getWebPubManifestPdf",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds-publication+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WPPublicationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/books/{bookId}/manifest/epub": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getWebPubManifestEpub",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds-publication+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WPPublicationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/books/{bookId}/manifest/divina": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getWebPubManifestDivina",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds-publication+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WPPublicationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/books/{bookId}/file": {
+      "get": {
+        "tags": [
+          "common-book-controller"
+        ],
+        "description": "Download the book file.",
+        "operationId": "getBookFile",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "book-controller"
+        ],
+        "operationId": "deleteBook",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    },
+    "/opds/v2/books/{bookId}/file/*": {
+      "get": {
+        "tags": [
+          "common-book-controller"
+        ],
+        "description": "Download the book file.",
+        "operationId": "getBookFile_1",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/books/{bookId}/file/*": {
+      "get": {
+        "tags": [
+          "common-book-controller"
+        ],
+        "description": "Download the book file.",
+        "operationId": "getBookFile_2",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v1.2/books/{bookId}/file/*": {
+      "get": {
+        "tags": [
+          "common-book-controller"
+        ],
+        "description": "Download the book file.",
+        "operationId": "getBookFile_3",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/books/{bookId}/file": {
+      "get": {
+        "tags": [
+          "common-book-controller"
+        ],
+        "description": "Download the book file.",
+        "operationId": "getBookFile_4",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/auth": {
+      "get": {
+        "tags": [
+          "opds-2-controller"
+        ],
+        "operationId": "getAuthDocument",
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/opds-authentication+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationDocumentDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/opds/v1.2/series": {
       "get": {
         "tags": [
@@ -2765,17 +5077,8 @@
         "tags": [
           "opds-controller"
         ],
-        "operationId": "getOneSeries",
+        "operationId": "getOneSeries_1",
         "parameters": [
-          {
-            "name": "User-Agent",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
           {
             "name": "id",
             "in": "path",
@@ -2832,17 +5135,8 @@
         "tags": [
           "opds-controller"
         ],
-        "operationId": "getLatestSeries",
+        "operationId": "getLatestSeries_2",
         "parameters": [
-          {
-            "name": "User-Agent",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
           {
             "name": "page",
             "in": "query",
@@ -2981,17 +5275,8 @@
         "tags": [
           "opds-controller"
         ],
-        "operationId": "getOneReadList",
+        "operationId": "getOneReadList_1",
         "parameters": [
-          {
-            "name": "User-Agent",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
           {
             "name": "id",
             "in": "path",
@@ -3098,17 +5383,8 @@
         "tags": [
           "opds-controller"
         ],
-        "operationId": "getOnDeck",
+        "operationId": "getOnDeck_2",
         "parameters": [
-          {
-            "name": "User-Agent",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
           {
             "name": "page",
             "in": "query",
@@ -3255,17 +5531,8 @@
         "tags": [
           "opds-controller"
         ],
-        "operationId": "getKeepReading",
+        "operationId": "getKeepReading_2",
         "parameters": [
-          {
-            "name": "User-Agent",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
           {
             "name": "page",
             "in": "query",
@@ -3364,17 +5631,8 @@
         "tags": [
           "opds-controller"
         ],
-        "operationId": "getOneCollection",
+        "operationId": "getOneCollection_1",
         "parameters": [
-          {
-            "name": "User-Agent",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
           {
             "name": "id",
             "in": "path",
@@ -3466,47 +5724,6 @@
         }
       }
     },
-    "/opds/v1.2/books/{bookId}/thumbnail": {
-      "get": {
-        "tags": [
-          "opds-controller"
-        ],
-        "operationId": "getBookThumbnail",
-        "parameters": [
-          {
-            "name": "bookId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationErrorResponse"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "default response",
-            "content": {
-              "image/jpeg": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/opds/v1.2/books/{bookId}/thumbnail/small": {
       "get": {
         "tags": [
@@ -3548,12 +5765,12 @@
         }
       }
     },
-    "/api/v1/books/{bookId}/pages/{pageNumber}": {
+    "/opds/v1.2/books/{bookId}/thumbnail": {
       "get": {
         "tags": [
-          "book-controller"
+          "opds-common-controller"
         ],
-        "operationId": "getBookPage",
+        "operationId": "getBookThumbnail",
         "parameters": [
           {
             "name": "bookId",
@@ -3561,38 +5778,6 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "pageNumber",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "convert",
-            "in": "query",
-            "description": "Convert the image to the provided format.",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "jpeg",
-                "png"
-              ]
-            }
-          },
-          {
-            "name": "zero_based",
-            "in": "query",
-            "description": "If set to true, pages will start at index 0. If set to false, pages will start at index 1.",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
             }
           }
         ],
@@ -3610,7 +5795,48 @@
           "default": {
             "description": "default response",
             "content": {
-              "image/*": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/opds/v2/books/{bookId}/thumbnail": {
+      "get": {
+        "tags": [
+          "opds-common-controller"
+        ],
+        "operationId": "getBookThumbnail_1",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "default response",
+            "content": {
+              "image/jpeg": {
                 "schema": {
                   "type": "string",
                   "format": "binary"
@@ -3624,9 +5850,9 @@
     "/opds/v1.2/books/{bookId}/pages/{pageNumber}": {
       "get": {
         "tags": [
-          "book-controller"
+          "opds-controller"
         ],
-        "operationId": "getBookPage_1",
+        "operationId": "getBookPageOpds",
         "parameters": [
           {
             "name": "bookId",
@@ -3656,16 +5882,6 @@
                 "jpeg",
                 "png"
               ]
-            }
-          },
-          {
-            "name": "zero_based",
-            "in": "query",
-            "description": "If set to true, pages will start at index 0. If set to false, pages will start at index 1.",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
             }
           }
         ],
@@ -3699,17 +5915,8 @@
         "tags": [
           "opds-controller"
         ],
-        "operationId": "getLatestBooks",
+        "operationId": "getLatestBooks_2",
         "parameters": [
-          {
-            "name": "User-Agent",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
           {
             "name": "page",
             "in": "query",
@@ -3753,6 +5960,351 @@
         }
       }
     },
+    "/kobo/{authToken}/v1/library/{bookId}/metadata": {
+      "get": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "getBookMetadata",
+        "parameters": [
+          {
+            "name": "authToken",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json;charset\u003dutf-8": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kobo/{authToken}/v1/library/sync": {
+      "get": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "syncLibrary",
+        "parameters": [
+          {
+            "name": "authToken",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json;charset\u003dutf-8": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kobo/{authToken}/v1/initialization": {
+      "get": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "initialization",
+        "parameters": [
+          {
+            "name": "authToken",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json;charset\u003dutf-8": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourcesDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kobo/{authToken}/v1/books/{thumbnailId}/thumbnail/{width}/{height}/{isGreyScale}/image.jpg": {
+      "get": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "getBookCover",
+        "parameters": [
+          {
+            "name": "thumbnailId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "width",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "height",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isGreyScale",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kobo/{authToken}/v1/books/{thumbnailId}/thumbnail/{width}/{height}/{quality}/{isGreyScale}/image.jpg": {
+      "get": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "getBookCover_1",
+        "parameters": [
+          {
+            "name": "thumbnailId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "width",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "height",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "quality",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isGreyScale",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kobo/{authToken}/v1/books/{bookId}/file/epub": {
+      "get": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "getBookFile_5",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "convert_kepub",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamingResponseBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kobo/{authToken}/ping": {
+      "get": {
+        "tags": [
+          "kobo-controller"
+        ],
+        "operationId": "ping",
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json;charset\u003dutf-8": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/users/{id}/authentication-activity/latest": {
       "get": {
         "tags": [
@@ -3764,6 +6316,14 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apikey_id",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -4487,6 +7047,14 @@
             }
           },
           {
+            "name": "oneshot",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "unpaged",
             "in": "query",
             "required": false,
@@ -4570,7 +7138,7 @@
         "tags": [
           "series-controller"
         ],
-        "operationId": "getOneSeries_1",
+        "operationId": "getOneSeries_2",
         "parameters": [
           {
             "name": "seriesId",
@@ -5015,6 +7583,14 @@
             }
           },
           {
+            "name": "oneshot",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "unpaged",
             "in": "query",
             "required": false,
@@ -5143,6 +7719,14 @@
             }
           },
           {
+            "name": "oneshot",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "unpaged",
             "in": "query",
             "required": false,
@@ -5197,7 +7781,7 @@
           "series-controller"
         ],
         "description": "Return recently added or updated series.",
-        "operationId": "getLatestSeries_1",
+        "operationId": "getLatestSeries_3",
         "parameters": [
           {
             "name": "library_id",
@@ -5212,6 +7796,14 @@
           },
           {
             "name": "deleted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "oneshot",
             "in": "query",
             "required": false,
             "schema": {
@@ -5424,6 +8016,14 @@
           },
           {
             "name": "complete",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "oneshot",
             "in": "query",
             "required": false,
             "schema": {
@@ -6580,7 +9180,7 @@
             }
           },
           {
-            "name": "release_years",
+            "name": "release_year",
             "in": "query",
             "required": false,
             "schema": {
@@ -6939,7 +9539,7 @@
         "tags": [
           "book-controller"
         ],
-        "operationId": "getBookThumbnail_1",
+        "operationId": "getBookThumbnail_2",
         "parameters": [
           {
             "name": "bookId",
@@ -7058,6 +9658,46 @@
         }
       }
     },
+    "/api/v1/books/{bookId}/positions": {
+      "get": {
+        "tags": [
+          "book-controller"
+        ],
+        "operationId": "getPositions",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.readium.position-list+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/R2Positions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/books/{bookId}/pages": {
       "get": {
         "tags": [
@@ -7094,6 +9734,100 @@
                   "items": {
                     "$ref": "#/components/schemas/PageDto"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/books/{bookId}/pages/{pageNumber}": {
+      "get": {
+        "tags": [
+          "book-controller"
+        ],
+        "operationId": "getBookPage_1",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "convert",
+            "in": "query",
+            "description": "Convert the image to the provided format.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "jpeg",
+                "png"
+              ]
+            }
+          },
+          {
+            "name": "zero_based",
+            "in": "query",
+            "description": "If set to true, pages will start at index 0. If set to false, pages will start at index 1.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "Some very limited server driven content negotiation is handled. If a book is a PDF book, and the Accept header contains \u0027application/pdf\u0027 as a more specific type than other \u0027image/\u0027 types, a raw PDF page will be returned.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/MediaType"
+              }
+            }
+          },
+          {
+            "name": "contentNegotiation",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "default response",
+            "content": {
+              "image/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
                 }
               }
             }
@@ -7191,13 +9925,12 @@
         }
       }
     },
-    "/api/v1/books/{bookId}/file": {
+    "/api/v1/books/{bookId}/manifest": {
       "get": {
         "tags": [
           "book-controller"
         ],
-        "description": "Download the book file.",
-        "operationId": "getBookFile",
+        "operationId": "getWebPubManifest_1",
         "parameters": [
           {
             "name": "bookId",
@@ -7222,81 +9955,14 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/octet-stream": {
+              "application/webpub+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StreamingResponseBody"
+                  "$ref": "#/components/schemas/WPPublicationDto"
                 }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "book-controller"
-        ],
-        "operationId": "deleteBook",
-        "parameters": [
-          {
-            "name": "bookId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "*/*": {
+              },
+              "application/divina+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationErrorResponse"
-                }
-              }
-            }
-          },
-          "202": {
-            "description": "Accepted"
-          }
-        }
-      }
-    },
-    "/api/v1/books/{bookId}/file/*": {
-      "get": {
-        "tags": [
-          "book-controller"
-        ],
-        "description": "Download the book file.",
-        "operationId": "getBookFile_1",
-        "parameters": [
-          {
-            "name": "bookId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidationErrorResponse"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "$ref": "#/components/schemas/StreamingResponseBody"
+                  "$ref": "#/components/schemas/WPPublicationDto"
                 }
               }
             }
@@ -7304,13 +9970,12 @@
         }
       }
     },
-    "/opds/v1.2/books/{bookId}/file/*": {
+    "/api/v1/books/{bookId}/manifest/pdf": {
       "get": {
         "tags": [
           "book-controller"
         ],
-        "description": "Download the book file.",
-        "operationId": "getBookFile_2",
+        "operationId": "getWebPubManifestPdf_1",
         "parameters": [
           {
             "name": "bookId",
@@ -7335,9 +10000,89 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/octet-stream": {
+              "application/webpub+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StreamingResponseBody"
+                  "$ref": "#/components/schemas/WPPublicationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/books/{bookId}/manifest/epub": {
+      "get": {
+        "tags": [
+          "book-controller"
+        ],
+        "operationId": "getWebPubManifestEpub_1",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/webpub+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WPPublicationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/books/{bookId}/manifest/divina": {
+      "get": {
+        "tags": [
+          "book-controller"
+        ],
+        "operationId": "getWebPubManifestDivina_1",
+        "parameters": [
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/divina+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WPPublicationDto"
                 }
               }
             }
@@ -7411,7 +10156,7 @@
           "book-controller"
         ],
         "description": "Return newly added or updated books.",
-        "operationId": "getLatestBooks_1",
+        "operationId": "getLatestBooks_3",
         "parameters": [
           {
             "name": "unpaged",
@@ -7726,6 +10471,39 @@
         }
       }
     },
+    "/api/v2/users/me/api-keys/{keyId}": {
+      "delete": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "deleteApiKey",
+        "parameters": [
+          {
+            "name": "keyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/api/v1/tasks": {
       "delete": {
         "tags": [
@@ -7753,6 +10531,42 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/syncpoints/me": {
+      "delete": {
+        "tags": [
+          "sync-point-controller"
+        ],
+        "operationId": "deleteMySyncPointsByApiKey",
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
           }
         }
       }
@@ -8004,6 +10818,254 @@
           }
         }
       },
+      "JsonNode": {
+        "type": "object"
+      },
+      "Location": {
+        "required": [
+          "fragments"
+        ],
+        "type": "object",
+        "properties": {
+          "fragments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "progression": {
+            "type": "number",
+            "format": "float"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalProgression": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "R2Device": {
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "R2Locator": {
+        "required": [
+          "href",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "locations": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "text": {
+            "$ref": "#/components/schemas/Text"
+          },
+          "koboSpan": {
+            "type": "string"
+          }
+        }
+      },
+      "R2Progression": {
+        "required": [
+          "device",
+          "locator",
+          "modified"
+        ],
+        "type": "object",
+        "properties": {
+          "modified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "device": {
+            "$ref": "#/components/schemas/R2Device"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/R2Locator"
+          }
+        }
+      },
+      "Text": {
+        "type": "object",
+        "properties": {
+          "after": {
+            "type": "string"
+          },
+          "before": {
+            "type": "string"
+          },
+          "highlight": {
+            "type": "string"
+          }
+        }
+      },
+      "BookmarkDto": {
+        "required": [
+          "LastModified"
+        ],
+        "type": "object",
+        "properties": {
+          "LastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ProgressPercent": {
+            "type": "number",
+            "format": "float"
+          },
+          "ContentSourceProgressPercent": {
+            "type": "number",
+            "format": "float"
+          },
+          "Location": {
+            "$ref": "#/components/schemas/LocationDto"
+          }
+        }
+      },
+      "LocationDto": {
+        "required": [
+          "Source"
+        ],
+        "type": "object",
+        "properties": {
+          "Value": {
+            "type": "string"
+          },
+          "Type": {
+            "type": "string"
+          },
+          "Source": {
+            "type": "string"
+          }
+        }
+      },
+      "ReadingStateDto": {
+        "required": [
+          "CurrentBookmark",
+          "EntitlementId",
+          "LastModified",
+          "Statistics",
+          "StatusInfo"
+        ],
+        "type": "object",
+        "properties": {
+          "Created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "CurrentBookmark": {
+            "$ref": "#/components/schemas/BookmarkDto"
+          },
+          "EntitlementId": {
+            "type": "string"
+          },
+          "LastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "PriorityTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Statistics": {
+            "$ref": "#/components/schemas/StatisticsDto"
+          },
+          "StatusInfo": {
+            "$ref": "#/components/schemas/StatusInfoDto"
+          }
+        }
+      },
+      "ReadingStateStateUpdateDto": {
+        "required": [
+          "ReadingStates"
+        ],
+        "type": "object",
+        "properties": {
+          "ReadingStates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadingStateDto"
+            }
+          }
+        }
+      },
+      "StatisticsDto": {
+        "required": [
+          "LastModified"
+        ],
+        "type": "object",
+        "properties": {
+          "LastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "RemainingTimeMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "SpentReadingMinutes": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "StatusInfoDto": {
+        "required": [
+          "LastModified",
+          "Status"
+        ],
+        "type": "object",
+        "properties": {
+          "LastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Status": {
+            "type": "string",
+            "enum": [
+              "ReadyToRead",
+              "Finished",
+              "Reading"
+            ]
+          },
+          "TimesStartedReading": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "LastTimeFinished": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "LastTimeStartedReading": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "TachiyomiReadProgressUpdateV2Dto": {
         "required": [
           "lastBookNumberSortRead"
@@ -8053,28 +11115,6 @@
         }
       },
       "LibraryUpdateDto": {
-        "required": [
-          "analyzeDimensions",
-          "convertToCbz",
-          "emptyTrashAfterScan",
-          "hashFiles",
-          "hashPages",
-          "importBarcodeIsbn",
-          "importComicInfoBook",
-          "importComicInfoCollection",
-          "importComicInfoReadList",
-          "importComicInfoSeries",
-          "importComicInfoSeriesAppendVolume",
-          "importEpubBook",
-          "importEpubSeries",
-          "importLocalArtwork",
-          "importMylarSeries",
-          "name",
-          "repairExtensions",
-          "root",
-          "scanForceModifiedTime",
-          "seriesCover"
-        ],
         "type": "object",
         "properties": {
           "name": {
@@ -8116,6 +11156,29 @@
           "scanForceModifiedTime": {
             "type": "boolean"
           },
+          "scanInterval": {
+            "type": "string",
+            "enum": [
+              "DISABLED",
+              "HOURLY",
+              "EVERY_6H",
+              "EVERY_12H",
+              "DAILY",
+              "WEEKLY"
+            ]
+          },
+          "scanOnStartup": {
+            "type": "boolean"
+          },
+          "scanCbx": {
+            "type": "boolean"
+          },
+          "scanPdf": {
+            "type": "boolean"
+          },
+          "scanEpub": {
+            "type": "boolean"
+          },
           "repairExtensions": {
             "type": "boolean"
           },
@@ -8142,8 +11205,19 @@
           },
           "analyzeDimensions": {
             "type": "boolean"
+          },
+          "oneshotsDirectory": {
+            "type": "string"
+          },
+          "scanDirectoryExclusions": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
-        }
+        },
+        "description": "Fields to update. You can omit fields you don\u0027t want to update."
       },
       "UserCreationDto": {
         "required": [
@@ -8238,6 +11312,50 @@
           },
           "ageRestriction": {
             "$ref": "#/components/schemas/AgeRestrictionDto"
+          }
+        }
+      },
+      "ApiKeyRequestDto": {
+        "required": [
+          "comment"
+        ],
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiKeyDto": {
+        "required": [
+          "comment",
+          "createdDate",
+          "id",
+          "key",
+          "lastModifiedDate",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedDate": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -8344,15 +11462,26 @@
           },
           "comment": {
             "type": "string"
+          },
+          "number": {
+            "type": "number",
+            "format": "float"
+          },
+          "seriesId": {
+            "type": "string"
           }
         }
       },
-      "SeriesThumbnailDto": {
+      "ThumbnailSeriesDto": {
         "required": [
+          "fileSize",
+          "height",
           "id",
+          "mediaType",
           "selected",
           "seriesId",
-          "type"
+          "type",
+          "width"
         ],
         "type": "object",
         "properties": {
@@ -8367,6 +11496,21 @@
           },
           "selected": {
             "type": "boolean"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "width": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -8442,10 +11586,14 @@
       },
       "ThumbnailReadListDto": {
         "required": [
+          "fileSize",
+          "height",
           "id",
+          "mediaType",
           "readListId",
           "selected",
-          "type"
+          "type",
+          "width"
         ],
         "type": "object",
         "properties": {
@@ -8460,6 +11608,21 @@
           },
           "selected": {
             "type": "boolean"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "width": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -8646,7 +11809,13 @@
           "name",
           "repairExtensions",
           "root",
+          "scanCbx",
+          "scanDirectoryExclusions",
+          "scanEpub",
           "scanForceModifiedTime",
+          "scanInterval",
+          "scanOnStartup",
+          "scanPdf",
           "seriesCover"
         ],
         "type": "object",
@@ -8690,6 +11859,36 @@
           "scanForceModifiedTime": {
             "type": "boolean"
           },
+          "scanInterval": {
+            "type": "string",
+            "enum": [
+              "DISABLED",
+              "HOURLY",
+              "EVERY_6H",
+              "EVERY_12H",
+              "DAILY",
+              "WEEKLY"
+            ]
+          },
+          "scanOnStartup": {
+            "type": "boolean"
+          },
+          "scanCbx": {
+            "type": "boolean"
+          },
+          "scanPdf": {
+            "type": "boolean"
+          },
+          "scanEpub": {
+            "type": "boolean"
+          },
+          "scanDirectoryExclusions": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "repairExtensions": {
             "type": "boolean"
           },
@@ -8716,6 +11915,9 @@
           },
           "analyzeDimensions": {
             "type": "boolean"
+          },
+          "oneshotsDirectory": {
+            "type": "string"
           }
         }
       },
@@ -8740,7 +11942,13 @@
           "name",
           "repairExtensions",
           "root",
+          "scanCbx",
+          "scanDirectoryExclusions",
+          "scanEpub",
           "scanForceModifiedTime",
+          "scanInterval",
+          "scanOnStartup",
+          "scanPdf",
           "seriesCover",
           "unavailable"
         ],
@@ -8788,6 +11996,36 @@
           "scanForceModifiedTime": {
             "type": "boolean"
           },
+          "scanInterval": {
+            "type": "string",
+            "enum": [
+              "DISABLED",
+              "HOURLY",
+              "EVERY_6H",
+              "EVERY_12H",
+              "DAILY",
+              "WEEKLY"
+            ]
+          },
+          "scanOnStartup": {
+            "type": "boolean"
+          },
+          "scanCbx": {
+            "type": "boolean"
+          },
+          "scanPdf": {
+            "type": "boolean"
+          },
+          "scanEpub": {
+            "type": "boolean"
+          },
+          "scanDirectoryExclusions": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "repairExtensions": {
             "type": "boolean"
           },
@@ -8815,6 +12053,9 @@
           "analyzeDimensions": {
             "type": "boolean"
           },
+          "oneshotsDirectory": {
+            "type": "string"
+          },
           "unavailable": {
             "type": "boolean"
           }
@@ -8822,18 +12063,23 @@
       },
       "DirectoryRequestDto": {
         "required": [
-          "path"
+          "path",
+          "showFiles"
         ],
         "type": "object",
         "properties": {
           "path": {
             "type": "string"
+          },
+          "showFiles": {
+            "type": "boolean"
           }
         }
       },
       "DirectoryListingDto": {
         "required": [
-          "directories"
+          "directories",
+          "files"
         ],
         "type": "object",
         "properties": {
@@ -8841,6 +12087,12 @@
             "type": "string"
           },
           "directories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PathDto"
+            }
+          },
+          "files": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PathDto"
@@ -8932,9 +12184,13 @@
       "ThumbnailSeriesCollectionDto": {
         "required": [
           "collectionId",
+          "fileSize",
+          "height",
           "id",
+          "mediaType",
           "selected",
-          "type"
+          "type",
+          "width"
         ],
         "type": "object",
         "properties": {
@@ -8949,15 +12205,34 @@
           },
           "selected": {
             "type": "boolean"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "width": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
       "ThumbnailBookDto": {
         "required": [
           "bookId",
+          "fileSize",
+          "height",
           "id",
+          "mediaType",
           "selected",
-          "type"
+          "type",
+          "width"
         ],
         "type": "object",
         "properties": {
@@ -8972,6 +12247,21 @@
           },
           "selected": {
             "type": "boolean"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "width": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -9068,6 +12358,9 @@
               "type": "string"
             }
           },
+          "ageRestriction": {
+            "$ref": "#/components/schemas/AgeRestrictionUpdateDto"
+          },
           "labelsAllow": {
             "uniqueItems": true,
             "type": "array",
@@ -9082,9 +12375,6 @@
               "type": "string"
             }
           },
-          "ageRestriction": {
-            "$ref": "#/components/schemas/AgeRestrictionUpdateDto"
-          },
           "sharedLibraries": {
             "$ref": "#/components/schemas/SharedLibrariesUpdateDto"
           }
@@ -9097,6 +12387,57 @@
         "type": "object",
         "properties": {
           "password": {
+            "type": "string"
+          }
+        }
+      },
+      "SettingsUpdateDto": {
+        "type": "object",
+        "properties": {
+          "deleteEmptyCollections": {
+            "type": "boolean"
+          },
+          "deleteEmptyReadLists": {
+            "type": "boolean"
+          },
+          "rememberMeDurationDays": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "renewRememberMeKey": {
+            "type": "boolean"
+          },
+          "thumbnailSize": {
+            "type": "string",
+            "enum": [
+              "DEFAULT",
+              "MEDIUM",
+              "LARGE",
+              "XLARGE"
+            ]
+          },
+          "taskPoolSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "koboProxy": {
+            "type": "boolean"
+          },
+          "serverPort": {
+            "maximum": 65535,
+            "type": "integer",
+            "format": "int32"
+          },
+          "serverContextPath": {
+            "pattern": "^\\/[\\w-\\/]*[a-zA-Z0-9]$",
+            "type": "string"
+          },
+          "koboPort": {
+            "maximum": 65535,
+            "type": "integer",
+            "format": "int32"
+          },
+          "kepubifyPath": {
             "type": "string"
           }
         }
@@ -9222,17 +12563,17 @@
             "type": "integer",
             "format": "int32"
           },
+          "alternateTitles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlternateTitleUpdateDto"
+            }
+          },
           "sharingLabels": {
             "uniqueItems": true,
             "type": "array",
             "items": {
               "type": "string"
-            }
-          },
-          "alternateTitles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AlternateTitleUpdateDto"
             }
           }
         },
@@ -9364,13 +12705,6 @@
               "type": "string"
             }
           },
-          "summary": {
-            "type": "string"
-          },
-          "releaseDate": {
-            "type": "string",
-            "format": "date"
-          },
           "isbn": {
             "type": "string"
           },
@@ -9385,9 +12719,517 @@
             "items": {
               "$ref": "#/components/schemas/AuthorUpdateDto"
             }
+          },
+          "summary": {
+            "type": "string"
+          },
+          "releaseDate": {
+            "type": "string",
+            "format": "date"
           }
         },
         "description": "Metadata fields to update. Set a field to null to unset the metadata. You can omit fields you don\u0027t want to update."
+      },
+      "FacetDto": {
+        "required": [
+          "links",
+          "metadata"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FeedMetadataDto"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          }
+        }
+      },
+      "FeedDto": {
+        "required": [
+          "facets",
+          "groups",
+          "links",
+          "metadata",
+          "navigation",
+          "publications"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FeedMetadataDto"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          },
+          "navigation": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          },
+          "facets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetDto"
+            }
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedGroupDto"
+            }
+          },
+          "publications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPPublicationDto"
+            }
+          }
+        }
+      },
+      "FeedGroupDto": {
+        "required": [
+          "links",
+          "metadata",
+          "navigation",
+          "publications"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FeedMetadataDto"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          },
+          "navigation": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          },
+          "publications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPPublicationDto"
+            }
+          }
+        }
+      },
+      "FeedMetadataDto": {
+        "required": [
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "subTitle": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "identifier": {
+            "type": "string"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "description": {
+            "type": "string"
+          },
+          "itemsPerPage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentPage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "numberOfItems": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "WPBelongsToDto": {
+        "required": [
+          "collection",
+          "series"
+        ],
+        "type": "object",
+        "properties": {
+          "series": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPContributorDto"
+            }
+          },
+          "collection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPContributorDto"
+            }
+          }
+        }
+      },
+      "WPContributorDto": {
+        "required": [
+          "links",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "position": {
+            "type": "number",
+            "format": "float"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          }
+        }
+      },
+      "WPLinkDto": {
+        "required": [
+          "properties"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "rel": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "templated": {
+            "type": "boolean"
+          },
+          "width": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "WPMetadataDto": {
+        "required": [
+          "artist",
+          "author",
+          "colorist",
+          "contributor",
+          "editor",
+          "illustrator",
+          "inker",
+          "letterer",
+          "penciler",
+          "publisher",
+          "rendition",
+          "subject",
+          "title",
+          "translator"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "identifier": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "conformsTo": {
+            "type": "string"
+          },
+          "sortAs": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string"
+          },
+          "modified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "published": {
+            "type": "string",
+            "format": "date"
+          },
+          "language": {
+            "type": "string"
+          },
+          "author": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "translator": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "editor": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "artist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "illustrator": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "letterer": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "penciler": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "colorist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inker": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contributor": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "publisher": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "subject": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "readingProgression": {
+            "type": "string",
+            "enum": [
+              "rtl",
+              "ltr",
+              "ttb",
+              "btt",
+              "auto"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "numberOfPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "belongsTo": {
+            "$ref": "#/components/schemas/WPBelongsToDto"
+          },
+          "rendition": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "WPPublicationDto": {
+        "required": [
+          "images",
+          "landmarks",
+          "links",
+          "metadata",
+          "pageList",
+          "readingOrder",
+          "resources",
+          "toc"
+        ],
+        "type": "object",
+        "properties": {
+          "context": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/WPMetadataDto"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          },
+          "readingOrder": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          },
+          "toc": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          },
+          "landmarks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          },
+          "pageList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          }
+        }
+      },
+      "StreamingResponseBody": {
+        "type": "object"
+      },
+      "AuthenticationDocumentDto": {
+        "required": [
+          "authentication",
+          "id",
+          "links",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "authentication": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthenticationFlowDto"
+            }
+          },
+          "title": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          }
+        }
+      },
+      "AuthenticationFlowDto": {
+        "required": [
+          "links",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "http://opds-spec.org/auth/basic",
+              "http://opds-spec.org/auth/oauth/implicit",
+              "http://opds-spec.org/auth/oauth/password"
+            ]
+          },
+          "labels": {
+            "$ref": "#/components/schemas/LabelsDto"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WPLinkDto"
+            }
+          }
+        }
+      },
+      "LabelsDto": {
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
       },
       "OpdsAuthor": {
         "required": [
@@ -9531,6 +13373,17 @@
           }
         }
       },
+      "ResourcesDto": {
+        "required": [
+          "Resources"
+        ],
+        "type": "object",
+        "properties": {
+          "Resources": {
+            "$ref": "#/components/schemas/JsonNode"
+          }
+        }
+      },
       "AuthenticationActivityDto": {
         "required": [
           "dateTime",
@@ -9542,6 +13395,12 @@
             "type": "string"
           },
           "email": {
+            "type": "string"
+          },
+          "apiKeyId": {
+            "type": "string"
+          },
+          "apiKeyComment": {
             "type": "string"
           },
           "ip": {
@@ -9576,6 +13435,9 @@
             "type": "integer",
             "format": "int32"
           },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
           "size": {
             "type": "integer",
             "format": "int32"
@@ -9592,9 +13454,6 @@
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
           },
           "first": {
             "type": "boolean"
@@ -9614,13 +13473,6 @@
       "PageableObject": {
         "type": "object",
         "properties": {
-          "offset": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "sort": {
-            "$ref": "#/components/schemas/SortObject"
-          },
           "pageNumber": {
             "type": "integer",
             "format": "int32"
@@ -9634,19 +13486,26 @@
           },
           "unpaged": {
             "type": "boolean"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
           }
         }
       },
       "SortObject": {
         "type": "object",
         "properties": {
-          "empty": {
-            "type": "boolean"
-          },
           "sorted": {
             "type": "boolean"
           },
           "unsorted": {
+            "type": "boolean"
+          },
+          "empty": {
             "type": "boolean"
           }
         }
@@ -9714,6 +13573,9 @@
             "type": "integer",
             "format": "int32"
           },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
           "size": {
             "type": "integer",
             "format": "int32"
@@ -9731,9 +13593,6 @@
           "sort": {
             "$ref": "#/components/schemas/SortObject"
           },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
-          },
           "first": {
             "type": "boolean"
           },
@@ -9746,6 +13605,102 @@
           },
           "empty": {
             "type": "boolean"
+          }
+        }
+      },
+      "SettingMultiSourceInteger": {
+        "required": [
+          "configurationSource",
+          "databaseSource",
+          "effectiveValue"
+        ],
+        "type": "object",
+        "properties": {
+          "configurationSource": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "databaseSource": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "effectiveValue": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SettingMultiSourceString": {
+        "required": [
+          "configurationSource",
+          "databaseSource",
+          "effectiveValue"
+        ],
+        "type": "object",
+        "properties": {
+          "configurationSource": {
+            "type": "string"
+          },
+          "databaseSource": {
+            "type": "string"
+          },
+          "effectiveValue": {
+            "type": "string"
+          }
+        }
+      },
+      "SettingsDto": {
+        "required": [
+          "deleteEmptyCollections",
+          "deleteEmptyReadLists",
+          "kepubifyPath",
+          "koboProxy",
+          "rememberMeDurationDays",
+          "serverContextPath",
+          "serverPort",
+          "taskPoolSize",
+          "thumbnailSize"
+        ],
+        "type": "object",
+        "properties": {
+          "deleteEmptyCollections": {
+            "type": "boolean"
+          },
+          "deleteEmptyReadLists": {
+            "type": "boolean"
+          },
+          "rememberMeDurationDays": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "thumbnailSize": {
+            "type": "string",
+            "enum": [
+              "DEFAULT",
+              "MEDIUM",
+              "LARGE",
+              "XLARGE"
+            ]
+          },
+          "taskPoolSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "serverPort": {
+            "$ref": "#/components/schemas/SettingMultiSourceInteger"
+          },
+          "serverContextPath": {
+            "$ref": "#/components/schemas/SettingMultiSourceString"
+          },
+          "koboProxy": {
+            "type": "boolean"
+          },
+          "koboPort": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "kepubifyPath": {
+            "$ref": "#/components/schemas/SettingMultiSourceString"
           }
         }
       },
@@ -9819,6 +13774,9 @@
             "type": "integer",
             "format": "int32"
           },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
           "size": {
             "type": "integer",
             "format": "int32"
@@ -9835,9 +13793,6 @@
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
           },
           "first": {
             "type": "boolean"
@@ -9869,6 +13824,7 @@
           "libraryId",
           "metadata",
           "name",
+          "oneshot",
           "url"
         ],
         "type": "object",
@@ -9920,6 +13876,9 @@
             "$ref": "#/components/schemas/BookMetadataAggregationDto"
           },
           "deleted": {
+            "type": "boolean"
+          },
+          "oneshot": {
             "type": "boolean"
           }
         }
@@ -10086,9 +14045,6 @@
           }
         }
       },
-      "StreamingResponseBody": {
-        "type": "object"
-      },
       "BookDto": {
         "required": [
           "created",
@@ -10102,6 +14058,7 @@
           "metadata",
           "name",
           "number",
+          "oneshot",
           "seriesId",
           "seriesTitle",
           "size",
@@ -10165,6 +14122,9 @@
           },
           "fileHash": {
             "type": "string"
+          },
+          "oneshot": {
+            "type": "boolean"
           }
         }
       },
@@ -10271,6 +14231,9 @@
       "MediaDto": {
         "required": [
           "comment",
+          "epubDivinaCompatible",
+          "epubIsKepub",
+          "mediaProfile",
           "mediaType",
           "pagesCount",
           "status"
@@ -10289,6 +14252,15 @@
           },
           "comment": {
             "type": "string"
+          },
+          "epubDivinaCompatible": {
+            "type": "boolean"
+          },
+          "epubIsKepub": {
+            "type": "boolean"
+          },
+          "mediaProfile": {
+            "type": "string"
           }
         }
       },
@@ -10302,6 +14274,9 @@
           "totalPages": {
             "type": "integer",
             "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
           },
           "size": {
             "type": "integer",
@@ -10319,9 +14294,6 @@
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
           },
           "first": {
             "type": "boolean"
@@ -10342,6 +14314,8 @@
         "required": [
           "completed",
           "created",
+          "deviceId",
+          "deviceName",
           "lastModified",
           "page",
           "readDate"
@@ -10366,6 +14340,12 @@
           "lastModified": {
             "type": "string",
             "format": "date-time"
+          },
+          "deviceId": {
+            "type": "string"
+          },
+          "deviceName": {
+            "type": "string"
           }
         }
       },
@@ -10396,6 +14376,9 @@
             "type": "integer",
             "format": "int32"
           },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
           "size": {
             "type": "integer",
             "format": "int32"
@@ -10412,9 +14395,6 @@
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
           },
           "first": {
             "type": "boolean"
@@ -10518,6 +14498,9 @@
             "type": "integer",
             "format": "int32"
           },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
           "size": {
             "type": "integer",
             "format": "int32"
@@ -10534,9 +14517,6 @@
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
           },
           "first": {
             "type": "boolean"
@@ -10564,6 +14544,9 @@
             "type": "integer",
             "format": "int32"
           },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
           "size": {
             "type": "integer",
             "format": "int32"
@@ -10580,9 +14563,6 @@
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
           },
           "first": {
             "type": "boolean"
@@ -10630,6 +14610,9 @@
             "type": "integer",
             "format": "int32"
           },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
           "size": {
             "type": "integer",
             "format": "int32"
@@ -10646,9 +14629,6 @@
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
           },
           "first": {
             "type": "boolean"
@@ -10705,6 +14685,9 @@
             "type": "integer",
             "format": "int32"
           },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
           "size": {
             "type": "integer",
             "format": "int32"
@@ -10721,9 +14704,6 @@
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
           },
           "first": {
             "type": "boolean"
@@ -10751,6 +14731,9 @@
             "type": "integer",
             "format": "int32"
           },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
           "size": {
             "type": "integer",
             "format": "int32"
@@ -10767,9 +14750,6 @@
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
           },
           "first": {
             "type": "boolean"
@@ -10794,6 +14774,61 @@
         "properties": {
           "isClaimed": {
             "type": "boolean"
+          }
+        }
+      },
+      "R2Positions": {
+        "required": [
+          "positions",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "positions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/R2Locator"
+            }
+          }
+        }
+      },
+      "MediaType": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "subtype": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "qualityValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "wildcardType": {
+            "type": "boolean"
+          },
+          "wildcardSubtype": {
+            "type": "boolean"
+          },
+          "subtypeSuffix": {
+            "type": "string"
+          },
+          "concrete": {
+            "type": "boolean"
+          },
+          "charset": {
+            "type": "string"
           }
         }
       },

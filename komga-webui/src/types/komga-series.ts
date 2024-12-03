@@ -1,4 +1,4 @@
-import {AuthorDto, WebLinkDto} from '@/types/komga-books'
+import {AuthorDto, BookDto, WebLinkDto} from '@/types/komga-books'
 import {Context} from '@/types/context'
 
 export interface SeriesDto {
@@ -15,6 +15,7 @@ export interface SeriesDto {
   metadata: SeriesMetadataDto,
   booksMetadata: SeriesBooksMetadataDto,
   deleted: boolean,
+  oneshot: boolean,
 
   // custom fields
   context: Context
@@ -103,10 +104,19 @@ export interface SeriesThumbnailDto {
   id: string,
   seriesId: string,
   type: string,
-  selected: boolean
+  selected: boolean,
+  mediaType: string,
+  fileSize: number,
+  width: number,
+  height: number,
 }
 
 export interface AlternateTitleDto {
   label: string,
   title: string
+}
+
+export interface Oneshot {
+  series: SeriesDto,
+  book: BookDto,
 }

@@ -8,6 +8,7 @@ import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.gotson.komga.domain.model.BookMetadata
+import org.gotson.komga.domain.model.Dimension
 import org.gotson.komga.domain.model.Media
 import org.gotson.komga.domain.model.ThumbnailBook
 import org.gotson.komga.domain.model.ThumbnailSeries
@@ -43,7 +44,6 @@ class SeriesLifecycleTest(
   @Autowired private val thumbnailSeriesRepository: ThumbnailSeriesRepository,
   @Autowired private val thumbnailBookRepository: ThumbnailBookRepository,
 ) {
-
   @SpykBean
   private lateinit var bookLifecycle: BookLifecycle
 
@@ -79,17 +79,19 @@ class SeriesLifecycleTest(
   @Test
   fun `given series with unordered books when saving then books are ordered with natural sort`() {
     // given
-    val books = listOf(
-      makeBook("book 1", libraryId = library.id),
-      makeBook("boôk 05", libraryId = library.id),
-      makeBook("  book 3", libraryId = library.id),
-      makeBook("book   4   ", libraryId = library.id),
-      makeBook("book  6", libraryId = library.id),
-      makeBook("book  002", libraryId = library.id),
-    )
-    val createdSeries = makeSeries(name = "series", libraryId = library.id).let {
-      seriesLifecycle.createSeries(it)
-    }
+    val books =
+      listOf(
+        makeBook("book 1", libraryId = library.id),
+        makeBook("boôk 05", libraryId = library.id),
+        makeBook("  book 3", libraryId = library.id),
+        makeBook("book   4   ", libraryId = library.id),
+        makeBook("book  6", libraryId = library.id),
+        makeBook("book  002", libraryId = library.id),
+      )
+    val createdSeries =
+      makeSeries(name = "series", libraryId = library.id).let {
+        seriesLifecycle.createSeries(it)
+      }
     seriesLifecycle.addBooks(createdSeries, books)
 
     // when
@@ -107,15 +109,17 @@ class SeriesLifecycleTest(
   @Test
   fun `given series when removing a book then remaining books are indexed in sequence`() {
     // given
-    val books = listOf(
-      makeBook("book 1", libraryId = library.id),
-      makeBook("book 2", libraryId = library.id),
-      makeBook("book 3", libraryId = library.id),
-      makeBook("book 4", libraryId = library.id),
-    )
-    val createdSeries = makeSeries(name = "series", libraryId = library.id).let {
-      seriesLifecycle.createSeries(it)
-    }
+    val books =
+      listOf(
+        makeBook("book 1", libraryId = library.id),
+        makeBook("book 2", libraryId = library.id),
+        makeBook("book 3", libraryId = library.id),
+        makeBook("book 4", libraryId = library.id),
+      )
+    val createdSeries =
+      makeSeries(name = "series", libraryId = library.id).let {
+        seriesLifecycle.createSeries(it)
+      }
     seriesLifecycle.addBooks(createdSeries, books)
     seriesLifecycle.sortBooks(createdSeries)
 
@@ -136,15 +140,17 @@ class SeriesLifecycleTest(
   @Test
   fun `given series when adding a book then all books are indexed in sequence`() {
     // given
-    val books = listOf(
-      makeBook("book 1", libraryId = library.id),
-      makeBook("book 2", libraryId = library.id),
-      makeBook("book 4", libraryId = library.id),
-      makeBook("book 5", libraryId = library.id),
-    )
-    val createdSeries = makeSeries(name = "series", libraryId = library.id).let {
-      seriesLifecycle.createSeries(it)
-    }
+    val books =
+      listOf(
+        makeBook("book 1", libraryId = library.id),
+        makeBook("book 2", libraryId = library.id),
+        makeBook("book 4", libraryId = library.id),
+        makeBook("book 5", libraryId = library.id),
+      )
+    val createdSeries =
+      makeSeries(name = "series", libraryId = library.id).let {
+        seriesLifecycle.createSeries(it)
+      }
     seriesLifecycle.addBooks(createdSeries, books)
     seriesLifecycle.sortBooks(createdSeries)
 
@@ -225,12 +231,14 @@ class SeriesLifecycleTest(
 
     @Test
     fun `given series when adding books and an exception occur while saving media then books are not saved`() {
-      val books = listOf(
-        makeBook("book 1", libraryId = library.id),
-      )
-      val createdSeries = makeSeries(name = "series", libraryId = library.id).let {
-        seriesLifecycle.createSeries(it)
-      }
+      val books =
+        listOf(
+          makeBook("book 1", libraryId = library.id),
+        )
+      val createdSeries =
+        makeSeries(name = "series", libraryId = library.id).let {
+          seriesLifecycle.createSeries(it)
+        }
 
       every { mediaRepository.insert(any<Collection<Media>>()) } throws DataAccessException("")
 
@@ -246,12 +254,14 @@ class SeriesLifecycleTest(
 
     @Test
     fun `given series when adding books and an exception occur while saving metadata then books are not saved`() {
-      val books = listOf(
-        makeBook("book 1", libraryId = library.id),
-      )
-      val createdSeries = makeSeries(name = "series", libraryId = library.id).let {
-        seriesLifecycle.createSeries(it)
-      }
+      val books =
+        listOf(
+          makeBook("book 1", libraryId = library.id),
+        )
+      val createdSeries =
+        makeSeries(name = "series", libraryId = library.id).let {
+          seriesLifecycle.createSeries(it)
+        }
 
       every { bookMetadataRepository.insert(any<Collection<BookMetadata>>()) } throws DataAccessException("")
 
@@ -268,7 +278,7 @@ class SeriesLifecycleTest(
 
   @Test
   fun `given a sidecar thumbnail when deleting then IllegarlArgumentException is thrown`() {
-    val thumbnail = ThumbnailSeries(type = ThumbnailSeries.Type.SIDECAR)
+    val thumbnail = ThumbnailSeries(type = ThumbnailSeries.Type.SIDECAR, fileSize = 0, mediaType = "", dimension = Dimension(0, 0))
 
     val thrown = catchThrowable { seriesLifecycle.deleteThumbnailForSeries(thumbnail) }
 
@@ -291,11 +301,12 @@ class SeriesLifecycleTest(
       Files.createFile(bookSidecarPath)
 
       val series = makeSeries(name = "series", libraryId = library.id, url = seriesPath.toUri().toURL())
-      val books = listOf(
-        makeBook("1", libraryId = library.id, url = book1Path.toUri().toURL()),
-        makeBook("2", libraryId = library.id, url = book2Path.toUri().toURL()),
-      )
-      val bookSidecar = ThumbnailBook(bookId = books[0].id, type = ThumbnailBook.Type.SIDECAR, url = bookSidecarPath.toUri().toURL())
+      val books =
+        listOf(
+          makeBook("1", libraryId = library.id, url = book1Path.toUri().toURL()),
+          makeBook("2", libraryId = library.id, url = book2Path.toUri().toURL()),
+        )
+      val bookSidecar = ThumbnailBook(bookId = books[0].id, type = ThumbnailBook.Type.SIDECAR, url = bookSidecarPath.toUri().toURL(), fileSize = 0, mediaType = "", dimension = Dimension(0, 0))
 
       seriesLifecycle.createSeries(series)
       seriesLifecycle.addBooks(series, books)
@@ -327,12 +338,13 @@ class SeriesLifecycleTest(
       Files.createFile(seriesSidecarPath)
 
       val series = makeSeries(name = "series", libraryId = library.id, url = seriesPath.toUri().toURL())
-      val books = listOf(
-        makeBook("1", libraryId = library.id, url = book1Path.toUri().toURL()),
-        makeBook("2", libraryId = library.id, url = book2Path.toUri().toURL()),
-      )
-      val bookSidecar = ThumbnailBook(bookId = books[0].id, type = ThumbnailBook.Type.SIDECAR, url = bookSidecarPath.toUri().toURL())
-      val seriesSidecar = ThumbnailSeries(seriesId = series.id, type = ThumbnailSeries.Type.SIDECAR, url = seriesSidecarPath.toUri().toURL())
+      val books =
+        listOf(
+          makeBook("1", libraryId = library.id, url = book1Path.toUri().toURL()),
+          makeBook("2", libraryId = library.id, url = book2Path.toUri().toURL()),
+        )
+      val bookSidecar = ThumbnailBook(bookId = books[0].id, type = ThumbnailBook.Type.SIDECAR, url = bookSidecarPath.toUri().toURL(), fileSize = 0, mediaType = "", dimension = Dimension(0, 0))
+      val seriesSidecar = ThumbnailSeries(seriesId = series.id, type = ThumbnailSeries.Type.SIDECAR, url = seriesSidecarPath.toUri().toURL(), fileSize = 0, mediaType = "", dimension = Dimension(0, 0))
 
       seriesLifecycle.createSeries(series)
       seriesLifecycle.addBooks(series, books)
@@ -367,12 +379,13 @@ class SeriesLifecycleTest(
       Files.createFile(seriesSidecarPath)
 
       val series = makeSeries(name = "series", libraryId = library.id, url = seriesPath.toUri().toURL())
-      val books = listOf(
-        makeBook("1", libraryId = library.id, url = book1Path.toUri().toURL()),
-        makeBook("2", libraryId = library.id, url = book2Path.toUri().toURL()),
-      )
-      val bookSidecar = ThumbnailBook(bookId = books[0].id, type = ThumbnailBook.Type.SIDECAR, url = bookSidecarPath.toUri().toURL())
-      val seriesSidecar = ThumbnailSeries(seriesId = series.id, type = ThumbnailSeries.Type.SIDECAR, url = seriesSidecarPath.toUri().toURL())
+      val books =
+        listOf(
+          makeBook("1", libraryId = library.id, url = book1Path.toUri().toURL()),
+          makeBook("2", libraryId = library.id, url = book2Path.toUri().toURL()),
+        )
+      val bookSidecar = ThumbnailBook(bookId = books[0].id, type = ThumbnailBook.Type.SIDECAR, url = bookSidecarPath.toUri().toURL(), fileSize = 0, mediaType = "", dimension = Dimension(0, 0))
+      val seriesSidecar = ThumbnailSeries(seriesId = series.id, type = ThumbnailSeries.Type.SIDECAR, url = seriesSidecarPath.toUri().toURL(), fileSize = 0, mediaType = "", dimension = Dimension(0, 0))
 
       seriesLifecycle.createSeries(series)
       seriesLifecycle.addBooks(series, books)
@@ -422,12 +435,13 @@ class SeriesLifecycleTest(
       val seriesSidecarPath = seriesPath.resolve("cover.png")
 
       val series = makeSeries(name = "series", libraryId = library.id, url = seriesPath.toUri().toURL())
-      val books = listOf(
-        makeBook("1", libraryId = library.id, url = book1Path.toUri().toURL()),
-        makeBook("2", libraryId = library.id, url = book2Path.toUri().toURL()),
-      )
-      val bookSidecar = ThumbnailBook(bookId = books[0].id, type = ThumbnailBook.Type.SIDECAR, url = bookSidecarPath.toUri().toURL())
-      val seriesSidecar = ThumbnailSeries(seriesId = series.id, type = ThumbnailSeries.Type.SIDECAR, url = seriesSidecarPath.toUri().toURL())
+      val books =
+        listOf(
+          makeBook("1", libraryId = library.id, url = book1Path.toUri().toURL()),
+          makeBook("2", libraryId = library.id, url = book2Path.toUri().toURL()),
+        )
+      val bookSidecar = ThumbnailBook(bookId = books[0].id, type = ThumbnailBook.Type.SIDECAR, url = bookSidecarPath.toUri().toURL(), fileSize = 0, mediaType = "", dimension = Dimension(0, 0))
+      val seriesSidecar = ThumbnailSeries(seriesId = series.id, type = ThumbnailSeries.Type.SIDECAR, url = seriesSidecarPath.toUri().toURL(), fileSize = 0, mediaType = "", dimension = Dimension(0, 0))
 
       seriesLifecycle.createSeries(series)
       seriesLifecycle.addBooks(series, books)
