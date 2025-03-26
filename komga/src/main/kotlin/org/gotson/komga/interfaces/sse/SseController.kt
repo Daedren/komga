@@ -117,12 +117,13 @@ class SseController(
 
     synchronized(emitters) {
       emitters
-        .filter { if (adminOnly) it.value.roleAdmin else true }
+        .filter { if (adminOnly) it.value.isAdmin else true }
         .filter { if (userIdOnly != null) it.value.id == userIdOnly else true }
         .forEach { (emitter, _) ->
           try {
             emitter.send(
-              SseEmitter.event()
+              SseEmitter
+                .event()
                 .name(name)
                 .data(data, MediaType.APPLICATION_JSON),
             )

@@ -24,6 +24,7 @@ Komga is a media server for your comics, mangas, BDs, magazines and eBooks.
 - Offers a REST API, many community tools and scripts can interact with Komga
 - OPDS v1 and v2 support
 - Kobo Sync with your Kobo eReader
+- KOReader Sync
 - Download book files, whole series, or read lists
 - Duplicate files detection
 - Duplicate pages detection and removal
@@ -48,7 +49,7 @@ Check the [development guidelines](./DEVELOPING.md).
 
 ## Sponsors
 
-[![Jetbrains_logo](./.github/readme-images/sponsors-jetbrains.png)](https://www.jetbrains.com/?from=Komga)
+[![Jetbrains_logo](./.github/readme-images/jetbrains.svg)](https://www.jetbrains.com/?from=Komga)
 
 ## Credits
 

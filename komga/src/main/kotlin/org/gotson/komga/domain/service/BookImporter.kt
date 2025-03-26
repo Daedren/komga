@@ -20,6 +20,7 @@ import org.gotson.komga.domain.persistence.LibraryRepository
 import org.gotson.komga.domain.persistence.MediaRepository
 import org.gotson.komga.domain.persistence.ReadListRepository
 import org.gotson.komga.domain.persistence.ReadProgressRepository
+import org.gotson.komga.domain.persistence.SeriesRepository
 import org.gotson.komga.domain.persistence.SidecarRepository
 import org.gotson.komga.domain.persistence.ThumbnailBookRepository
 import org.gotson.komga.language.toIndexedMap
@@ -62,6 +63,7 @@ class BookImporter(
   private val eventPublisher: ApplicationEventPublisher,
   private val taskEmitter: TaskEmitter,
   private val historicalEventRepository: HistoricalEventRepository,
+  private val seriesRepository: SeriesRepository,
 ) {
   fun importBook(
     sourceFile: Path,
@@ -72,28 +74,11 @@ class BookImporter(
   ): Book {
     try {
       if (sourceFile.notExists()) throw FileNotFoundException("File not found: $sourceFile").withCode("ERR_1018")
-      if (series.oneshot) throw IllegalArgumentException("Destination series is oneshot")
+      if (series.oneshot && upgradeBookId.isNullOrEmpty()) throw IllegalArgumentException("Destination series is oneshot but upgradeBookId is missing")
 
       libraryRepository.findAll().forEach { library ->
         if (sourceFile.startsWith(library.path)) throw PathContainedInPath("Cannot import file that is part of an existing library", "ERR_1019")
       }
-
-      val destFile =
-        series.path.resolve(
-          if (destinationName != null)
-            Paths.get("$destinationName.${sourceFile.extension}").name
-          else
-            sourceFile.name,
-        )
-      val sidecars =
-        fileSystemScanner.scanBookSidecars(sourceFile).associateWith {
-          series.path.resolve(
-            if (destinationName != null)
-              it.url.toURI().toPath().name.replace(sourceFile.nameWithoutExtension, destinationName, true)
-            else
-              it.url.toURI().toPath().name,
-          )
-        }
 
       val bookToUpgrade =
         if (upgradeBookId != null) {
@@ -102,6 +87,36 @@ class BookImporter(
           }
         } else {
           null
+        }
+
+      val destDir =
+        if (series.oneshot)
+          series.path.parent
+        else
+          series.path
+
+      val destFile =
+        destDir.resolve(
+          if (destinationName != null)
+            Paths.get("$destinationName.${sourceFile.extension}").name
+          else
+            sourceFile.name,
+        )
+      val sidecars =
+        fileSystemScanner.scanBookSidecars(sourceFile).associateWith {
+          destDir.resolve(
+            if (destinationName != null)
+              it.url
+                .toURI()
+                .toPath()
+                .name
+                .replace(sourceFile.nameWithoutExtension, destinationName, true)
+            else
+              it.url
+                .toURI()
+                .toPath()
+                .name,
+          )
         }
 
       var deletedUpgradedFile = false
@@ -166,14 +181,18 @@ class BookImporter(
             logger.warn(e) { "Filesystem does not support hardlinks, copying instead" }
             sourceFile.copyTo(destFile)
             sidecars.forEach {
-              it.key.url.toURI().toPath().copyTo(it.value, true)
+              it.key.url
+                .toURI()
+                .toPath()
+                .copyTo(it.value, true)
             }
           }
       }
 
       val importedBook =
-        fileSystemScanner.scanFile(destFile)
-          ?.copy(libraryId = series.libraryId)
+        fileSystemScanner
+          .scanFile(destFile)
+          ?.copy(libraryId = series.libraryId, oneshot = series.oneshot)
           ?: throw IllegalStateException("Newly imported book could not be scanned: $destFile").withCode("ERR_1022")
 
       seriesLifecycle.addBooks(series, listOf(importedBook))
@@ -200,16 +219,21 @@ class BookImporter(
         }
 
         // copy read progress
-        readProgressRepository.findAllByBookId(bookToUpgrade.id)
+        readProgressRepository
+          .findAllByBookId(bookToUpgrade.id)
           .map { it.copy(bookId = importedBook.id) }
           .forEach { readProgressRepository.save(it) }
 
         // replace upgraded book by imported book in read lists
-        readListRepository.findAllContainingBookId(bookToUpgrade.id, filterOnLibraryIds = null)
+        readListRepository
+          .findAllContainingBookId(bookToUpgrade.id, filterOnLibraryIds = null)
           .forEach { rl ->
             readListRepository.update(
               rl.copy(
-                bookIds = rl.bookIds.values.map { if (it == bookToUpgrade.id) importedBook.id else it }.toIndexedMap(),
+                bookIds =
+                  rl.bookIds.values
+                    .map { if (it == bookToUpgrade.id) importedBook.id else it }
+                    .toIndexedMap(),
               ),
             )
           }
@@ -222,6 +246,11 @@ class BookImporter(
 
         // delete upgraded book
         bookLifecycle.deleteOne(bookToUpgrade)
+
+        // update series if one-shot, so it's not marked as not found during the next scan
+        if (series.oneshot) {
+          seriesRepository.update(series.copy(url = importedBook.url, fileLastModified = importedBook.fileLastModified))
+        }
       }
 
       seriesLifecycle.sortBooks(series)

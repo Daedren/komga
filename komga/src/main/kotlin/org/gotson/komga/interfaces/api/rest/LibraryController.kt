@@ -1,20 +1,24 @@
 package org.gotson.komga.interfaces.api.rest
 
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.gotson.komga.application.tasks.HIGHEST_PRIORITY
 import org.gotson.komga.application.tasks.HIGH_PRIORITY
 import org.gotson.komga.application.tasks.TaskEmitter
-import org.gotson.komga.domain.model.BookSearch
 import org.gotson.komga.domain.model.DirectoryNotFoundException
 import org.gotson.komga.domain.model.DuplicateNameException
 import org.gotson.komga.domain.model.Library
 import org.gotson.komga.domain.model.PathContainedInPath
-import org.gotson.komga.domain.model.ROLE_ADMIN
+import org.gotson.komga.domain.model.SearchCondition
+import org.gotson.komga.domain.model.SearchContext
+import org.gotson.komga.domain.model.SearchOperator
 import org.gotson.komga.domain.persistence.BookRepository
 import org.gotson.komga.domain.persistence.LibraryRepository
 import org.gotson.komga.domain.persistence.SeriesRepository
 import org.gotson.komga.domain.service.LibraryLifecycle
+import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration
 import org.gotson.komga.infrastructure.security.KomgaPrincipal
 import org.gotson.komga.infrastructure.web.filePathToUrl
 import org.gotson.komga.interfaces.api.rest.dto.LibraryCreationDto
@@ -22,6 +26,7 @@ import org.gotson.komga.interfaces.api.rest.dto.LibraryDto
 import org.gotson.komga.interfaces.api.rest.dto.LibraryUpdateDto
 import org.gotson.komga.interfaces.api.rest.dto.toDomain
 import org.gotson.komga.interfaces.api.rest.dto.toDto
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -42,6 +47,7 @@ import java.io.FileNotFoundException
 
 @RestController
 @RequestMapping("api/v1/libraries", produces = [MediaType.APPLICATION_JSON_VALUE])
+@Tag(name = OpenApiConfiguration.TagNames.LIBRARIES)
 class LibraryController(
   private val taskEmitter: TaskEmitter,
   private val libraryLifecycle: LibraryLifecycle,
@@ -50,6 +56,10 @@ class LibraryController(
   private val seriesRepository: SeriesRepository,
 ) {
   @GetMapping
+  @Operation(
+    summary = "List all libraries",
+    description = "The libraries are filtered based on the current user's permissions",
+  )
   fun getAll(
     @AuthenticationPrincipal principal: KomgaPrincipal,
   ): List<LibraryDto> =
@@ -57,57 +67,61 @@ class LibraryController(
       libraryRepository.findAll()
     } else {
       libraryRepository.findAllByIds(principal.user.sharedLibrariesIds)
-    }.sortedBy { it.name.lowercase() }.map { it.toDto(includeRoot = principal.user.roleAdmin) }
+    }.sortedBy { it.name.lowercase() }.map { it.toDto(includeRoot = principal.user.isAdmin) }
 
   @GetMapping("{libraryId}")
+  @Operation(summary = "Get details for a single library")
   fun getOne(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @PathVariable libraryId: String,
   ): LibraryDto =
     libraryRepository.findByIdOrNull(libraryId)?.let {
       if (!principal.user.canAccessLibrary(it)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
-      it.toDto(includeRoot = principal.user.roleAdmin)
+      it.toDto(includeRoot = principal.user.isAdmin)
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
   @PostMapping
-  @PreAuthorize("hasRole('$ROLE_ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
+  @Operation(summary = "Create a library")
   fun addOne(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @Valid @RequestBody
     library: LibraryCreationDto,
   ): LibraryDto =
     try {
-      libraryLifecycle.addLibrary(
-        Library(
-          name = library.name,
-          root = filePathToUrl(library.root),
-          importComicInfoBook = library.importComicInfoBook,
-          importComicInfoSeries = library.importComicInfoSeries,
-          importComicInfoCollection = library.importComicInfoCollection,
-          importComicInfoReadList = library.importComicInfoReadList,
-          importComicInfoSeriesAppendVolume = library.importComicInfoSeriesAppendVolume,
-          importEpubBook = library.importEpubBook,
-          importEpubSeries = library.importEpubSeries,
-          importMylarSeries = library.importMylarSeries,
-          importLocalArtwork = library.importLocalArtwork,
-          importBarcodeIsbn = library.importBarcodeIsbn,
-          scanForceModifiedTime = library.scanForceModifiedTime,
-          scanInterval = library.scanInterval.toDomain(),
-          scanOnStartup = library.scanOnStartup,
-          scanCbx = library.scanCbx,
-          scanPdf = library.scanPdf,
-          scanEpub = library.scanEpub,
-          scanDirectoryExclusions = library.scanDirectoryExclusions,
-          repairExtensions = library.repairExtensions,
-          convertToCbz = library.convertToCbz,
-          emptyTrashAfterScan = library.emptyTrashAfterScan,
-          seriesCover = library.seriesCover.toDomain(),
-          hashFiles = library.hashFiles,
-          hashPages = library.hashPages,
-          analyzeDimensions = library.analyzeDimensions,
-          oneshotsDirectory = library.oneshotsDirectory?.ifBlank { null },
-        ),
-      ).toDto(includeRoot = principal.user.roleAdmin)
+      libraryLifecycle
+        .addLibrary(
+          Library(
+            name = library.name,
+            root = filePathToUrl(library.root),
+            importComicInfoBook = library.importComicInfoBook,
+            importComicInfoSeries = library.importComicInfoSeries,
+            importComicInfoCollection = library.importComicInfoCollection,
+            importComicInfoReadList = library.importComicInfoReadList,
+            importComicInfoSeriesAppendVolume = library.importComicInfoSeriesAppendVolume,
+            importEpubBook = library.importEpubBook,
+            importEpubSeries = library.importEpubSeries,
+            importMylarSeries = library.importMylarSeries,
+            importLocalArtwork = library.importLocalArtwork,
+            importBarcodeIsbn = library.importBarcodeIsbn,
+            scanForceModifiedTime = library.scanForceModifiedTime,
+            scanInterval = library.scanInterval.toDomain(),
+            scanOnStartup = library.scanOnStartup,
+            scanCbx = library.scanCbx,
+            scanPdf = library.scanPdf,
+            scanEpub = library.scanEpub,
+            scanDirectoryExclusions = library.scanDirectoryExclusions,
+            repairExtensions = library.repairExtensions,
+            convertToCbz = library.convertToCbz,
+            emptyTrashAfterScan = library.emptyTrashAfterScan,
+            seriesCover = library.seriesCover.toDomain(),
+            hashFiles = library.hashFiles,
+            hashPages = library.hashPages,
+            hashKoreader = library.hashKoreader,
+            analyzeDimensions = library.analyzeDimensions,
+            oneshotsDirectory = library.oneshotsDirectory?.ifBlank { null },
+          ),
+        ).toDto(includeRoot = principal.user.isAdmin)
     } catch (e: Exception) {
       when (e) {
         is FileNotFoundException,
@@ -122,9 +136,10 @@ class LibraryController(
     }
 
   @PutMapping("/{libraryId}")
-  @PreAuthorize("hasRole('$ROLE_ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @Deprecated("Use PATCH /v1/library instead", ReplaceWith("patchOne"))
+  @Deprecated("Use PATCH /v1/libraries/{libraryId} instead", ReplaceWith("patchOne"))
+  @Operation(summary = "Update a library", description = "Use PATCH /api/v1/libraries/{libraryId} instead. Deprecated since 1.3.0.", tags = [OpenApiConfiguration.TagNames.DEPRECATED])
   fun updateOne(
     @PathVariable libraryId: String,
     @Valid @RequestBody
@@ -134,8 +149,9 @@ class LibraryController(
   }
 
   @PatchMapping("/{libraryId}")
-  @PreAuthorize("hasRole('$ROLE_ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(summary = "Update a library", description = "You can omit fields you don't want to update")
   fun patchOne(
     @PathVariable libraryId: String,
     @Parameter(description = "Fields to update. You can omit fields you don't want to update.")
@@ -173,6 +189,7 @@ class LibraryController(
             seriesCover = seriesCover?.toDomain() ?: existing.seriesCover,
             hashFiles = hashFiles ?: existing.hashFiles,
             hashPages = hashPages ?: existing.hashPages,
+            hashKoreader = hashKoreader ?: existing.hashKoreader,
             analyzeDimensions = analyzeDimensions ?: existing.analyzeDimensions,
             oneshotsDirectory = if (isSet("oneshotsDirectory")) oneshotsDirectory?.ifBlank { null } else existing.oneshotsDirectory,
           )
@@ -195,8 +212,9 @@ class LibraryController(
   }
 
   @DeleteMapping("/{libraryId}")
-  @PreAuthorize("hasRole('$ROLE_ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(summary = "Delete a library")
   fun deleteOne(
     @PathVariable libraryId: String,
   ) {
@@ -206,8 +224,9 @@ class LibraryController(
   }
 
   @PostMapping("{libraryId}/scan")
-  @PreAuthorize("hasRole('$ROLE_ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.ACCEPTED)
+  @Operation(summary = "Scan a library")
   fun scan(
     @PathVariable libraryId: String,
     @RequestParam(required = false) deep: Boolean = false,
@@ -218,29 +237,45 @@ class LibraryController(
   }
 
   @PostMapping("{libraryId}/analyze")
-  @PreAuthorize("hasRole('$ROLE_ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.ACCEPTED)
+  @Operation(summary = "Analyze a library")
   fun analyze(
     @PathVariable libraryId: String,
   ) {
-    taskEmitter.analyzeBook(bookRepository.findAll(BookSearch(libraryIds = listOf(libraryId))), HIGH_PRIORITY)
+    val books =
+      bookRepository
+        .findAll(
+          SearchCondition.LibraryId(SearchOperator.Is(libraryId)),
+          SearchContext.empty(),
+          Pageable.unpaged(),
+        ).content
+    taskEmitter.analyzeBook(books, HIGH_PRIORITY)
   }
 
   @PostMapping("{libraryId}/metadata/refresh")
-  @PreAuthorize("hasRole('$ROLE_ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.ACCEPTED)
+  @Operation(summary = "Refresh metadata for a library")
   fun refreshMetadata(
     @PathVariable libraryId: String,
   ) {
-    val books = bookRepository.findAll(BookSearch(libraryIds = listOf(libraryId)))
+    val books =
+      bookRepository
+        .findAll(
+          SearchCondition.LibraryId(SearchOperator.Is(libraryId)),
+          SearchContext.empty(),
+          Pageable.unpaged(),
+        ).content
     taskEmitter.refreshBookMetadata(books, priority = HIGH_PRIORITY)
     taskEmitter.refreshBookLocalArtwork(books, priority = HIGH_PRIORITY)
     taskEmitter.refreshSeriesLocalArtwork(seriesRepository.findAllIdsByLibraryId(libraryId), priority = HIGH_PRIORITY)
   }
 
   @PostMapping("{libraryId}/empty-trash")
-  @PreAuthorize("hasRole('$ROLE_ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.ACCEPTED)
+  @Operation(summary = "Empty trash for a library")
   fun emptyTrash(
     @PathVariable libraryId: String,
   ) {

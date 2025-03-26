@@ -25,7 +25,9 @@
       "generate_api_key": "Generiraj API ključ",
       "no_keys": "Još nije stvoren nijedan API ključ"
     },
-    "change_password": "promijeni lozinku"
+    "change_password": "promijeni lozinku",
+    "details": "Detalji",
+    "my_account": "Moj račun"
   },
   "announcements": {
     "mark_all_read": "Označi sve kao pročitano",
@@ -93,6 +95,7 @@
     "beginning_of_book": "Nalaziš se na početku knjige.",
     "changing_reading_direction": "Mijenjanje smjera čitanja u",
     "cycling_page_layout": "Mijenjanje rasporeda stranica",
+    "cycling_page_margin": "Mijenjanje margina stranica",
     "cycling_scale": "Mijenjanje skaliranja",
     "cycling_side_padding": "Mijenjanje rubova",
     "download_current_page": "Preuzmi trenutačnu stranicu",
@@ -101,9 +104,9 @@
     "move_next": "Ponovo pritisni „Dalje” za prelaženje na sljedeću knjigu.",
     "move_next_exit": "Ponovo pritisni „Dalje” za zatvaranje čitača.",
     "move_previous": "Ponovo pritisni „Prethodno” za prelaženje na prethodnu knjigu.",
-    "notification_poster_set_book": "Trenutačna stranica je postavljena kao plakat knjige.",
-    "notification_poster_set_readlist": "Trenutačna stranica je postavljena kao plakat liste čitanja.",
-    "notification_poster_set_series": "Trenutačna stranica je postavljena kao plakat serije.",
+    "notification_poster_set_book": "Trenutačna stranica je sada postavljena kao poster knjige.",
+    "notification_poster_set_readlist": "Trenutačna stranica je sada postavljena kao poster liste čitanja.",
+    "notification_poster_set_series": "Trenutačna stranica je sada postavljena kao poster serije.",
     "paged_reader_layout": {
       "double": "Dvije stranice",
       "double_no_cover": "Dvije stranice (bez omota)",
@@ -135,6 +138,7 @@
       "general": "Općenito",
       "gestures": "Geste",
       "page_layout": "Raspored stranica",
+      "page_margin": "Margine stranica",
       "paged": "Postavke prikaza stranica",
       "reading_mode": "Modus čitanja",
       "scale_type": "Vrsta skaliranja",
@@ -145,6 +149,7 @@
     "shortcuts": {
       "close": "Zatvori",
       "cycle_page_layout": "Mijenjaj raspored stranica",
+      "cycle_page_margin": "Mijenjaj margine stranica",
       "cycle_scale": "Mijenjaj skaliranje",
       "cycle_side_padding": "Mijenjaj rubove",
       "first_page": "Prva stranica",
@@ -168,6 +173,8 @@
   },
   "browse_book": {
     "comment": "KOMENTAR",
+    "date_created": "STVORENO",
+    "date_modified": "ZADNJA PROMJENA",
     "download_file": "Preuzmi datoteku",
     "file": "DATOTEKA",
     "format": "FORMAT",
@@ -177,6 +184,8 @@
     "outdated_tooltip": "Datoteka za ovu knjigu je promijenjena. Ova se knjiga mora ponovno analizirati",
     "read_book": "Čitaj knjigu",
     "read_incognito": "Čitaj inkognito",
+    "remove_from_collection": "Ukloni knjigu iz zbirke",
+    "remove_from_readlist": "Ukloni knjigu iz liste čitanja",
     "size": "VELIČINA"
   },
   "browse_collection": {
@@ -191,6 +200,7 @@
   },
   "browse_series": {
     "earliest_year_from_release_dates": "Ovo je najranija godina izdanja svih knjiga u seriji",
+    "remove_from_collection": "Ukloni serije iz zbirke",
     "series_no_summary": "Ova serija nema sažetak, pa smo odabrali jedan za tebe!",
     "summary_from_book": "Sažetak knjige {number}:"
   },
@@ -201,6 +211,8 @@
   "common": {
     "age": "Dob",
     "all_libraries": "Sve biblioteke",
+    "all_of": "Sve od",
+    "any_of": "Bilo koje od",
     "book": "Knjiga",
     "books": "Knjige",
     "books_n": "Nema knjige | 1 knjiga | {count} knjige",
@@ -219,8 +231,10 @@
     "dismiss": "Ukloni",
     "download": "Preuzmi",
     "drag_drop": "povuci i ispusti",
+    "duplicate": "Dupliciraj",
     "email": "E-mail adresa",
     "epub": "Epub",
+    "error": "Greška",
     "filename": "Ime datoteke",
     "filter_no_matches": "Aktivni filtar nema podudaranja",
     "genre": "Žanr",
@@ -233,8 +247,11 @@
     "locale_name": "Hrvatski",
     "locale_rtl": "false",
     "lock_all": "Zaključaj sve",
+    "media": "Mediji",
+    "more": "Više",
     "n_selected": "Odabrano: {count}",
     "nothing_to_show": "Nema ničega za pokazati",
+    "ok": "U redu",
     "oneshot": "Izdanje bez nastavka",
     "outdated": "Neaktualno",
     "page": "Stranica",
@@ -245,19 +262,23 @@
     "password": "Lozinka",
     "pdf": "PDF",
     "pending_tasks": "Nema zadataka na čekanju | 1 zadatak na čekanju | {count} zadataka na čekanju",
+    "pinned_libraries": "Prikvačene biblioteke",
     "publisher": "Izdavač",
     "read": "Čitaj",
     "read_on": "Čitaj {date}",
     "readlist": "Lista čitanja",
     "readlists": "Liste čitanja",
     "remember-me": "Zapamti me",
+    "reorder": "Promijeni redoslijed",
     "required": "Obavezno",
     "reset_filters": "Resetiraj filtre",
     "roles": "Uloge",
     "save_changes": "Spremi promjene",
     "series": "Serija | Serije",
+    "settings": "Postavke",
     "sidecars": "Povezane datoteke",
     "tags": "Oznake",
+    "ui": "Korisničko sučelje",
     "unavailable": "Nedostupno",
     "unlock_all": "Otključaj sve",
     "url": "URL",
@@ -281,6 +302,7 @@
     "comicrack_preambule_html": "Postojeće ComicRack liste čitanja možeš uvesti u <code>.cbl</code> formatu.<br>Komga će pokušati uskladiti danu seriju i broj knjige sa serijama i knjigama u tvojim bibliotekema.",
     "dialog_confirmation": {
       "body": "{unmatched} / {total} knjiga se ne podudaraju",
+      "body2": "{duplicates} / {total} knjiga je duplicirano",
       "create": "Svejedno stvori",
       "title": "Neke se knjige ne podudaraju"
     },
@@ -441,6 +463,7 @@
       "dialot_title_edit": "Uredi biblioteku",
       "field_analysis_analyze_dimensions": "Analiziraj dimenzije stranica",
       "field_analysis_hash_files": "Izračunaj šifre za datoteke",
+      "field_analysis_hash_koreader": "Izračunaj šifre za datoteke za KOReader",
       "field_analysis_hash_pages": "Izračunaj šifre za stranice",
       "field_convert_to_cbz": "Automatski konvertiraj u CBZ",
       "field_import_barcode_isbn": "ISBN barkod",
@@ -492,6 +515,11 @@
       "label_ordering": "Knjige u listi čitanja se standardno razvrstavaju ručno. Ručno razvrstavanje možeš deaktivirati za razvrstavanje po datumu izdanja.",
       "tab_general": "Općenito",
       "tab_poster": "Poster"
+    },
+    "edit_recommended": {
+      "button_confirm": "Spremi promjene",
+      "button_reset": "Resetiraj na standardne vrijednosti",
+      "dialog_title": "Uredi prikaz preporučenih"
     },
     "edit_series": {
       "button_cancel": "Odustani",
@@ -632,6 +660,7 @@
     "delete_to_save": "Izbriši i uštedi {size}",
     "deleted_count": "Izbrisano {count} puta",
     "empty_title": "Duple stranice nisu pronađene",
+    "empty_title_known": "Nema poznatih duplikata",
     "filter": {
       "count": "Broj",
       "date_added": "Datum dodavanja",
@@ -685,6 +714,11 @@
       "DuplicatePageDeleted": "Dupla stranica izbrisana",
       "SeriesFolderDeleted": "Mapa serije izbrisana"
     },
+    "media_profile": {
+      "DIVINA": "DIVINA",
+      "EPUB": "EPUB",
+      "PDF": "PDF"
+    },
     "media_status": {
       "ERROR": "Greška",
       "OUTDATED": "Neaktualno",
@@ -733,8 +767,10 @@
   "epubreader": {
     "current_chapter": "Aktualno poglavlje",
     "page_of": "Stranica {page} od {count}",
+    "publisher_font": "Izdavač",
     "settings": {
       "column_count": "Broj stupaca",
+      "font_family": "Font",
       "layout": "Raspored",
       "layout_paginated": "Paginirano",
       "layout_scroll": "Listanje klizačem",
@@ -796,11 +832,14 @@
   "filter": {
     "age_rating": "dobna kategorija",
     "age_rating_none": "Bez",
+    "any": "Bilo koji",
     "complete": "Dovršeno",
     "genre": "žanr",
     "in_progress": "U tijeku",
     "language": "jezik",
     "library": "biblioteka",
+    "media_profile": "Profil medija",
+    "media_status": "Stanje medija",
     "oneshot": "Izdanje bez nastavka",
     "publisher": "izdavač",
     "read": "Čitaj",
@@ -830,6 +869,8 @@
   },
   "library_navigation": {
     "browse": "Pregledaj",
+    "browse_books": "Knjige",
+    "browse_series": "Serije",
     "collections": "Zbirke",
     "readlists": "Liste čitanja",
     "recommended": "Preporučeno"
@@ -848,9 +889,6 @@
     "status": "Stanje",
     "url": "URL"
   },
-  "media_management": {
-    "title": "Upravljanje medijima"
-  },
   "menu": {
     "add_to_collection": "Dodaj u zbirku",
     "add_to_readlist": "Dodaj u listu čitanja",
@@ -865,10 +903,12 @@
     "empty_trash": "Isprazni smeće",
     "mark_read": "Označi kao pročitano",
     "mark_unread": "Označi kao nepročitano",
+    "pin": "Prikvači",
     "refresh_metadata": "Aktualiziraj metapodatke",
     "scan_library_files": "Pretraži datoteke biblioteke",
     "scan_library_files_deep": "Pretraži datoteke biblioteke (duboko)",
-    "select_all": "Odaberi sve"
+    "select_all": "Odaberi sve",
+    "unpin": "Otkvači"
   },
   "metrics": {
     "library_books": "Broj knjiga po biblioteci",
@@ -879,10 +919,17 @@
     "tasks_total_time": "Ukupno utrošeno vrijeme za zadatke",
     "title": "Statistika"
   },
+  "missing_posters": {
+    "title": "Posteri koji nedostaju"
+  },
   "navigation": {
     "home": "Početna stranica",
     "libraries": "Biblioteke",
     "logout": "Odjavi se"
+  },
+  "no_libraries_pinned": {
+    "subtitle": "Biblioteku možeš prikvačiti u izborniku s 3 točke",
+    "title": "Nema prikvačenih biblioteka"
   },
   "page_not_found": {
     "go_back_to_home_page": "Vrati se na početnu stranicu",
@@ -921,10 +968,12 @@
       "button_scan_libraries": "Pretraži sve biblioteke",
       "button_scan_libraries_deep": "Pretraži sve biblioteke (duboko)",
       "button_shutdown": "Isključi",
+      "download_log": "Preuzmi datoteku zapisa",
       "notification_tasks_cancelled": "Nema zadataka za prekidanje | Jedan zadatak prekinut | {count} zadatka prekinuta",
       "section_title": "Upravljanje serverom"
     },
-    "tab_title": "Server"
+    "tab_title": "Server",
+    "updates": "Aktualiziranja"
   },
   "server_settings": {
     "config_precedence": "Ima prednost nad konfiguracijskom datotekom",
@@ -938,6 +987,7 @@
     "hint_kobo_port": "Postavi samo u slučaju problema sa sinkronizacijom omota i preuzimanja",
     "label_delete_empty_collections": "Izbriši prazne zbirke nakon pretraživanja",
     "label_delete_empty_readlists": "Izbriši prazne liste čitanja nakon pretraživanja",
+    "label_kepubify_path": "Staza do kepubify",
     "label_kobo_port": "Eksterni priključak Kobo sinkronizacije",
     "label_kobo_proxy": "Zahtjevi servera Kobo sinkronizacije za Kobo trgovinu",
     "label_rememberme_duration": "„Zapamti me” trajanje (u danima)",
@@ -960,13 +1010,17 @@
   "sort": {
     "books_count": "Broj knjiga",
     "date_added": "Datum dodavanja",
+    "date_read": "Datum čitanja",
     "date_updated": "Datum aktualiziranja",
     "file_name": "Ime datoteke",
     "file_size": "Veličina datoteke",
     "folder_name": "Ime mape",
     "name": "Ime",
     "number": "Broj",
-    "release_date": "Datum izdanja"
+    "page_count": "Broj stranica",
+    "random": "Nasumce",
+    "release_date": "Datum izdanja",
+    "series": "Serije"
   },
   "theme": {
     "dark": "Tamna",
@@ -988,10 +1042,29 @@
     "less": "Manje naslova",
     "more": "Više naslova"
   },
+  "ui_settings": {
+    "general": "Općenito",
+    "label_oauth2_auto_login": "Automatska OAuth2 prijava",
+    "label_oauth2_hide_login": "Sakrij polja prijave ako je Oauth2 aktivirano",
+    "label_poster_blur_unread": "Zamuti poster za nepročitane knjige i serije",
+    "label_poster_stretch": "Rastegni poster na veličinu kartice",
+    "label_series_groups": "Grupiranje serija",
+    "section_oauth2": "OAuth2",
+    "series_groups": {
+      "alpha": "Abecedni red",
+      "japanese": "Gojūon (japanski)"
+    },
+    "tooltip_oauth2_auto_login": "Zahtijeva jednog pružatelja OAuth2 autentifikacije i aktiviranu opciju „sakrij polja prijave”"
+  },
+  "updates": {
+    "available": "Postoje nove verzije",
+    "latest_installed": "Najnovija Komga verzija je već instalirana"
+  },
   "user_roles": {
     "ADMIN": "Administrator",
     "FILE_DOWNLOAD": "Preuzimanje datoteke",
     "KOBO_SYNC": "Kobo sinkronizacija",
+    "KOREADER_SYNC": "KOReader sinkronizacija",
     "PAGE_STREAMING": "Internetski prijenos stranica",
     "USER": "Korisnik"
   },

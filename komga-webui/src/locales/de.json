@@ -25,7 +25,9 @@
       "generate_api_key": "Erzeuge API Schlüssel",
       "no_keys": "Bisher keine API Schlüssel vorhanden"
     },
-    "change_password": "Passwort ändern"
+    "change_password": "Passwort ändern",
+    "details": "Details",
+    "my_account": "Mein Account"
   },
   "announcements": {
     "mark_all_read": "Alle als gelesen markieren",
@@ -93,6 +95,7 @@
     "beginning_of_book": "Sie sind am Anfang des Buches.",
     "changing_reading_direction": "Leserichtung ändern zu",
     "cycling_page_layout": "Seitendarstellung ändern",
+    "cycling_page_margin": "Seitenabstände ändern",
     "cycling_scale": "Skalierung ändern",
     "cycling_side_padding": "Seitenrand ändern",
     "download_current_page": "Aktuelle Seite herunterladen",
@@ -135,6 +138,7 @@
       "general": "Allgemein",
       "gestures": "Gesten",
       "page_layout": "Seiteneinstellungen",
+      "page_margin": "Seitenabstand",
       "paged": "Einstellungen zur Seitenausrichtung",
       "reading_mode": "Lesemodus",
       "scale_type": "Skalierung",
@@ -145,6 +149,7 @@
     "shortcuts": {
       "close": "Schließen",
       "cycle_page_layout": "Wechsle Seitendarstellung",
+      "cycle_page_margin": "Seitenrandauswahl ändern",
       "cycle_scale": "Ändern der Skalierung",
       "cycle_side_padding": "Seitenrand ändern",
       "first_page": "Erste Seite",
@@ -168,6 +173,8 @@
   },
   "browse_book": {
     "comment": "Kommentar",
+    "date_created": "Erstellt",
+    "date_modified": "Zuletzt geändert",
     "download_file": "Datei herunterladen",
     "file": "DATEI",
     "format": "FORMAT",
@@ -177,6 +184,8 @@
     "outdated_tooltip": "Die Buchdatei hat sich geändert, das Buch muss analysiert werden",
     "read_book": "Lese Buch",
     "read_incognito": "Inkognito lesen",
+    "remove_from_collection": "Buch aus Sammlung entfernen",
+    "remove_from_readlist": "Entferne Buch aus der Leseliste",
     "size": "GRÖẞE"
   },
   "browse_collection": {
@@ -191,6 +200,7 @@
   },
   "browse_series": {
     "earliest_year_from_release_dates": "Dies ist das früheste Erscheinungsjahr von allen Büchern in der Serie",
+    "remove_from_collection": "Entferne Serie aus der Sammlung",
     "series_no_summary": "Diese Serie hat keine Kurzbeschreibung, es wurde eine aus der Serie per Zufall ausgewählt!",
     "summary_from_book": "Inhaltsangabe des Buches {number}:"
   },
@@ -201,6 +211,8 @@
   "common": {
     "age": "Alter",
     "all_libraries": "Alle Bibliotheken",
+    "all_of": "Alle von",
+    "any_of": "Einige von",
     "book": "Buch",
     "books": "Bücher",
     "books_n": "Kein Buch | 1 Buch | {count} Bücher",
@@ -219,8 +231,10 @@
     "dismiss": "Verwerfen",
     "download": "Herunterladen",
     "drag_drop": "Drag and Drop",
+    "duplicate": "Duplikat",
     "email": "E-Mail",
     "epub": "EPUB",
+    "error": "Fehler",
     "filename": "Dateiname",
     "filter_no_matches": "Die Suchkriterien haben kein Ergebnis geliefert",
     "genre": "Genre",
@@ -233,8 +247,11 @@
     "locale_name": "Deutsch",
     "locale_rtl": "false",
     "lock_all": "Alle sperren",
+    "media": "Media",
+    "more": "Mehr",
     "n_selected": "{count} markiert",
     "nothing_to_show": "Nichts anzuzeigen",
+    "ok": "OK",
     "oneshot": "One-Shot",
     "outdated": "Nicht mehr aktuell",
     "page": "Seite",
@@ -245,19 +262,23 @@
     "password": "Passwort",
     "pdf": "PDF",
     "pending_tasks": "Keine ausstehenden Aufgaben | 1 ausstehende Aufgabe | {count} ausstehende Aufgaben",
+    "pinned_libraries": "Fixierte Bibliotheken",
     "publisher": "Verlag",
     "read": "Lesen",
     "read_on": "Am {date} gelesen",
     "readlist": "Leseliste",
     "readlists": "Leseliste",
     "remember-me": "Erinnere Dich an mich",
+    "reorder": "Neu sortieren",
     "required": "Notwendig",
     "reset_filters": "Filter Zurücksetzen",
     "roles": "Rollen",
     "save_changes": "Änderungen speichern",
     "series": "Serie | Serien",
-    "sidecars": "Sidecars",
+    "settings": "Einstellungen",
+    "sidecars": "Extras",
     "tags": "Stichwörter",
+    "ui": "Benutzeroberfläche",
     "unavailable": "Nicht verfügbar",
     "unlock_all": "Alle entsperren",
     "url": "URL",
@@ -281,6 +302,7 @@
     "comicrack_preambule_html": "Es ist möglich ComicRack Leselisten im Format <code>.cbl</code> zu übernehmen.<br>Komga versucht die übernommenen Serien und Buchnummern mit den Serien und Büchern in der Bibliothek abzugleichen.",
     "dialog_confirmation": {
       "body": "{unmatched} / {total} Bücher haben keine Übereinstimmung",
+      "body2": "{duplicates} / {total} Bücher sind doppelt",
       "create": "Trotzdem erstellen",
       "title": "Einige Bücher stimmen nicht überein"
     },
@@ -441,6 +463,7 @@
       "dialot_title_edit": "Bibliothek bearbeiten",
       "field_analysis_analyze_dimensions": "Analysiere Seitenformat",
       "field_analysis_hash_files": "Erzeuge einen Hash für Dateien",
+      "field_analysis_hash_koreader": "Compute Hash für KO Reader Dateien",
       "field_analysis_hash_pages": "Erzeuge einen Hash für Seiten",
       "field_convert_to_cbz": "Automatisch in CBZ konvertieren",
       "field_import_barcode_isbn": "ISBN Strichcode",
@@ -492,6 +515,10 @@
       "label_ordering": "Standardmäßig werden die Bücher in einer Leseliste manuell sortiert. Sie können die manuelle Sortierung deaktivieren, um die Bücher nach Erscheinungsdatum zu sortieren.",
       "tab_general": "Allgemein",
       "tab_poster": "Poster"
+    },
+    "edit_recommended": {
+      "button_confirm": "Änderungen speichern",
+      "button_reset": "Zurücksetzen auf Standardwerte"
     },
     "edit_series": {
       "button_cancel": "Abbrechen",
@@ -848,9 +875,6 @@
     "status": "Status",
     "url": "URL"
   },
-  "media_management": {
-    "title": "Medien Verwaltung"
-  },
   "menu": {
     "add_to_collection": "Zu Sammlung hinzufügen",
     "add_to_readlist": "Füge zur Leseliste hinzu",
@@ -874,7 +898,7 @@
     "library_books": "Bücher pro Bibliothek",
     "library_disk_space": "Speicherverbrauch der Bibliothek",
     "library_series": "Serien pro Bibliothek",
-    "library_sidecars": "Sidecars pro Bibliothek",
+    "library_sidecars": "Extras pro Bibliothek",
     "tasks_executed": "Aufgaben ausgeführt",
     "tasks_total_time": "Benötigte Gesamtzeit für die Aufgaben",
     "title": "Metriken"
@@ -921,10 +945,12 @@
       "button_scan_libraries": "Scanne alle Bibliotheken",
       "button_scan_libraries_deep": "(Tiefen) Scan aller Bibliotheken",
       "button_shutdown": "Herunterfahren",
+      "download_log": "Lade das Logfile herunter",
       "notification_tasks_cancelled": "Keine Aufgaben abzubrechen | Eine Aufgabe abgebrochen | {count} Aufgaben abgebrochen",
       "section_title": "Serververwaltung"
     },
-    "tab_title": "Server"
+    "tab_title": "Server",
+    "updates": "Aktuallisierungen"
   },
   "server_settings": {
     "config_precedence": "Hat Vorrang vor der Konfigurationsdatei",
@@ -938,6 +964,7 @@
     "hint_kobo_port": "Nur zu setzen wenn es Sync Probleme mit Covers und Downloads gibt",
     "label_delete_empty_collections": "Lösche leere Kollectionen nach der Prüfung (Scan)",
     "label_delete_empty_readlists": "Lösche leere Leselisten nach der Überprüfung (Scan)",
+    "label_kepubify_path": "Dateipfad zu kepubify",
     "label_kobo_port": "Kobo Sync externer Port",
     "label_kobo_proxy": "Proxy Kobo Sync Anfrage für den Kobo Store",
     "label_rememberme_duration": "Laufzeit der Erinnere dich an mich Funktion (in Tagen)",
@@ -960,12 +987,15 @@
   "sort": {
     "books_count": "Anzahl der Bücher",
     "date_added": "Hinzufügedatum",
+    "date_read": "Lesedatum",
     "date_updated": "Aktualisierungsdatum",
     "file_name": "Dateiname",
     "file_size": "Dateigröße",
     "folder_name": "Ordnername",
     "name": "Nach Name sortiert",
     "number": "Nummer",
+    "page_count": "Anzahl Seiten",
+    "random": "Zufallsortierung",
     "release_date": "Veröffentlichungsdatum"
   },
   "theme": {
@@ -987,6 +1017,10 @@
   "titles_more": {
     "less": "Weniger Titel",
     "more": "Weitere Titel"
+  },
+  "updates": {
+    "available": "Aktuallisierung ist verfügbar",
+    "latest_installed": "Die neueste Version von Komga ist schon installiert"
   },
   "user_roles": {
     "ADMIN": "Systemverwalter",

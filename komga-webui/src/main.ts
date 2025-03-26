@@ -30,7 +30,9 @@ import komgaPageHashes from './plugins/komga-pagehashes.plugin'
 import komgaMetrics from './plugins/komga-metrics.plugin'
 import komgaHistory from './plugins/komga-history.plugin'
 import komgaAnnouncements from './plugins/komga-announcements.plugin'
+import komgaReleases from './plugins/komga-releases.plugin'
 import komgaSettings from './plugins/komga-settings.plugin'
+import komgaFonts from './plugins/komga-fonts.plugin'
 import vuetify from './plugins/vuetify'
 import logger from './plugins/logger.plugin'
 import './public-path'
@@ -57,6 +59,7 @@ Vue.use(Chartkick.use(Chart))
 
 Vue.use(httpPlugin)
 Vue.use(logger)
+Vue.use(komgaSettings, {store: store, http: Vue.prototype.$http})
 Vue.use(komgaFileSystem, {http: Vue.prototype.$http})
 Vue.use(komgaSeries, {http: Vue.prototype.$http})
 Vue.use(komgaCollections, {http: Vue.prototype.$http})
@@ -77,7 +80,8 @@ Vue.use(komgaPageHashes, {http: Vue.prototype.$http})
 Vue.use(komgaMetrics, {http: Vue.prototype.$http})
 Vue.use(komgaHistory, {http: Vue.prototype.$http})
 Vue.use(komgaAnnouncements, {http: Vue.prototype.$http})
-Vue.use(komgaSettings, {http: Vue.prototype.$http})
+Vue.use(komgaReleases, {http: Vue.prototype.$http})
+Vue.use(komgaFonts, {http: Vue.prototype.$http})
 
 Vue.config.productionTip = false
 

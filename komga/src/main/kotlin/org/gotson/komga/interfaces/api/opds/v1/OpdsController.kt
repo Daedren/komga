@@ -6,15 +6,17 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.apache.commons.io.FilenameUtils
-import org.gotson.komga.domain.model.BookSearchWithReadProgress
+import org.gotson.komga.domain.model.BookSearch
 import org.gotson.komga.domain.model.Library
 import org.gotson.komga.domain.model.Media
 import org.gotson.komga.domain.model.MediaProfile
-import org.gotson.komga.domain.model.ROLE_PAGE_STREAMING
 import org.gotson.komga.domain.model.ReadList
 import org.gotson.komga.domain.model.ReadStatus
+import org.gotson.komga.domain.model.SearchCondition
+import org.gotson.komga.domain.model.SearchContext
+import org.gotson.komga.domain.model.SearchOperator
 import org.gotson.komga.domain.model.SeriesCollection
-import org.gotson.komga.domain.model.SeriesSearchWithReadProgress
+import org.gotson.komga.domain.model.SeriesSearch
 import org.gotson.komga.domain.model.ThumbnailBook
 import org.gotson.komga.domain.persistence.LibraryRepository
 import org.gotson.komga.domain.persistence.MediaRepository
@@ -25,7 +27,6 @@ import org.gotson.komga.domain.service.BookLifecycle
 import org.gotson.komga.infrastructure.configuration.KomgaSettingsProvider
 import org.gotson.komga.infrastructure.image.ImageType
 import org.gotson.komga.infrastructure.security.KomgaPrincipal
-import org.gotson.komga.infrastructure.swagger.PageAsQueryParam
 import org.gotson.komga.interfaces.api.CommonBookController
 import org.gotson.komga.interfaces.api.ContentRestrictionChecker
 import org.gotson.komga.interfaces.api.dto.MEDIATYPE_OPDS_JSON_VALUE
@@ -126,14 +127,13 @@ class OpdsController(
 
   private fun linkStart() = OpdsLinkFeedNavigation(OpdsLinkRel.START, uriBuilder(ROUTE_CATALOG).toUriString())
 
-  private fun uriBuilder(path: String) =
-    ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("opds", "v1.2").path(path)
+  private fun uriBuilder(path: String) = ServletUriComponentsBuilder.fromCurrentContextPath().pathSegment("opds", "v1.2").path(path)
 
   private fun <T> linkPage(
     uriBuilder: UriComponentsBuilder,
     page: Page<T>,
-  ): List<OpdsLink> {
-    return listOfNotNull(
+  ): List<OpdsLink> =
+    listOfNotNull(
       if (!page.isFirst)
         OpdsLinkFeedNavigation(
           OpdsLinkRel.PREVIOUS,
@@ -149,7 +149,6 @@ class OpdsController(
       else
         null,
     )
-  }
 
   @GetMapping(ROUTE_CATALOG)
   fun getCatalog(): OpdsFeed =
@@ -241,7 +240,6 @@ class OpdsController(
       url = OpenSearchDescription.OpenSearchUrl(uriBuilder(ROUTE_SERIES_ALL).toUriString() + "?search={searchTerms}"),
     )
 
-  @PageAsQueryParam
   @GetMapping(ROUTE_ON_DECK)
   fun getOnDeck(
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -272,7 +270,6 @@ class OpdsController(
     )
   }
 
-  @PageAsQueryParam
   @GetMapping(ROUTE_KEEP_READING)
   fun getKeepReading(
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -281,22 +278,22 @@ class OpdsController(
     val pageable = PageRequest.of(page.pageNumber, page.pageSize, Sort.by(Sort.Order.desc("readProgress.readDate")))
 
     val bookSearch =
-      BookSearchWithReadProgress(
-        libraryIds = principal.user.getAuthorizedLibraryIds(null),
-        readStatus = setOf(ReadStatus.IN_PROGRESS),
-        mediaStatus = setOf(Media.Status.READY),
-        deleted = false,
+      BookSearch(
+        SearchCondition.AllOfBook(
+          SearchCondition.ReadStatus(SearchOperator.Is(ReadStatus.IN_PROGRESS)),
+          SearchCondition.MediaStatus(SearchOperator.Is(Media.Status.READY)),
+          SearchCondition.Deleted(SearchOperator.IsFalse),
+        ),
       )
 
     val bookPage =
       bookDtoRepository.findAll(
         bookSearch,
-        principal.user.id,
+        SearchContext(principal.user),
         pageable,
-        principal.user.restrictions,
       )
 
-    val builder = uriBuilder(ROUTE_ON_DECK)
+    val builder = uriBuilder(ROUTE_KEEP_READING)
 
     return OpdsFeedAcquisition(
       id = ID_KEEP_READING,
@@ -313,7 +310,6 @@ class OpdsController(
     )
   }
 
-  @PageAsQueryParam
   @GetMapping(ROUTE_SERIES_ALL)
   fun getAllSeries(
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -329,14 +325,17 @@ class OpdsController(
     val pageable = PageRequest.of(page.pageNumber, page.pageSize, sort)
 
     val seriesSearch =
-      SeriesSearchWithReadProgress(
-        libraryIds = principal.user.getAuthorizedLibraryIds(null),
-        searchTerm = searchTerm,
-        publishers = publishers,
-        deleted = false,
+      SeriesSearch(
+        SearchCondition.AllOfSeries(
+          buildList {
+            searchTerm?.let { add(SearchCondition.Title(SearchOperator.Contains(it))) }
+            publishers?.let { add(SearchCondition.AnyOfSeries(it.map { publisher -> SearchCondition.Publisher(SearchOperator.Is(publisher)) })) }
+            add(SearchCondition.Deleted(SearchOperator.IsFalse))
+          },
+        ),
       )
 
-    val seriesPage = seriesDtoRepository.findAll(seriesSearch, principal.user.id, pageable, principal.user.restrictions)
+    val seriesPage = seriesDtoRepository.findAll(seriesSearch, SearchContext(principal.user), pageable)
 
     val builder =
       uriBuilder(ROUTE_SERIES_ALL)
@@ -358,7 +357,6 @@ class OpdsController(
     )
   }
 
-  @PageAsQueryParam
   @GetMapping(ROUTE_SERIES_LATEST)
   fun getLatestSeries(
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -366,13 +364,9 @@ class OpdsController(
   ): OpdsFeed {
     val pageable = PageRequest.of(page.pageNumber, page.pageSize, Sort.by(Sort.Order.desc("lastModified")))
 
-    val seriesSearch =
-      SeriesSearchWithReadProgress(
-        libraryIds = principal.user.getAuthorizedLibraryIds(null),
-        deleted = false,
-      )
+    val seriesSearch = SeriesSearch(SearchCondition.Deleted(SearchOperator.IsFalse))
 
-    val seriesPage = seriesDtoRepository.findAll(seriesSearch, principal.user.id, pageable, principal.user.restrictions)
+    val seriesPage = seriesDtoRepository.findAll(seriesSearch, SearchContext(principal.user), pageable)
 
     val uriBuilder = uriBuilder(ROUTE_SERIES_LATEST)
 
@@ -391,21 +385,21 @@ class OpdsController(
     )
   }
 
-  @PageAsQueryParam
   @GetMapping(ROUTE_BOOKS_LATEST)
   fun getLatestBooks(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @Parameter(hidden = true) page: Pageable,
   ): OpdsFeed {
     val bookSearch =
-      BookSearchWithReadProgress(
-        libraryIds = principal.user.getAuthorizedLibraryIds(null),
-        mediaStatus = setOf(Media.Status.READY),
-        deleted = false,
+      BookSearch(
+        SearchCondition.AllOfBook(
+          SearchCondition.MediaStatus(SearchOperator.Is(Media.Status.READY)),
+          SearchCondition.Deleted(SearchOperator.IsFalse),
+        ),
       )
     val pageable = PageRequest.of(page.pageNumber, page.pageSize, Sort.by(Sort.Order.desc("createdDate")))
 
-    val bookPage = bookDtoRepository.findAll(bookSearch, principal.user.id, pageable, principal.user.restrictions)
+    val bookPage = bookDtoRepository.findAll(bookSearch, SearchContext(principal.user), pageable)
 
     val uriBuilder = uriBuilder(ROUTE_BOOKS_LATEST)
 
@@ -448,7 +442,6 @@ class OpdsController(
     )
   }
 
-  @PageAsQueryParam
   @GetMapping(ROUTE_COLLECTIONS_ALL)
   fun getCollections(
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -474,7 +467,6 @@ class OpdsController(
     )
   }
 
-  @PageAsQueryParam
   @GetMapping(ROUTE_READLISTS_ALL)
   fun getReadLists(
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -500,7 +492,6 @@ class OpdsController(
     )
   }
 
-  @PageAsQueryParam
   @GetMapping(ROUTE_PUBLISHERS_ALL)
   fun getPublishers(
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -534,7 +525,6 @@ class OpdsController(
     )
   }
 
-  @PageAsQueryParam
   @GetMapping("series/{id}")
   fun getOneSeries(
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -545,15 +535,18 @@ class OpdsController(
       contentRestrictionChecker.checkContentRestriction(principal.user, series)
 
       val bookSearch =
-        BookSearchWithReadProgress(
-          seriesIds = listOf(id),
-          mediaStatus = setOf(Media.Status.READY),
-          deleted = false,
+        BookSearch(
+          SearchCondition.AllOfBook(
+            SearchCondition.SeriesId(SearchOperator.Is(series.id)),
+            SearchCondition.MediaStatus(SearchOperator.Is(Media.Status.READY)),
+            SearchCondition.Deleted(SearchOperator.IsFalse),
+          ),
         )
       val pageable = PageRequest.of(page.pageNumber, page.pageSize, Sort.by(Sort.Order.asc("metadata.numberSort")))
 
       val entries =
-        bookDtoRepository.findAll(bookSearch, principal.user.id, pageable, principal.user.restrictions)
+        bookDtoRepository
+          .findAll(bookSearch, SearchContext(principal.user), pageable)
           .map { it.toOpdsEntry(mediaRepository.findById(it.id)) }
 
       val uriBuilder = uriBuilder("series/$id")
@@ -573,7 +566,6 @@ class OpdsController(
       )
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
-  @PageAsQueryParam
   @GetMapping("libraries/{id}")
   fun getOneLibrary(
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -584,15 +576,18 @@ class OpdsController(
       if (!principal.user.canAccessLibrary(library)) throw ResponseStatusException(HttpStatus.FORBIDDEN)
 
       val seriesSearch =
-        SeriesSearchWithReadProgress(
-          libraryIds = setOf(library.id),
-          deleted = false,
+        SeriesSearch(
+          SearchCondition.AllOfSeries(
+            SearchCondition.LibraryId(SearchOperator.Is(library.id)),
+            SearchCondition.Deleted(SearchOperator.IsFalse),
+          ),
         )
 
       val pageable = PageRequest.of(page.pageNumber, page.pageSize, Sort.by(Sort.Order.asc("metadata.titleSort")))
 
       val entries =
-        seriesDtoRepository.findAll(seriesSearch, principal.user.id, pageable, principal.user.restrictions)
+        seriesDtoRepository
+          .findAll(seriesSearch, SearchContext(principal.user), pageable)
           .map { it.toOpdsEntry() }
 
       val uriBuilder = uriBuilder("libraries/$id")
@@ -612,7 +607,6 @@ class OpdsController(
       )
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
-  @PageAsQueryParam
   @GetMapping("collections/{id}")
   fun getOneCollection(
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -628,13 +622,16 @@ class OpdsController(
       val pageable = PageRequest.of(page.pageNumber, page.pageSize, sort)
 
       val seriesSearch =
-        SeriesSearchWithReadProgress(
-          libraryIds = principal.user.getAuthorizedLibraryIds(null),
-          deleted = false,
+        SeriesSearch(
+          SearchCondition.AllOfSeries(
+            SearchCondition.CollectionId(SearchOperator.Is(collection.id)),
+            SearchCondition.Deleted(SearchOperator.IsFalse),
+          ),
         )
 
       val entries =
-        seriesDtoRepository.findAllByCollectionId(collection.id, seriesSearch, principal.user.id, pageable, principal.user.restrictions)
+        seriesDtoRepository
+          .findAll(seriesSearch, SearchContext(principal.user), pageable)
           .map { it.toOpdsEntry() }
 
       val uriBuilder = uriBuilder("collections/$id")
@@ -654,7 +651,6 @@ class OpdsController(
       )
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
-  @PageAsQueryParam
   @GetMapping("readlists/{id}")
   fun getOneReadList(
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -670,20 +666,14 @@ class OpdsController(
       val pageable = PageRequest.of(page.pageNumber, page.pageSize, sort)
 
       val bookSearch =
-        BookSearchWithReadProgress(
-          mediaStatus = setOf(Media.Status.READY),
-          deleted = false,
+        BookSearch(
+          SearchCondition.AllOfBook(
+            SearchCondition.ReadListId(SearchOperator.Is(readList.id)),
+            SearchCondition.MediaStatus(SearchOperator.Is(Media.Status.READY)),
+            SearchCondition.Deleted(SearchOperator.IsFalse),
+          ),
         )
-
-      val booksPage =
-        bookDtoRepository.findAllByReadListId(
-          readList.id,
-          principal.user.id,
-          principal.user.getAuthorizedLibraryIds(null),
-          bookSearch,
-          pageable,
-          principal.user.restrictions,
-        )
+      val booksPage = bookDtoRepository.findAll(bookSearch, SearchContext(principal.user), pageable)
 
       val entries =
         booksPage.map { bookDto ->
@@ -725,7 +715,7 @@ class OpdsController(
 
   @ApiResponse(content = [Content(mediaType = "image/*", schema = Schema(type = "string", format = "binary"))])
   @GetMapping("books/{bookId}/pages/{pageNumber}", produces = ["image/png", "image/gif", "image/jpeg"])
-  @PreAuthorize("hasRole('$ROLE_PAGE_STREAMING')")
+  @PreAuthorize("hasRole('PAGE_STREAMING')")
   fun getBookPageOpds(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     request: ServletWebRequest,
@@ -737,8 +727,7 @@ class OpdsController(
     )
     @RequestParam(value = "convert", required = false)
     convertTo: String?,
-  ): ResponseEntity<ByteArray> =
-    commonBookController.getBookPageInternal(bookId, pageNumber + 1, convertTo, request, principal, null)
+  ): ResponseEntity<ByteArray> = commonBookController.getBookPageInternal(bookId, pageNumber + 1, convertTo, request, principal, null)
 
   private fun SeriesDto.toOpdsEntry(prepend: Int? = null): OpdsEntryNavigation {
     val pre = prepend?.let { decimalFormat.format(it) + " - " } ?: ""
@@ -830,6 +819,5 @@ class OpdsController(
       bookDto.toOpdsEntry(mediaRepository.findById(bookDto.id)) { "${it.seriesTitle} ${it.metadata.number}: " }
     }
 
-  private fun sanitize(fileName: String): String =
-    fileName.replace(";", "")
+  private fun sanitize(fileName: String): String = fileName.replace(";", "")
 }

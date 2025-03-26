@@ -2,12 +2,11 @@ package org.gotson.komga.infrastructure.security
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.Filter
-import org.gotson.komga.domain.model.ROLE_ADMIN
-import org.gotson.komga.domain.model.ROLE_KOBO_SYNC
-import org.gotson.komga.domain.model.ROLE_USER
+import org.gotson.komga.domain.model.UserRoles
 import org.gotson.komga.infrastructure.configuration.KomgaSettingsProvider
 import org.gotson.komga.infrastructure.security.apikey.ApiKeyAuthenticationFilter
 import org.gotson.komga.infrastructure.security.apikey.ApiKeyAuthenticationProvider
+import org.gotson.komga.infrastructure.security.apikey.HeaderApiKeyAuthenticationConverter
 import org.gotson.komga.infrastructure.security.apikey.UriRegexApiKeyAuthenticationConverter
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest
 import org.springframework.boot.actuate.health.HealthEndpoint
@@ -76,53 +75,55 @@ class SecurityConfiguration(
           "/login/oauth2/code/**",
         )
         it.requestMatchers(EndpointRequest.toAnyEndpoint())
-      }
-      .authorizeHttpRequests {
+      }.authorizeHttpRequests {
         // allow unauthorized access to actuator health endpoint
         // this will only show limited details as `management.endpoint.health.show-details` is set to `when-authorized`
         it.requestMatchers(EndpointRequest.to(HealthEndpoint::class.java)).permitAll()
         // restrict all other actuator endpoints to ADMIN only
-        it.requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(ROLE_ADMIN)
+        it.requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole(UserRoles.ADMIN.name)
 
-        it.requestMatchers(
-          // to claim server before any account is created
-          "/api/v1/claim",
-          // used by webui
-          "/api/v1/oauth2/providers",
-          // epub resources - fonts are always requested anonymously, so we check for authorization within the controller method directly
-          "api/v1/books/{bookId}/resource/**",
-          // OPDS authentication document
-          "/opds/v2/auth",
-        ).permitAll()
+        it
+          .requestMatchers(
+            // to claim server before any account is created
+            "/api/v1/claim",
+            // used by webui
+            "/api/v1/oauth2/providers",
+            // used by webui, we check for authorization within the controller method directly and filter results from there
+            "/api/v1/client-settings/global/list",
+            // epub resources - fonts are always requested anonymously, so we check for authorization within the controller method directly
+            "/api/v1/books/{bookId}/resource/**",
+            // dynamic fonts
+            "/api/v1/fonts/resource/**",
+            // OPDS authentication document
+            "/opds/v2/auth",
+            // KOReader user creation
+            "/koreader/users/create",
+          ).permitAll()
 
         // all other endpoints are restricted to authenticated users
-        it.requestMatchers(
-          "/api/**",
-          "/opds/**",
-          "/sse/**",
-        ).hasRole(ROLE_USER)
-      }
-      .headers { headersConfigurer ->
+        it
+          .requestMatchers(
+            "/api/**",
+            "/opds/**",
+            "/sse/**",
+          ).authenticated()
+      }.headers { headersConfigurer ->
         headersConfigurer.cacheControl { it.disable() } // headers are set in WebMvcConfiguration
         headersConfigurer.frameOptions { it.sameOrigin() } // for epubreader iframes
-      }
-      .userDetailsService(komgaUserDetailsService)
+      }.userDetailsService(komgaUserDetailsService)
       .httpBasic {
         it.authenticationDetailsSource(userAgentWebAuthenticationDetailsSource)
-      }
-      .logout {
+      }.logout {
         it.logoutUrl("/api/logout")
         it.deleteCookies(sessionCookieName)
         it.invalidateHttpSession(true)
-      }
-      .sessionManagement { session ->
+      }.sessionManagement { session ->
         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
         session.sessionConcurrency {
           it.sessionRegistry(theSessionRegistry)
           it.maximumSessions(-1)
         }
-      }
-      .exceptionHandling {
+      }.exceptionHandling {
         it.defaultAuthenticationEntryPointFor(opdsAuthenticationEntryPoint, AntPathRequestMatcher("/opds/v2/**"))
       }
 
@@ -133,7 +134,8 @@ class SecurityConfiguration(
           it.oidcUserService(oidcUserService)
         }
         oauth2.authenticationDetailsSource(userAgentWebAuthenticationDetailsSource)
-        oauth2.loginPage("/login")
+        oauth2
+          .loginPage("/login")
           .defaultSuccessUrl("/?server_redirect=Y", true)
           .failureHandler { request, response, exception ->
             val errorMessage =
@@ -155,9 +157,12 @@ class SecurityConfiguration(
           TokenBasedRememberMeServices(komgaSettingsProvider.rememberMeKey, komgaUserDetailsService).apply {
             setTokenValiditySeconds(komgaSettingsProvider.rememberMeDuration.inWholeSeconds.toInt())
             setAuthenticationDetailsSource(userAgentWebAuthenticationDetailsSource)
+            setCookieName("komga-remember-me")
           },
         )
       }
+
+    http.addFilterBefore(restAuthenticationFilter(), AnonymousAuthenticationFilter::class.java)
 
     return http.build()
   }
@@ -177,7 +182,7 @@ class SecurityConfiguration(
 
       securityMatcher("/kobo/**")
       authorizeHttpRequests {
-        authorize(anyRequest, hasRole(ROLE_KOBO_SYNC))
+        authorize(anyRequest, hasRole(UserRoles.KOBO_SYNC.name))
       }
 
       headers {
@@ -201,10 +206,58 @@ class SecurityConfiguration(
     return http.build()
   }
 
+  @Bean
+  fun kosyncFilterChain(
+    http: HttpSecurity,
+    encoder: PasswordEncoder,
+  ): SecurityFilterChain {
+    http {
+      cors {}
+
+      csrf { disable() }
+      formLogin { disable() }
+      httpBasic { disable() }
+      logout { disable() }
+
+      securityMatcher("/koreader/**")
+      authorizeHttpRequests {
+        authorize(anyRequest, hasRole(UserRoles.KOREADER_SYNC.name))
+      }
+
+      headers {
+        cacheControl { disable() }
+      }
+
+      sessionManagement {
+        sessionCreationPolicy = SessionCreationPolicy.IF_REQUIRED
+        sessionConcurrency {
+          sessionRegistry = theSessionRegistry
+          maximumSessions = -1
+        }
+      }
+
+      addFilterBefore<AnonymousAuthenticationFilter>(kosyncAuthenticationFilter())
+    }
+
+    return http.build()
+  }
+
   fun koboAuthenticationFilter(): Filter =
     ApiKeyAuthenticationFilter(
       apiKeyAuthenticationProvider(),
       UriRegexApiKeyAuthenticationConverter(Regex("""\/kobo\/([\w-]+)"""), tokenEncoder, userAgentWebAuthenticationDetailsSource),
+    )
+
+  fun kosyncAuthenticationFilter(): Filter =
+    ApiKeyAuthenticationFilter(
+      apiKeyAuthenticationProvider(),
+      HeaderApiKeyAuthenticationConverter("X-Auth-User", tokenEncoder, userAgentWebAuthenticationDetailsSource),
+    )
+
+  fun restAuthenticationFilter(): Filter =
+    ApiKeyAuthenticationFilter(
+      apiKeyAuthenticationProvider(),
+      HeaderApiKeyAuthenticationConverter("X-API-Key", tokenEncoder, userAgentWebAuthenticationDetailsSource),
     )
 
   fun apiKeyAuthenticationProvider(): AuthenticationManager =

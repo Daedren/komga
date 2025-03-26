@@ -19,7 +19,15 @@
   },
   "account_settings": {
     "account_settings": "アカウント設定",
-    "change_password": "パスワードの変更"
+    "api_key": {
+      "created_date": "作成日: {date}",
+      "force_kobo_sync": "Kobo syncを強制",
+      "generate_api_key": "APIキーを生成",
+      "no_keys": "まだAPIキーが作成されていません"
+    },
+    "change_password": "パスワードの変更",
+    "details": "詳細",
+    "my_account": "マイアカウント"
   },
   "announcements": {
     "mark_all_read": "すべて既読にする",
@@ -27,6 +35,7 @@
     "tab_title": "お知らせ"
   },
   "authentication_activity": {
+    "api_key": "APIキー",
     "datetime": "日 / 時",
     "email": "メールアドレス",
     "error": "エラー",
@@ -128,6 +137,7 @@
       "general": "全般",
       "gestures": "ジェスチャー",
       "page_layout": "ページレイアウト",
+      "page_margin": "ページ余白",
       "paged": "リーダーのページ設定",
       "reading_mode": "ビューアモード",
       "scale_type": "大きさ",
@@ -161,6 +171,8 @@
   },
   "browse_book": {
     "comment": "コメント",
+    "date_created": "作成済み",
+    "date_modified": "最終更新",
     "download_file": "ファイルをダウンロード",
     "file": "ファイル名",
     "format": "フォーマット",
@@ -170,6 +182,8 @@
     "outdated_tooltip": "この本のファイルが変更されました。この本を再分析する必要があります",
     "read_book": "書籍を読む",
     "read_incognito": "シークレットモードで読む",
+    "remove_from_collection": "コレクションから本を削除",
+    "remove_from_readlist": "読書リストから本を削除",
     "size": "サイズ"
   },
   "browse_collection": {
@@ -184,6 +198,7 @@
   },
   "browse_series": {
     "earliest_year_from_release_dates": "シリーズ内の書籍の発行日のうち、これが最初の年です",
+    "remove_from_collection": "コレクションからシリーズを削除",
     "series_no_summary": "このシリーズはサマリがないので、ピックアップしました！",
     "summary_from_book": "{number} 巻のサマリ:"
   },
@@ -203,6 +218,7 @@
     "choose_image": "画像を選択",
     "close": "閉じる",
     "collections": "コレクション",
+    "copied": "コピーしました!",
     "create": "作成",
     "delete": "削除",
     "dimension": "幅: {width}, 高さ: {height}",
@@ -211,8 +227,10 @@
     "dismiss": "却下",
     "download": "ダウンロード",
     "drag_drop": "ドラッグ&ドロップ",
+    "duplicate": "重複",
     "email": "メールアドレス",
     "epub": "Epub",
+    "error": "エラー",
     "filename": "ファイル名",
     "filter_no_matches": "フィルタに一致するものはありません",
     "genre": "ジャンル",
@@ -220,12 +238,14 @@
     "go_to_library": "ライブラリへ移動",
     "go_to_readlist": "リストを開く",
     "go_to_series": "シリーズへ移動",
+    "i_understand": "了解しました",
     "library": "ライブラリー",
     "locale_name": "日本語",
     "locale_rtl": "false",
     "lock_all": "すべてをロックする",
     "n_selected": "{count} 冊を選択中",
     "nothing_to_show": "表示するものはありません",
+    "ok": "OK",
     "oneshot": "ワンショット",
     "outdated": "古い",
     "page": "ページ",
@@ -242,13 +262,16 @@
     "readlist": "読書リスト",
     "readlists": "読書リスト",
     "remember-me": "ログイン状態を保持",
+    "reorder": "並び替え",
     "required": "必須",
     "reset_filters": "フィルタのリセット",
     "roles": "役割",
     "save_changes": "変更を保存",
     "series": "シリーズ | シリーズ",
+    "settings": "設定",
     "sidecars": "サイドカー",
     "tags": "タグ",
+    "ui": "ユーザーインターフェース",
     "unavailable": "利用できません",
     "unlock_all": "全てアンロック",
     "url": "URL",
@@ -272,6 +295,7 @@
     "comicrack_preambule_html": "既存のComicRackの読書リストを<code>.cbl</code>形式でインポートすることができます。<br>Komgaは指定されたシリーズと書籍番号を、あなたのライブラリにあるシリーズと本に一致させようとします。",
     "dialog_confirmation": {
       "body": "{total} 冊のうち {unmatched} 冊が一致しませんでした",
+      "body2": "{total} 冊のうち {duplicates} 冊が重複しています",
       "create": "生成を試みる",
       "title": "数冊の書籍が一致しませんでした"
     },
@@ -287,6 +311,14 @@
     "tab_title": "データインポート"
   },
   "dialog": {
+    "add_api_key": {
+      "button_confirm": "生成",
+      "context": "APIキーは、Kobo Syncプロトコルによる認証に使用できます。",
+      "dialog_title": "新しいAPIキーを生成",
+      "field_comment": "コメント",
+      "field_comment_hint": "このAPIキーは何のためにありますか？",
+      "info_copy": "ここで必ずAPIキーをコピーしてください。もう二度と見ることはできなくなります！"
+    },
     "add_to_collection": {
       "button_create": "作成",
       "card_collection_subtitle": "0 シリーズ | 1 シリーズ | {count} シリーズ",
@@ -319,6 +351,12 @@
     "book_picker": {
       "filter": "冊数、タイトル又は発行日によるフィルタ",
       "title": "書籍を選択"
+    },
+    "delete_apikey": {
+      "button_confirm": "削除",
+      "confirm_delete": "APIキー\"{name}\"を削除することを了解しました",
+      "dialog_title": "APIキーを削除",
+      "warning_html": "このAPIキーを使用するアプリケーションまたはスクリプトは、Komga APIにアクセスできなくなります。この操作を元に戻すことはできません。"
     },
     "delete_book": {
       "button_confirm": "削除",
@@ -470,6 +508,9 @@
       "tab_general": "一般",
       "tab_poster": "ポスター"
     },
+    "edit_recommended": {
+      "button_confirm": "変更を保存"
+    },
     "edit_series": {
       "button_cancel": "キャンセル",
       "button_confirm": "変更を保存",
@@ -538,6 +579,10 @@
       },
       "title": "出力先のファイル名"
     },
+    "force_kobo_sync": {
+      "dialog_title": "Kobo syncを強制",
+      "warning_html": "これにより、このAPIキーのすべての同期履歴が削除されます。koboは次回の同期時にすべてを同期します。"
+    },
     "password_change": {
       "button_cancel": "キャンセル",
       "button_confirm": "パスワード変更",
@@ -605,8 +650,11 @@
     "delete_to_save": "{size}を削除して保存する",
     "deleted_count": "削除{count}回",
     "empty_title": "重複ページなし",
+    "empty_title_known": "重複はありません",
     "filter": {
       "count": "カウント",
+      "date_added": "追加日",
+      "date_modified": "変更日",
       "delete_count": "削除数",
       "delete_size": "省スペース",
       "match_count": "マッチ数",
@@ -655,6 +703,11 @@
       "BookImported": "書籍がインポートされました",
       "DuplicatePageDeleted": "重複ページが削除されました",
       "SeriesFolderDeleted": "シリーズのフォルダが削除されました"
+    },
+    "media_profile": {
+      "DIVINA": "DIVINA",
+      "EPUB": "EPUB",
+      "PDF": "PDF"
     },
     "media_status": {
       "ERROR": "エラー",
@@ -706,6 +759,7 @@
     "page_of": "{page} / {count} ページ",
     "settings": {
       "column_count": "列数",
+      "font_family": "フォント",
       "layout": "レイアウト",
       "layout_paginated": "ページごと",
       "layout_scroll": "スクロール",
@@ -761,7 +815,8 @@
     "ERR_1030": "ComicRack CBLにはName要素がありません",
     "ERR_1031": "ComicRack CBL Bookにシリーズまたは番号がありません",
     "ERR_1032": "EPUBのメディアタイプが間違っています",
-    "ERR_1033": "いくつかの項目が欠落しています"
+    "ERR_1033": "いくつかの項目が欠落しています",
+    "ERR_1034": "そのコメントのAPIキーは既に存在します"
   },
   "filter": {
     "age_rating": "年齢レーティング",
@@ -817,9 +872,6 @@
     "size": "サイズ",
     "status": "状態",
     "url": "URL"
-  },
-  "media_management": {
-    "title": "メディア管理"
   },
   "menu": {
     "add_to_collection": "コレクションに追加",
@@ -894,7 +946,8 @@
       "notification_tasks_cancelled": "キャンセルするタスクがありません | 1個のタスクがキャンセルされました | {count}個のタスクがキャンセルされました",
       "section_title": "サーバ管理"
     },
-    "tab_title": "サーバ"
+    "tab_title": "サーバ",
+    "updates": "アップデート"
   },
   "server_settings": {
     "config_precedence": "設定ファイルよりも優先されます",
@@ -905,8 +958,12 @@
       "btn_confirm": "はい(大きい場合のみ)",
       "title": "サムネイルを再生成"
     },
+    "hint_kobo_port": "カバーとダウンロードで同期の問題が発生した場合にのみ設定します",
     "label_delete_empty_collections": "スキャン後に空のコレクションを削除する",
     "label_delete_empty_readlists": "スキャン後に空の読書リストを削除する",
+    "label_kepubify_path": "kepubifyへのパス",
+    "label_kobo_port": "Kobo sync外部ポート",
+    "label_kobo_proxy": "Kobo StoreへのKobo Syncリクエストをプロキシ",
     "label_rememberme_duration": "「ログイン状態を保持」の時間 (日)",
     "label_server_context_path": "ベースURL",
     "label_server_port": "サーバーのポート",
@@ -933,6 +990,8 @@
     "folder_name": "フォルダ名",
     "name": "書名",
     "number": "巻数",
+    "page_count": "ページ数",
+    "random": "ランダム",
     "release_date": "発行日"
   },
   "theme": {
@@ -958,10 +1017,12 @@
   "user_roles": {
     "ADMIN": "管理者",
     "FILE_DOWNLOAD": "ファイルのダウンロード",
+    "KOBO_SYNC": "Kobo Sync",
     "PAGE_STREAMING": "ストリーム配信",
     "USER": "ユーザ"
   },
   "users": {
+    "api_keys": "APIキー",
     "authentication_activity": "認証アクティビティ",
     "users": "ユーザ"
   },

@@ -1,21 +1,20 @@
 package org.gotson.komga.interfaces.api.rest
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import jakarta.validation.Valid
 import org.gotson.komga.domain.model.AgeRestriction
 import org.gotson.komga.domain.model.ContentRestrictions
 import org.gotson.komga.domain.model.DuplicateNameException
-import org.gotson.komga.domain.model.ROLE_ADMIN
-import org.gotson.komga.domain.model.ROLE_FILE_DOWNLOAD
-import org.gotson.komga.domain.model.ROLE_KOBO_SYNC
-import org.gotson.komga.domain.model.ROLE_PAGE_STREAMING
 import org.gotson.komga.domain.model.UserEmailAlreadyExistsException
+import org.gotson.komga.domain.model.UserRoles
 import org.gotson.komga.domain.persistence.AuthenticationActivityRepository
 import org.gotson.komga.domain.persistence.KomgaUserRepository
 import org.gotson.komga.domain.persistence.LibraryRepository
 import org.gotson.komga.domain.service.KomgaUserLifecycle
 import org.gotson.komga.infrastructure.jooq.UnpagedSorted
+import org.gotson.komga.infrastructure.openapi.OpenApiConfiguration.TagNames
 import org.gotson.komga.infrastructure.security.KomgaPrincipal
 import org.gotson.komga.interfaces.api.rest.dto.ApiKeyDto
 import org.gotson.komga.interfaces.api.rest.dto.ApiKeyRequestDto
@@ -62,13 +61,14 @@ class UserController(
   private val demo = env.activeProfiles.contains("demo")
 
   @GetMapping("me")
+  @Operation(summary = "Retrieve current user", tags = [TagNames.CURRENT_USER])
   fun getMe(
     @AuthenticationPrincipal principal: KomgaPrincipal,
-  ): UserDto =
-    principal.toDto()
+  ): UserDto = principal.toDto()
 
   @PatchMapping("me/password")
   @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(summary = "Update current user's password", tags = [TagNames.CURRENT_USER])
   fun updateMyPassword(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @Valid @RequestBody
@@ -81,13 +81,14 @@ class UserController(
   }
 
   @GetMapping
-  @PreAuthorize("hasRole('$ROLE_ADMIN')")
-  fun getAll(): List<UserDto> =
-    userRepository.findAll().map { it.toDto() }
+  @PreAuthorize("hasRole('ADMIN')")
+  @Operation(summary = "List users", tags = [TagNames.USERS])
+  fun getAll(): List<UserDto> = userRepository.findAll().map { it.toDto() }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  @PreAuthorize("hasRole('$ROLE_ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
+  @Operation(summary = "Create user", tags = [TagNames.USERS])
   fun addOne(
     @Valid @RequestBody
     newUser: UserCreationDto,
@@ -100,7 +101,8 @@ class UserController(
 
   @DeleteMapping("{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @PreAuthorize("hasRole('$ROLE_ADMIN') and #principal.user.id != #id")
+  @PreAuthorize("hasRole('ADMIN') and #principal.user.id != #id")
+  @Operation(summary = "Delete user", tags = [TagNames.USERS])
   fun delete(
     @PathVariable id: String,
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -112,7 +114,8 @@ class UserController(
 
   @PatchMapping("{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @PreAuthorize("hasRole('$ROLE_ADMIN') and #principal.user.id != #id")
+  @PreAuthorize("hasRole('ADMIN') and #principal.user.id != #id")
+  @Operation(summary = "Update user", tags = [TagNames.USERS])
   fun updateUser(
     @PathVariable id: String,
     @Valid @RequestBody
@@ -123,10 +126,7 @@ class UserController(
       val updatedUser =
         with(patch) {
           existing.copy(
-            roleAdmin = if (isSet("roles")) roles!!.contains(ROLE_ADMIN) else existing.roleAdmin,
-            roleFileDownload = if (isSet("roles")) roles!!.contains(ROLE_FILE_DOWNLOAD) else existing.roleFileDownload,
-            rolePageStreaming = if (isSet("roles")) roles!!.contains(ROLE_PAGE_STREAMING) else existing.rolePageStreaming,
-            roleKoboSync = if (isSet("roles")) roles!!.contains(ROLE_KOBO_SYNC) else existing.roleKoboSync,
+            roles = if (isSet("roles")) UserRoles.valuesOf(roles!!) else existing.roles,
             sharedAllLibraries = if (isSet("sharedLibraries")) sharedLibraries!!.all else existing.sharedAllLibraries,
             sharedLibrariesIds =
               if (isSet("sharedLibraries")) {
@@ -169,7 +169,8 @@ class UserController(
 
   @PatchMapping("{id}/password")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @PreAuthorize("hasRole('$ROLE_ADMIN') or #principal.user.id == #id")
+  @PreAuthorize("hasRole('ADMIN') or #principal.user.id == #id")
+  @Operation(summary = "Update user's password", tags = [TagNames.USERS])
   fun updatePassword(
     @PathVariable id: String,
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -184,12 +185,13 @@ class UserController(
 
   @GetMapping("me/authentication-activity")
   @PageableAsQueryParam
+  @Operation(summary = "Retrieve authentication activity for the current user", tags = [TagNames.CURRENT_USER])
   fun getMyAuthenticationActivity(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
     @Parameter(hidden = true) page: Pageable,
   ): Page<AuthenticationActivityDto> {
-    if (demo && !principal.user.roleAdmin) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+    if (demo && !principal.user.isAdmin) throw ResponseStatusException(HttpStatus.FORBIDDEN)
     val sort =
       if (page.sort.isSorted)
         page.sort
@@ -211,7 +213,8 @@ class UserController(
 
   @GetMapping("authentication-activity")
   @PageableAsQueryParam
-  @PreAuthorize("hasRole('$ROLE_ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
+  @Operation(summary = "Retrieve authentication activity", tags = [TagNames.USERS])
   fun getAuthenticationActivity(
     @RequestParam(name = "unpaged", required = false) unpaged: Boolean = false,
     @Parameter(hidden = true) page: Pageable,
@@ -236,7 +239,8 @@ class UserController(
   }
 
   @GetMapping("{id}/authentication-activity/latest")
-  @PreAuthorize("hasRole('$ROLE_ADMIN') or #principal.user.id == #id")
+  @PreAuthorize("hasRole('ADMIN') or #principal.user.id == #id")
+  @Operation(summary = "Retrieve latest authentication activity for a user", tags = [TagNames.USERS])
   fun getLatestAuthenticationActivityForUser(
     @PathVariable id: String,
     @AuthenticationPrincipal principal: KomgaPrincipal,
@@ -248,19 +252,21 @@ class UserController(
     } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 
   @GetMapping("me/api-keys")
+  @Operation(summary = "Retrieve API keys", tags = [TagNames.API_KEYS])
   fun getApiKeys(
     @AuthenticationPrincipal principal: KomgaPrincipal,
   ): Collection<ApiKeyDto> {
-    if (demo) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+    if (demo && !principal.user.isAdmin) throw ResponseStatusException(HttpStatus.FORBIDDEN)
     return userRepository.findApiKeyByUserId(principal.user.id).map { it.toDto().redacted() }
   }
 
   @PostMapping("me/api-keys")
+  @Operation(summary = "Create API key", tags = [TagNames.API_KEYS])
   fun createApiKey(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @Valid @RequestBody apiKeyRequest: ApiKeyRequestDto,
   ): ApiKeyDto {
-    if (demo) throw ResponseStatusException(HttpStatus.FORBIDDEN)
+    if (demo && !principal.user.isAdmin) throw ResponseStatusException(HttpStatus.FORBIDDEN)
     return try {
       userLifecycle.createApiKey(principal.user, apiKeyRequest.comment)?.toDto()
     } catch (e: DuplicateNameException) {
@@ -271,6 +277,7 @@ class UserController(
 
   @DeleteMapping("me/api-keys/{keyId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(summary = "Delete API key", tags = [TagNames.API_KEYS])
   fun deleteApiKey(
     @AuthenticationPrincipal principal: KomgaPrincipal,
     @PathVariable keyId: String,

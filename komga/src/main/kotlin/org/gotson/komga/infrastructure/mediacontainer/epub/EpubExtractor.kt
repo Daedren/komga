@@ -17,7 +17,7 @@ import org.jsoup.Jsoup
 import org.jsoup.parser.Parser
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.util.UriUtils
+import java.net.URLDecoder
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.deleteIfExists
@@ -59,51 +59,39 @@ class EpubExtractor(
         // EPUB 3 - try to get cover from manifest properties 'cover-image'
         manifest.values.firstOrNull { it.properties.contains("cover-image") }
           ?: // EPUB 2 - get cover from meta element with name="cover"
-          opfDoc.selectFirst("metadata > meta[name=cover]")?.attr("content")?.ifBlank { null }?.let { manifest[it] }
-
+          opfDoc
+            .selectFirst("metadata > meta[name=cover]")
+            ?.attr("content")
+            ?.ifBlank { null }
+            ?.let { manifest[it] }
+          ?: // try id="cover-image"
+          manifest.values.firstOrNull { it.id == "cover-image" }
       if (coverManifestItem != null) {
         val href = coverManifestItem.href
         val mediaType = coverManifestItem.mediaType
         val coverPath = normalizeHref(opfDir, href)
-        TypedBytes(
-          zip.getEntryBytes(coverPath),
-          mediaType,
-        )
+        zip.getEntryBytes(coverPath)?.let { coverBytes ->
+          TypedBytes(
+            coverBytes,
+            mediaType,
+          )
+        }
       } else {
         null
       }
     }
 
-  fun getManifest(
-    path: Path,
-    analyzeDimensions: Boolean,
-  ): EpubManifest =
-    path.epub { epub ->
-      val (resources, missingResources) = getResources(epub).partition { it.fileSize != null }
-      val isFixedLayout = isFixedLayout(epub)
-      val pageCount = computePageCount(epub)
-      val isKepub = isKepub(epub, resources)
-      EpubManifest(
-        resources = resources,
-        missingResources = missingResources,
-        toc = getToc(epub),
-        landmarks = getLandmarks(epub),
-        pageList = getPageList(epub),
-        pageCount = pageCount,
-        isFixedLayout = isFixedLayout,
-        positions = computePositions(epub, path, resources, isFixedLayout, isKepub),
-        divinaPages = getDivinaPages(epub, isFixedLayout, pageCount, analyzeDimensions),
-        isKepub = isKepub,
-      )
-    }
-
-  private fun getResources(epub: EpubPackage): List<MediaFile> {
-    val spine = epub.opfDoc.select("spine > itemref").map { it.attr("idref") }.mapNotNull { epub.manifest[it] }
+  fun getResources(epub: EpubPackage): List<MediaFile> {
+    val spine =
+      epub.opfDoc
+        .select("spine > itemref")
+        .map { it.attr("idref") }
+        .mapNotNull { epub.manifest[it] }
 
     val pages =
       spine.map { page ->
         MediaFile(
-          normalizeHref(epub.opfDir, UriUtils.decode(page.href, Charsets.UTF_8)),
+          normalizeHref(epub.opfDir, URLDecoder.decode(page.href, Charsets.UTF_8)),
           page.mediaType,
           MediaFile.SubType.EPUB_PAGE,
         )
@@ -112,7 +100,7 @@ class EpubExtractor(
     val assets =
       epub.manifest.values.filterNot { spine.contains(it) }.map {
         MediaFile(
-          normalizeHref(epub.opfDir, UriUtils.decode(it.href, Charsets.UTF_8)),
+          normalizeHref(epub.opfDir, URLDecoder.decode(it.href, Charsets.UTF_8)),
           it.mediaType,
           MediaFile.SubType.EPUB_ASSET,
         )
@@ -124,64 +112,78 @@ class EpubExtractor(
     }
   }
 
-  private fun getDivinaPages(
+  fun getDivinaPages(
     epub: EpubPackage,
     isFixedLayout: Boolean,
     pageCount: Int,
     analyzeDimensions: Boolean,
   ): List<BookPage> {
-    if (!isFixedLayout) return emptyList()
-
-    try {
-      val pagesWithImages =
-        epub.opfDoc.select("spine > itemref")
-          .map { it.attr("idref") }
-          .mapNotNull { idref -> epub.manifest[idref]?.href?.let { normalizeHref(epub.opfDir, it) } }
-          .map { pagePath ->
-            val doc = epub.zip.getEntryInputStream(pagePath).use { Jsoup.parse(it, null, "") }
-
-            // if a page has text over the threshold then the book is not divina compatible
-            if (doc.body().text().length > letterCountThreshold) return emptyList()
-
-            val img =
-              doc.getElementsByTag("img")
-                .map { it.attr("src") } // get the src, which can be a relative path
-
-            val svg =
-              doc.select("svg > image[xlink:href]")
-                .map { it.attr("xlink:href") } // get the source, which can be a relative path
-
-            (img + svg).map { (Path(pagePath).parent ?: Path("")).resolve(it).normalize().invariantSeparatorsPathString } // resolve it against the page folder
-          }
-
-      if (pagesWithImages.size != pageCount) return emptyList()
-      val imagesPath = pagesWithImages.flatten()
-      if (imagesPath.size != pageCount) return emptyList()
-
-      val divinaPages =
-        imagesPath.mapNotNull { imagePath ->
-          val mediaType = epub.manifest.values.firstOrNull { normalizeHref(epub.opfDir, it.href) == imagePath }?.mediaType ?: return@mapNotNull null
-          val zipEntry = epub.zip.getEntry(imagePath)
-          if (!contentDetector.isImage(mediaType)) return@mapNotNull null
-
-          val dimension =
-            if (analyzeDimensions)
-              epub.zip.getInputStream(zipEntry).use { imageAnalyzer.getDimension(it) }
-            else
-              null
-          val fileSize = if (zipEntry.size == ArchiveEntry.SIZE_UNKNOWN) null else zipEntry.size
-          BookPage(fileName = imagePath, mediaType = mediaType, dimension = dimension, fileSize = fileSize)
-        }
-
-      if (divinaPages.size != pageCount) return emptyList()
-      return divinaPages
-    } catch (e: Exception) {
-      logger.warn(e) { "Error while getting divina pages" }
+    if (!isFixedLayout) {
+      logger.info { "Epub Divina detection failed: book is not fixed layout" }
       return emptyList()
     }
+
+    val pagesWithImages =
+      epub.opfDoc
+        .select("spine > itemref")
+        .map { it.attr("idref") }
+        .mapNotNull { idref -> epub.manifest[idref]?.href?.let { normalizeHref(epub.opfDir, it) } }
+        .map { pagePath ->
+          val doc = epub.zip.getEntryInputStream(pagePath)?.use { Jsoup.parse(it, null, "") } ?: return@map emptyList()
+
+          // if a page has text over the threshold then the book is not divina compatible
+          if (doc.body().text().length > letterCountThreshold) return emptyList()
+
+          val img =
+            doc
+              .getElementsByTag("img")
+              .map { it.attr("src") } // get the src, which can be a relative path
+
+          val svg =
+            doc
+              .select("svg > image[xlink:href]")
+              .map { it.attr("xlink:href") } // get the source, which can be a relative path
+
+          (img + svg).map { (Path(pagePath).parent ?: Path("")).resolve(it).normalize().invariantSeparatorsPathString } // resolve it against the page folder
+        }
+
+    if (pagesWithImages.size != pageCount) {
+      logger.info { "Epub Divina detection failed: book has ${pagesWithImages.size} pages with images, but $pageCount total pages" }
+      return emptyList()
+    }
+    // Only keep unique image path for each page. KCC sometimes generates HTML pages with 5 times the same image.
+    val imagesPath = pagesWithImages.map { it.distinct() }.flatten()
+    if (imagesPath.size != pageCount) {
+      logger.info { "Epub Divina detection failed: book has ${imagesPath.size} detected images, but $pageCount total pages" }
+      return emptyList()
+    }
+
+    val divinaPages =
+      imagesPath.mapNotNull { imagePath ->
+        val mediaType =
+          epub.manifest.values
+            .firstOrNull { normalizeHref(epub.opfDir, it.href) == imagePath }
+            ?.mediaType ?: return@mapNotNull null
+        val zipEntry = epub.zip.getEntry(imagePath)
+        if (!contentDetector.isImage(mediaType)) return@mapNotNull null
+
+        val dimension =
+          if (analyzeDimensions)
+            epub.zip.getInputStream(zipEntry).use { imageAnalyzer.getDimension(it) }
+          else
+            null
+        val fileSize = if (zipEntry.size == ArchiveEntry.SIZE_UNKNOWN) null else zipEntry.size
+        BookPage(fileName = imagePath, mediaType = mediaType, dimension = dimension, fileSize = fileSize)
+      }
+
+    if (divinaPages.size != pageCount) {
+      logger.info { "Epub Divina detection failed: book has ${divinaPages.size} detected divina pages, but $pageCount total pages" }
+      return emptyList()
+    }
+    return divinaPages
   }
 
-  private fun isKepub(
+  fun isKepub(
     epub: EpubPackage,
     resources: List<MediaFile>,
   ): Boolean {
@@ -189,8 +191,8 @@ class EpubExtractor(
       val readingOrder = resources.filter { it.subType == MediaFile.SubType.EPUB_PAGE }
 
       readingOrder.forEach { mediaFile ->
-        val doc = epub.zip.getEntryInputStream(mediaFile.fileName).use { Jsoup.parse(it, null, "") }
-        if (!doc.getElementsByClass("koboSpan").isNullOrEmpty()) return true
+        val doc = epub.zip.getEntryInputStream(mediaFile.fileName)?.use { Jsoup.parse(it, null, "") }
+        if (!doc?.getElementsByClass("koboSpan").isNullOrEmpty()) return true
       }
     } catch (e: Exception) {
       logger.warn(e) { "Error while checking if EPUB is KEPUB" }
@@ -198,20 +200,24 @@ class EpubExtractor(
     return false
   }
 
-  private fun computePageCount(epub: EpubPackage): Int {
+  fun computePageCount(epub: EpubPackage): Int {
     val spine =
-      epub.opfDoc.select("spine > itemref")
+      epub.opfDoc
+        .select("spine > itemref")
         .map { it.attr("idref") }
         .mapNotNull { idref -> epub.manifest[idref]?.href?.let { normalizeHref(epub.opfDir, it) } }
 
-    return epub.zip.entries.toList().filter { it.name in spine }.sumOf { ceil(it.compressedSize / 1024.0).toInt() }
+    return epub.zip.entries
+      .toList()
+      .filter { it.name in spine }
+      .sumOf { ceil(it.compressedSize / 1024.0).toInt() }
   }
 
-  private fun isFixedLayout(epub: EpubPackage) =
+  fun isFixedLayout(epub: EpubPackage) =
     epub.opfDoc.selectFirst("metadata > *|meta[property=rendition:layout]")?.text() == "pre-paginated" ||
       epub.opfDoc.selectFirst("metadata > *|meta[name=fixed-layout]")?.attr("content") == "true"
 
-  private fun computePositions(
+  fun computePositions(
     epub: EpubPackage,
     path: Path,
     resources: List<MediaFile>,
@@ -225,11 +231,12 @@ class EpubExtractor(
     val koboPositions =
       when {
         isFixedLayout -> emptyMap()
-        isKepub -> computePositionsFromKoboSpan(readingOrder) { filename -> epub.zip.getEntryInputStream(filename).use { it.readBytes().decodeToString() } }
+        isKepub -> computePositionsFromKoboSpan(readingOrder) { filename -> epub.zip.getEntryInputStream(filename).use { it?.readBytes()?.decodeToString() } }
         kepubConverter.isAvailable -> {
           try {
             val kepub =
-              kepubConverter.convertEpubToKepubWithoutChecks(path)
+              kepubConverter
+                .convertEpubToKepubWithoutChecks(path)
                 ?.also { it.toFile().deleteOnExit() }
                 // if the conversion failed, throw an exception that will be caught in the catch block
                 ?: throw IllegalStateException()
@@ -294,12 +301,12 @@ class EpubExtractor(
    */
   private fun computePositionsFromKoboSpan(
     readingOrder: List<MediaFile>,
-    resourceSupplier: (String) -> String,
-  ): Map<String, List<Pair<String, Float>>> =
+    resourceSupplier: (String) -> String?,
+  ): Map<String, List<Pair<String, Float>>?> =
     readingOrder.associate { file ->
-      val doc = Jsoup.parse(resourceSupplier(file.fileName), Parser.htmlParser().setTrackPosition(true))
+      val doc = resourceSupplier(file.fileName)?.let { resource -> Jsoup.parse(resource, Parser.htmlParser().setTrackPosition(true)) }
       file.fileName to
-        doc.select("span.koboSpan").mapNotNull { koboSpan ->
+        doc?.select("span.koboSpan")?.mapNotNull { koboSpan ->
           val id = koboSpan.id()
           if (!id.isNullOrBlank()) {
             // progression is built from the position in the file of each koboSpan, divided by the file size
@@ -311,7 +318,7 @@ class EpubExtractor(
         }
     }
 
-  private fun getToc(epub: EpubPackage): List<EpubTocEntry> {
+  fun getToc(epub: EpubPackage): List<EpubTocEntry> {
     // Epub 3
     epub.getNavResource()?.let { return processNav(it, Epub3Nav.TOC) }
     // Epub 2
@@ -319,7 +326,7 @@ class EpubExtractor(
     return emptyList()
   }
 
-  private fun getPageList(epub: EpubPackage): List<EpubTocEntry> {
+  fun getPageList(epub: EpubPackage): List<EpubTocEntry> {
     // Epub 3
     epub.getNavResource()?.let { return processNav(it, Epub3Nav.PAGELIST) }
     // Epub 2
@@ -327,7 +334,7 @@ class EpubExtractor(
     return emptyList()
   }
 
-  private fun getLandmarks(epub: EpubPackage): List<EpubTocEntry> {
+  fun getLandmarks(epub: EpubPackage): List<EpubTocEntry> {
     // Epub 3
     epub.getNavResource()?.let { return processNav(it, Epub3Nav.LANDMARKS) }
 

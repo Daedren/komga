@@ -54,7 +54,6 @@ class SyncPointLifecycleTest(
     KomgaUser(
       "user1@example.org",
       "",
-      false,
       sharedLibrariesIds = setOf(library1.id, library2.id),
       restrictions =
         ContentRestrictions(
@@ -190,12 +189,11 @@ class SyncPointLifecycleTest(
     val book2 = makeBook("valid2", libraryId = library1.id)
     val book3 = makeBook("valid3", libraryId = library1.id)
 
-    val series =
-      makeSeries(name = "series1", libraryId = library1.id).also { series ->
-        seriesLifecycle.createSeries(series).let { created ->
-          seriesLifecycle.addBooks(created, listOf(book1, book2, book3))
-        }
+    makeSeries(name = "series1", libraryId = library1.id).also { series ->
+      seriesLifecycle.createSeries(series).let { created ->
+        seriesLifecycle.addBooks(created, listOf(book1, book2, book3))
       }
+    }
 
     bookRepository.findAll().forEach { mediaRepository.findById(it.id).let { media -> mediaRepository.update(media.copy(status = Media.Status.READY, mediaType = MediaType.EPUB.type)) } }
 
@@ -231,12 +229,11 @@ class SyncPointLifecycleTest(
     val book3 = makeBook("valid3", libraryId = library1.id)
     val book4 = makeBook("no hash to hash", libraryId = library1.id)
 
-    val series =
-      makeSeries(name = "series1", libraryId = library1.id).also { series ->
-        seriesLifecycle.createSeries(series).let { created ->
-          seriesLifecycle.addBooks(created, listOf(book1, book2, book3))
-        }
+    makeSeries(name = "series1", libraryId = library1.id).also { series ->
+      seriesLifecycle.createSeries(series).let { created ->
+        seriesLifecycle.addBooks(created, listOf(book1, book2, book3))
       }
+    }
 
     bookRepository.findAll().forEach { mediaRepository.findById(it.id).let { media -> mediaRepository.update(media.copy(status = Media.Status.READY, mediaType = MediaType.EPUB.type)) } }
 
