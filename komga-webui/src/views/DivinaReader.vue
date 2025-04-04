@@ -369,7 +369,7 @@ import jsFileDownloader from 'js-file-downloader'
 import screenfull from 'screenfull'
 import {ItemTypes} from '@/types/items'
 import {getBookReadRouteFromMedia} from '@/functions/book-format'
-import { partialScreenshot } from '@/functions/screenshot'
+import { partialScreenshot, partialScreenshotWithDomToImage } from '@/functions/screenshot'
 
 export default Vue.extend({
   name: 'DivinaReader',
@@ -958,7 +958,8 @@ export default Vue.extend({
     beginScreenshot() {
       let reader = (this.$refs.reader as Vue)
 
-      partialScreenshot(reader.$el).then(blob => {
+
+      partialScreenshotWithDomToImage(reader.$el).then(blob => {
         this.cropperEnabled = !this.cropperEnabled
         this.cropperImgSrc = blob
       })
